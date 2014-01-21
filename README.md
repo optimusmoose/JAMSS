@@ -1,4 +1,4 @@
-JaMMS
+JAMMS
 =====
 
-A GUI Java Mass Spectrometry Simulation Suite
+A GUI Java Mass Spectrometry Simulation Suite. See README.txt for info.
