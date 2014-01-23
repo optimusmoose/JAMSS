@@ -15,6 +15,16 @@ JAMSS mass spec simulator.
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+To run the program:
+1) Download project
+2) Navigate to .../JAMSS/dist/
+3) Some OSs will allow the execution of the jar file with a double click (JAMSS.jar). For instance, on linux, right click the jar and select "run with Java" (or something like that).
+4) Alternative: navigate a terminal to the .jar and execute: "java -jar JAMSS.jar"
+5) Optionally, specify how much RAM you want to dedicate to the run: "java -Xmx10g -jar JAMSS.jar" will allocate 10GB of RAM. 
+
+To develop the program:
+1) Open as a netbeans project (easiest).
+
 Minimumalist run:
 1) Open a fasta file. (IMPORTANT: Make sure fasta headers do not contain a #. If they do, remove it.)
 2) Click run.
