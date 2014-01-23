@@ -25,17 +25,15 @@ import java.util.Random;
  * @author rob
  */
 public class RandomFactory {
-	// TODO fold in digester options
-	public Random rand;
-	public long randSeed;
-	public RandomFactory() {
-		randSeed = System.currentTimeMillis();
+	public static long cloneSeed;
+	public static Random rand;
+	public RandomFactory() {}
+	public static void setSeed(){
 		rand = new Random();
-		rand.setSeed(randSeed);
-	}
-	public RandomFactory(long _randseed){
-		randSeed = _randseed;
-		rand = new Random();
-		rand.setSeed(randSeed);
+		if (cloneSeed == 0){
+			cloneSeed = System.currentTimeMillis();
+		}
+		rand.setSeed(cloneSeed);
+		MassSpec.simOptions = MassSpec.simOptions + "," + cloneSeed;
 	}
 }

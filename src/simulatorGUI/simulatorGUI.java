@@ -17,11 +17,12 @@
 */
 package simulatorGUI;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.ProgressMonitor;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
@@ -30,6 +31,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  */
 public class simulatorGUI extends javax.swing.JFrame {
 
+	long cloneSeed;
+	
     /** Creates new form simulatorGUI */
     public simulatorGUI() {
         initComponents();
@@ -37,6 +40,7 @@ public class simulatorGUI extends javax.swing.JFrame {
 		openFastaFileChooser.setFileFilter(fastaFilter);
 		FileNameExtensionFilter mzMLFilter = new FileNameExtensionFilter("mzML files","mzML");
 		openOptsFileChooser.setFileFilter(mzMLFilter);
+		
     }
 
     /** This method is called from within the constructor to
@@ -102,7 +106,7 @@ public class simulatorGUI extends javax.swing.JFrame {
         jLabel8 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
         jLabel6 = new javax.swing.JLabel();
-        jCheckBox1 = new javax.swing.JCheckBox();
+        cloneCheckBox = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(null);
@@ -143,6 +147,7 @@ public class simulatorGUI extends javax.swing.JFrame {
 
         jLabel2.setText("*mzML Output File:");
 
+        textOutputFile.setText("output");
         textOutputFile.setMaximumSize(new java.awt.Dimension(64, 25));
         textOutputFile.setMinimumSize(new java.awt.Dimension(64, 25));
         textOutputFile.setPreferredSize(new java.awt.Dimension(64, 25));
@@ -153,6 +158,7 @@ public class simulatorGUI extends javax.swing.JFrame {
 
         jLabel7.setText("Truth Output File:");
 
+        textTruthOutputFile.setText("truth");
         textTruthOutputFile.setMaximumSize(new java.awt.Dimension(64, 25));
         textTruthOutputFile.setMinimumSize(new java.awt.Dimension(64, 25));
         textTruthOutputFile.setPreferredSize(new java.awt.Dimension(64, 25));
@@ -258,7 +264,7 @@ public class simulatorGUI extends javax.swing.JFrame {
         jLabel5.setIcon(new javax.swing.ImageIcon("/home/rob/Documents/mass_spec/mspireSimulator/JaMSS_logo.jpeg")); // NOI18N
         jLabel5.setToolTipText("");
 
-        jLabel6.setText("Replicate?");
+        jLabel6.setText("Clone?");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -295,7 +301,7 @@ public class simulatorGUI extends javax.swing.JFrame {
                                 .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                     .addGap(247, 247, 247)
                                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(jCheckBox1, javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addComponent(cloneCheckBox, javax.swing.GroupLayout.Alignment.TRAILING)
                                         .addComponent(spinnerPyroglutamateLossPercent, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                         .addComponent(checkboxCarbamidomethylationGain, javax.swing.GroupLayout.Alignment.TRAILING)
                                         .addComponent(spinnerOxidationMethioninePercent, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -377,7 +383,7 @@ public class simulatorGUI extends javax.swing.JFrame {
                             .addComponent(jLabel6)
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(1, 1, 1)
-                                .addComponent(jCheckBox1)))
+                                .addComponent(cloneCheckBox)))
                         .addGap(75, 75, 75)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -497,6 +503,52 @@ private void buttonOptionsOpenMouseClicked(java.awt.event.MouseEvent evt) {//GEN
         File file = openOptsFileChooser.getSelectedFile();
          textOptionsFilename.setText(file.getAbsolutePath());
     }
+	
+	// read mzML file and set the msOptions string (will be overridden if not clone)
+	try{
+	BufferedReader br = new BufferedReader(new FileReader(textOptionsFilename.getText()));
+	String line;
+	boolean gotOptions = false;
+	while ((line = br.readLine()) != null) {
+		if(line.contains("Simulated Options")){
+			int startIdx = line.indexOf("value=") + 7;
+			MassSpec.simOptions = line.substring(startIdx,line.indexOf(" ", startIdx)-1);
+			String[] options = MassSpec.simOptions.split(",");
+			textOutputFile.setText(options[0]);
+			textTruthOutputFile.setText(options[1]);
+			checkboxCarbamidomethylationGain.setSelected(Boolean.parseBoolean(options[2]));
+			spinnerPyroglutamateLossPercent.setValue(Integer.parseInt(options[3]));
+			spinnerPhosphorylationGainPercent.setValue(Integer.parseInt(options[4]));
+			spinnerOxidationMethioninePercent.setValue(Integer.parseInt(options[5]));
+			comboDigester.setSelectedIndex(Integer.parseInt(options[6]));
+			textSamplingRate.setText(options[7]);
+			textRuntime.setText(options[8]);
+			sliderCleavages.setValue(Integer.parseInt(options[9]));
+			sliderMS2PerScan.setValue(Integer.parseInt(options[10]));
+			checkBoxOneD.setSelected(Boolean.parseBoolean(options[11]));
+			textPH.setText(options[12]);
+			textDropout.setText(options[13]);
+			textWhiteNoise.setText(options[14]);
+			textMaxNoise.setText(options[15]);
+			textMinNoise.setText(options[16]);
+			textChromOverlapRange.setText(options[17]);
+			cloneCheckBox.setSelected(Boolean.parseBoolean(options[18]));
+			cloneSeed = Long.parseLong(options[19]);
+			gotOptions = true;
+System.out.println(MassSpec.simOptions);
+		}
+	}
+	br.close();
+	if (!gotOptions){
+		JOptionPane.showMessageDialog(null, "Error: file does not contain JAMSS options tag.", "Error", JOptionPane.ERROR_MESSAGE);
+		textOptionsFilename.setText("");
+		return;
+	}
+	} catch (Exception e){
+		e.printStackTrace();
+		JOptionPane.showMessageDialog(null, "Error: error reading mzML options from supplied file.", "Error", JOptionPane.ERROR_MESSAGE);
+		textOptionsFilename.setText("");
+	}
 }//GEN-LAST:event_buttonOptionsOpenMouseClicked
 
 private void buttonFastaOpenMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_buttonFastaOpenMouseClicked
@@ -528,6 +580,7 @@ private void resetDefaults(){
 	textMaxNoise.setText("1000");
 	textMinNoise.setText("50");
 	textChromOverlapRange.setText("0.002");
+	cloneCheckBox.setSelected(false);
 }
 
 private void buttonRestoreDefaultsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_buttonRestoreDefaultsMouseClicked
@@ -557,9 +610,41 @@ private void buttonRunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
 	MassSpec.maxWhiteNoiseIntensity = Double.parseDouble(textMaxNoise.getText());
 	MassSpec.truthFile = textTruthOutputFile.getText();
 	MassSpec.numCpus = sliderNumCPUs.getValue();
-	
+	if (cloneCheckBox.isSelected()){ 
+		if (cloneSeed != 0){
+			RandomFactory.cloneSeed = cloneSeed;
+		}
+		else{
+			JOptionPane.showMessageDialog(null, "Error: Clone option selected but options from previous mzML file have not been loaded.", "Error", JOptionPane.ERROR_MESSAGE);
+			return;
+		}
+	}
+		
 	// set Ph
 	Modifications.pH = Double.parseDouble(textPH.getText());
+
+	// create string of simulator options to put in mzML file
+	StringBuilder msOptions = new StringBuilder();
+	msOptions.append(textOutputFile.getText() + ",");
+	msOptions.append(textTruthOutputFile.getText() + ",");
+	msOptions.append(checkboxCarbamidomethylationGain.isSelected() + ",");
+	msOptions.append(spinnerPyroglutamateLossPercent.getValue() + ",");
+	msOptions.append(spinnerPhosphorylationGainPercent.getValue() + ",");
+	msOptions.append(spinnerOxidationMethioninePercent.getValue() + ",");
+	msOptions.append(comboDigester.getSelectedIndex() + ",");
+	msOptions.append(textSamplingRate.getText() + ",");
+	msOptions.append(textRuntime.getText() + ",");
+	msOptions.append(sliderCleavages.getValue() + ",");
+	msOptions.append(sliderMS2PerScan.getValue() + ",");
+	msOptions.append(checkBoxOneD.isSelected() + ",");
+	msOptions.append(textPH.getText() + ",");
+	msOptions.append(textDropout.getText() + ",");
+	msOptions.append(textWhiteNoise.getText() + ",");
+	msOptions.append(textMaxNoise.getText() + ",");
+	msOptions.append(textMinNoise.getText() + ",");
+	msOptions.append(textChromOverlapRange.getText() + ",");
+	msOptions.append(cloneCheckBox.isSelected());
+	MassSpec.simOptions = msOptions.toString();
 	
 	(new Thread() {	public void run() {
 		long startTime = System.currentTimeMillis();
@@ -626,8 +711,8 @@ private void buttonRunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
     private javax.swing.JButton buttonRun;
     private javax.swing.JCheckBox checkBoxOneD;
     private javax.swing.JCheckBox checkboxCarbamidomethylationGain;
+    private javax.swing.JCheckBox cloneCheckBox;
     private javax.swing.JComboBox comboDigester;
-    private javax.swing.JCheckBox jCheckBox1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;

@@ -63,6 +63,7 @@ public class MassSpec {
 	public static String intensityModelLocation;
 	public static String rtModelLocation;
 	public static int numCpus;
+	public static String simOptions;
 	
 	//
 	// constants
@@ -180,7 +181,7 @@ public class MassSpec {
 	
 	private FFTbase fftBase;
 	private static RandomFactory randomFactory = new RandomFactory();
-	private static double maxIntensity = 999999999.0 + randomFactory.rand.nextDouble() * (9000000000.0); 
+	public static double maxIntensity; 
 	
 	// this the hash of the centroids generated for the specific
 	// thread containing this mass spec object
@@ -958,7 +959,7 @@ public class MassSpec {
 				}
 				double normalizedAbundance = 0;
 				double newMass = 0;
-				double lastMass = (monoMass + charge)/charge - 1/charge;
+				double lastMass = (monoMass + charge)/charge - NEUTRON_MASS/charge;
 				LinkedList<Double> isotopeMasses = new LinkedList<Double>();
 				LinkedList<Double> isotopeIntensities = new LinkedList<Double>();
 
@@ -1278,7 +1279,7 @@ public class MassSpec {
 			outputWriter.write("\t\t</cvList>"+ System.getProperty("line.separator"));
 			outputWriter.write("\t\t<fileDescription>"+ System.getProperty("line.separator"));
 			outputWriter.write("\t\t\t<fileContent>"+ System.getProperty("line.separator"));
-			outputWriter.write("\t\t\t\t<userParam name=\"Simulated Options\" value=\"TODO\" type=\"options\"/>"+ System.getProperty("line.separator"));
+			outputWriter.write("\t\t\t\t<userParam name=\"Simulated Options\" value=\"" + simOptions + "\" type=\"options\"/>"+ System.getProperty("line.separator"));
 			outputWriter.write("\t\t\t</fileContent>"+ System.getProperty("line.separator"));
 			outputWriter.write("\t\t\t<sourceFileList count=\"1\">"+ System.getProperty("line.separator"));
 			outputWriter.write("\t\t\t\t<sourceFile id=\"sourcefile1\" name=\"mspire-simulated\" location=\"file://\">"+ System.getProperty("line.separator"));

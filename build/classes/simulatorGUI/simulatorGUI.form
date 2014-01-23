@@ -67,7 +67,7 @@
                               <Group type="102" alignment="1" attributes="0">
                                   <EmptySpace min="-2" pref="247" max="-2" attributes="0"/>
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="jCheckBox1" alignment="1" min="-2" max="-2" attributes="0"/>
+                                      <Component id="cloneCheckBox" alignment="1" min="-2" max="-2" attributes="0"/>
                                       <Component id="spinnerPyroglutamateLossPercent" alignment="1" min="-2" max="-2" attributes="0"/>
                                       <Component id="checkboxCarbamidomethylationGain" alignment="1" min="-2" max="-2" attributes="0"/>
                                       <Component id="spinnerOxidationMethioninePercent" alignment="1" min="-2" max="-2" attributes="0"/>
@@ -169,7 +169,7 @@
                           <Component id="jLabel6" min="-2" max="-2" attributes="0"/>
                           <Group type="102" attributes="0">
                               <EmptySpace min="1" pref="1" max="-2" attributes="0"/>
-                              <Component id="jCheckBox1" min="-2" max="-2" attributes="0"/>
+                              <Component id="cloneCheckBox" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace min="-2" pref="75" max="-2" attributes="0"/>
@@ -385,6 +385,7 @@
     </Component>
     <Component class="javax.swing.JTextField" name="textOutputFile">
       <Properties>
+        <Property name="text" type="java.lang.String" value="output"/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="new java.awt.Dimension(64, 25)" type="code"/>
         </Property>
@@ -413,6 +414,7 @@
     </Component>
     <Component class="javax.swing.JTextField" name="textTruthOutputFile">
       <Properties>
+        <Property name="text" type="java.lang.String" value="truth"/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
           <Connection code="new java.awt.Dimension(64, 25)" type="code"/>
         </Property>
@@ -653,10 +655,10 @@
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel6">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Replicate?"/>
+        <Property name="text" type="java.lang.String" value="Clone?"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JCheckBox" name="jCheckBox1">
+    <Component class="javax.swing.JCheckBox" name="cloneCheckBox">
     </Component>
   </SubComponents>
 </Form>

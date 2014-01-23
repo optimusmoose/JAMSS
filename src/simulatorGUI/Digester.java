@@ -66,6 +66,11 @@ public class Digester {
 
 	public void processFile(File file, int missedCleavages, String intensityModelLocation, String rtModelLocation) {
 		simulatorGUI.progressMonitor.setNote("Reading .fasta file");
+		
+		// set up the random seed
+		RandomFactory.setSeed();
+		MassSpec.maxIntensity = 999999999.0 + RandomFactory.rand.nextDouble() * (9000000000.0);
+		
 		int numCores = MassSpec.numCpus;
 		MassSpec.intensityModelLocation = intensityModelLocation;
 		MassSpec.rtModelLocation = rtModelLocation;
