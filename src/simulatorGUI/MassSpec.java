@@ -337,7 +337,7 @@ public class MassSpec {
 		}
 		
 		// check for extant RT files and delete them
-		File directory = new File(pathToClass + File.separator + "JAMSSfiles");
+		File directory = new File(pathToClass + "JAMSSfiles" + File.separator);
 		directory.mkdir(); // create a new directory if doesn't exist
 		// get all .ser files
 		String[] myFiles = directory.list(new FilenameFilter() {
@@ -350,10 +350,12 @@ public class MassSpec {
 		if (myFiles != null){
 			for (String fileName : myFiles){
 				// delete file
-				File file = new File(pathToClass + File.separator + fileName);
+				
+				File file = new File(pathToClass + "JAMSSfiles" + File.separator + fileName);
 				file.delete();
 			}
 		}
+
 		// Create thread-specific list of output
 		outputScans = new HashMap();
 		
@@ -1273,16 +1275,16 @@ public class MassSpec {
 	
 	public static boolean outputPre(int totalScans){
 		String filename = "output.mzML";
-		File outputFile = new File(File.separator + "JAMSSfiles" + File.separator + filename);
+		File outputFile = new File("JAMSSfiles" + File.separator + filename);
 		try{
 			outputFile.delete(); // overwrite any previous truth file
 			outputFile.createNewFile(); 
 		} catch(IOException e){
-			JOptionPane.showMessageDialog(null, "Error creating mzML truth file.", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Error creating mzML file.", "Error", JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
 		try {
-			FileWriter outputWriter = new FileWriter(File.separator + "JAMSSfiles" + File.separator + filename, true);
+			FileWriter outputWriter = new FileWriter("JAMSSfiles" + File.separator + filename, true);
 			outputWriter.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + System.getProperty("line.separator"));
 			outputWriter.write("\t<mzML xmlns=\"http://psi.hupo.org/ms/mzml\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xsi:schemaLocation=\"http://psi.hupo.org/ms/mzml http://psidev.info/files/ms/mzML/xsd/mzML1.1.0.xsd\" version=\"1.1.0\" id=\"ms1_and_ms2\">"+ System.getProperty("line.separator"));
 			outputWriter.write("\t\t<cvList count=\"3\">"+ System.getProperty("line.separator"));
@@ -1326,7 +1328,7 @@ public class MassSpec {
 	
 	public static boolean outputPost(){
 		try {
-			FileWriter mzMLWriter = new FileWriter(File.separator + "JAMSSfiles" + File.separator + "output.mzML",true); // append
+			FileWriter mzMLWriter = new FileWriter("JAMSSfiles" + File.separator + "output.mzML",true); // append
 
 			// write tail
 			mzMLWriter.write("\t\t</spectrumList>"+ System.getProperty("line.separator"));
@@ -1342,7 +1344,7 @@ public class MassSpec {
 	// output mzml file
 	public static int output(LinkedList<Centroid> masterScan, double rt, int scanIdx){
 		try {
-			FileWriter mzMLWriter = new FileWriter(File.separator + "JAMSSfiles" + File.separator + "output.mzML",true); // append
+			FileWriter mzMLWriter = new FileWriter("JAMSSfiles" + File.separator + "output.mzML",true); // append
 			int precursorIdx;
 			
 			String encodedMZ = compressCentroids(masterScan,true);
@@ -1493,7 +1495,7 @@ public class MassSpec {
 		}
 	}
 	static boolean printTruthPre(){
-		File peptideFile = new File(File.separator + "JAMSSfiles" + File.separator + "output_truth_peptides.csv");
+		File peptideFile = new File("JAMSSfiles" + File.separator + "output_truth_peptides.csv");
 		try{
 			peptideFile.createNewFile(); // overwrite any previous truth file
 		} catch(IOException e){
@@ -1501,7 +1503,7 @@ public class MassSpec {
 			return false;
 		}
 		
-		File truthFile = new File(File.separator + "JAMSSfiles" + File.separator + "output_truth.csv");
+		File truthFile = new File("JAMSSfiles" + File.separator + "output_truth.csv");
 		try{
 			truthFile.createNewFile(); // overwrite any previous truth file
 		} catch(IOException e){
@@ -1515,7 +1517,7 @@ public class MassSpec {
 		// print peptide file 
 		try {
 			//contains list of peptide sequences and IDs
-			FileWriter peptideWriter = new FileWriter(File.separator + "JAMSSfiles" + File.separator + "output_truth_peptides.csv",true); // append
+			FileWriter peptideWriter = new FileWriter("JAMSSfiles" + File.separator + "output_truth_peptides.csv",true); // append
 
 			for(int pepIdx = 0; pepIdx < peptides.size(); pepIdx++){
 				//proteinID (pos in fasta file), peptideID, peptide sequence
@@ -1530,7 +1532,7 @@ public class MassSpec {
 		// print regular truth file
 		try {
 			// centroidID, ionFeatureID, charge, pepID, proteinID, m/z, RT, intensity
-			FileWriter truthWriter = new FileWriter(File.separator + "JAMSSfiles" + File.separator + "output_truth.csv",true); // append
+			FileWriter truthWriter = new FileWriter("JAMSSfiles" + File.separator + "output_truth.csv",true); // append
 			for (Centroid cent : masterScan){
 				truthWriter.write(cent.centroidID + "," + cent.ionFeatureID + "," + cent.charge +"," + cent.pepID + "," + cent.proteinID + "," + cent.mz + "," + rt + "," + cent.abundance);
 			}
@@ -1546,20 +1548,23 @@ public class MassSpec {
 		// write out each RT scan as a serialized list of centroids
 		// and empty the linked list at this RT
 		Object[] keys = outputScans.keySet().toArray();
-		for (int i=keys.length-1; i>=0; i--){
+		int i = 0;
+		for (Object scan : outputScans.values()){
 			try{
 				// create a filename with the RT followed by time to distinguish it from other files at this RT
-				FileOutputStream fileOut = new FileOutputStream(pathToClass + File.separator + "JAMSSfiles" + File.separator + keys[i] + "_" + msIdx + ".ser",true);
+				FileOutputStream fileOut = new FileOutputStream(pathToClass + "JAMSSfiles" + File.separator + keys[i] + "_" + msIdx + ".ser",true);
 				ObjectOutputStream out = new ObjectOutputStream(fileOut);
-				out.writeObject((LinkedList<Centroid>)outputScans.get(keys[i]));
+				out.writeObject((LinkedList<Centroid>) scan);
 				out.close();
 				fileOut.close();
+				i++;
 			} catch (IOException ex){
 				JOptionPane.showMessageDialog(null, "Error serializing centroids.", "Error", JOptionPane.ERROR_MESSAGE);
 				return false;
 			}
-			outputScans.remove(keys[i]);
+//			outputScans.remove(keys[i]);
 		}	
+		outputScans = new HashMap();
 		System.gc();
 		totalCentroids = 0;
 		return true;
@@ -1572,9 +1577,11 @@ public class MassSpec {
 		int scanIdx = 0;
 		// for each RT
 		for(Double rt : rtList){
+			simulatorGUI.progressMonitor.setNote("Preparing output: RT Scan " + scanIdx + " of " + rtList.size());
+			simulatorGUI.progressMonitor.setProgress(75 + (int)(25.0 * (double) (scanIdx/rtList.size())));
 			LinkedList<Centroid> masterScan = new LinkedList<Centroid>();
 			
-			File directory = new File(pathToClass + File.separator + "JAMSSfiles");
+			File directory = new File(pathToClass + "JAMSSfiles");
 
 			// get all .ser files
 			String[] myFiles = directory.list(new FilenameFilter() {
@@ -1585,18 +1592,18 @@ public class MassSpec {
 			});
 			
 			for (String fileName : myFiles){
-				if (fileName.replace(pathToClass + File.separator + "JAMSSfiles" + File.separator,"").split("_")[0].equals(rt.toString())){
+				if (fileName.replace(pathToClass + "JAMSSfiles" + File.separator,"").split("_")[0].equals(rt.toString())){
 					// open file and deserialize objects in file
 					LinkedList<Centroid> thisScan = null;
 					try
 					{
-					   FileInputStream fileIn = new FileInputStream(pathToClass + File.separator + "JAMSSfiles" + File.separator + fileName);
+					   FileInputStream fileIn = new FileInputStream(pathToClass + "JAMSSfiles" + File.separator + fileName);
 					   ObjectInputStream in = new ObjectInputStream(fileIn);
 					   thisScan = (LinkedList<Centroid>) in.readObject();
 					   in.close();
 					   fileIn.close();
 					   // delete file
-					   File file = new File(pathToClass + File.separator + "JAMSSfiles" + File.separator + fileName);
+					   File file = new File(pathToClass + "JAMSSfiles" + File.separator + fileName);
 					   file.delete();
 					}catch(IOException i)
 					{
@@ -1628,7 +1635,6 @@ public class MassSpec {
 			}
 			
 		}
-		simulatorGUI.progressMonitor.setProgress(79 + (int) (21.0 * (scanIdx / rtList.size())));
 		// write the end of the output and truth files
 		outputPost();
 	}

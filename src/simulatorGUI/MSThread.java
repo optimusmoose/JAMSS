@@ -28,13 +28,15 @@ import javax.swing.JOptionPane;
 public class MSThread extends Thread{
 	BlockingQueue<String> queue;
 	Digester digester;
-	int maxCentroids;
+	double maxCentroids;
 	static int maxQueueSize;
-	int index;
+	static int proteinCount=0;
+	public boolean writing = false;
+	public boolean full = false;
 	public MSThread(BlockingQueue<String> q, Digester _digester){
 		queue = q;
 		digester = _digester;
-		maxCentroids = (int) (Runtime.getRuntime().maxMemory() / 1000.0); //in b. Assume 1 kb per centroid (conservative)
+		maxCentroids = (Runtime.getRuntime().maxMemory() / 100.0) / MassSpec.numCpus; //in bytes
 		maxQueueSize = queue.size();
 	}
 	
@@ -44,19 +46,31 @@ public class MSThread extends Thread{
 		MassSpec massSpec = new MassSpec();
 		while (!queue.isEmpty()) {
 			//
-			if (massSpec.getTotalCentroids() > maxCentroids / MassSpec.numCpus){ // match RAM usage to allocated VM
+			if (massSpec.getTotalCentroids() > maxCentroids){ // match RAM usage to allocated VM
 				// to save RAM, write all current centroids to disk and reset
 				// output scans data structure 
-				massSpec.writeTempFile();
+				full = true;
 			}
-			try {
-				String data = queue.take();
-				String[] parts = data.split("_");
-				massSpec.processPeptides(digester.processProtein(parts[0], Integer.parseInt(parts[1])), Double.parseDouble(parts[2]), Integer.parseInt(parts[3]));
-				simulatorGUI.progressMonitor.setProgress((int) (((double) queue.size()/(double) maxQueueSize) * 75.0)+4);
-			} catch (InterruptedException e) {
-				JOptionPane.showMessageDialog(null, "Error: Mass spec thread interrupted.", "Error", JOptionPane.ERROR_MESSAGE);
-				return;
+			if (writing){
+				massSpec.writeTempFile();
+				full = false;
+				writing = false;
+			}
+			if (!full){ // have to wait for writeout if full
+				try {
+					String data = queue.take();
+					String[] parts = data.split("_");
+					massSpec.processPeptides(digester.processProtein(parts[0], Integer.parseInt(parts[1])), Double.parseDouble(parts[2]), Integer.parseInt(parts[3]));
+					proteinCount++;
+					simulatorGUI.progressMonitor.setNote("Simulating protein "+proteinCount + " of " + maxQueueSize);
+					simulatorGUI.progressMonitor.setProgress((int) (((double) proteinCount/(double) maxQueueSize) * 75.0)+4);
+				} catch (InterruptedException e) {
+					JOptionPane.showMessageDialog(null, "Error: Mass spec thread interrupted.", "Error", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+			} else{
+				try{Thread.sleep(10000);}
+				catch(Exception e){}
 			}
 		}
 		massSpec.writeTempFile();

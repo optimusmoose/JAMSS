@@ -69,7 +69,7 @@ public class Digester {
 		
 		// set up the random seed
 		RandomFactory.setSeed();
-		MassSpec.maxIntensity = 999999999.0 + RandomFactory.rand.nextDouble() * (9000000000.0);
+		MassSpec.maxIntensity = 99999999.0 + RandomFactory.rand.nextDouble() * (900000.0);
 		
 		int numCores = MassSpec.numCpus;
 		MassSpec.intensityModelLocation = intensityModelLocation;
@@ -150,7 +150,8 @@ public class Digester {
 			threads[i] = new MSThread(queue, this);
 			threads[i].start();
 		}
-		
+		WriteThread writeThread = new WriteThread(threads,queue);
+		writeThread.start(); // will kill itself when queue is empty
 		try{
 			for(int i = 0; i < threads.length; i++){
 				threads[i].join(); // wait till the thread is done
@@ -158,7 +159,6 @@ public class Digester {
 		} catch (InterruptedException e){
 			// no error because we know we are interrupting them
 		}
-		
 		MassSpec.finish();
 	}
 
