@@ -31,8 +31,7 @@ public class MSThread extends Thread{
 	double maxCentroids;
 	static int maxQueueSize;
 	static int proteinCount=0;
-	public boolean writing = false;
-	public boolean full = false;
+	public boolean finished = false;
 	public MSThread(BlockingQueue<String> q, Digester _digester){
 		queue = q;
 		digester = _digester;
@@ -49,32 +48,23 @@ public class MSThread extends Thread{
 			if (massSpec.getTotalCentroids() > maxCentroids){ // match RAM usage to allocated VM
 				// to save RAM, write all current centroids to disk and reset
 				// output scans data structure 
-				full = true;
-			}
-			if (writing){
 				massSpec.writeTempFile();
-				full = false;
-				writing = false;
 			}
-			if (!full){ // have to wait for writeout if full
-				try {
-					String data = queue.take();
-					String[] parts = data.split("_");
-					massSpec.processPeptides(digester.processProtein(parts[0], Integer.parseInt(parts[1])), Double.parseDouble(parts[2]), Integer.parseInt(parts[3]));
-					proteinCount++;
-					simulatorGUI.progressMonitor.setNote("Simulating protein "+proteinCount + " of " + maxQueueSize);
-					simulatorGUI.progressMonitor.setProgress((int) (((double) proteinCount/(double) maxQueueSize) * 75.0)+4);
-				} catch (InterruptedException e) {
-					JOptionPane.showMessageDialog(null, "Error: Mass spec thread interrupted.", "Error", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-			} else{
-				try{Thread.sleep(10000);}
-				catch(Exception e){}
+			try {
+				String data = queue.take();
+				String[] parts = data.split("_");
+				massSpec.processPeptides(digester.processProtein(parts[0], Integer.parseInt(parts[1])), Double.parseDouble(parts[2]), Integer.parseInt(parts[3]));
+				proteinCount++;
+				simulatorGUI.progressMonitor.setNote("Simulating protein "+proteinCount + " of " + maxQueueSize);
+				simulatorGUI.progressMonitor.setProgress((int) (((double) proteinCount/(double) maxQueueSize) * 75.0)+4);
+			} catch (InterruptedException e) {
+				JOptionPane.showMessageDialog(null, "Error: Mass spec thread interrupted.", "Error", JOptionPane.ERROR_MESSAGE);
+				return;
 			}
 		}
 		massSpec.writeTempFile();
 		massSpec = null;
-		System.gc();
+		finished = true;
+		return;
 	}
 }

@@ -150,14 +150,12 @@ public class Digester {
 			threads[i] = new MSThread(queue, this);
 			threads[i].start();
 		}
-		WriteThread writeThread = new WriteThread(threads,queue);
-		writeThread.start(); // will kill itself when queue is empty
-		try{
-			for(int i = 0; i < threads.length; i++){
-				threads[i].join(); // wait till the thread is done
+		for(int i = 0; i < threads.length; i++){
+			while(!threads[i].finished){
+				try{Thread.sleep(2000);} catch(Exception e){
+					JOptionPane.showMessageDialog(null, "Error finishing mass spec.", "Error", JOptionPane.ERROR_MESSAGE);
+				}
 			}
-		} catch (InterruptedException e){
-			// no error because we know we are interrupting them
 		}
 		MassSpec.finish();
 	}

@@ -935,17 +935,17 @@ public class MassSpec {
 
 						// set the relative abundance at this mass number to the element's relative abundance
 						for (int i=0; i<el.massNumberArray.length; i++){
-							relativeAbundancesReal[el.massNumberArray[i]] = el.relativeAbundanceArray[i];// * abundance;
+							relativeAbundancesReal[el.massNumberArray[i]] = el.relativeAbundanceArray[i];
 						}
 
 						// convert to frequency domain
 						fftBase = new FFTbase(relativeAbundancesReal.length);
-						fftBase.fft(relativeAbundancesReal, relativeAbundancesImag); // TESTED
+						fftBase.fft(relativeAbundancesReal, relativeAbundancesImag);
 
 						// convolve the frequencies of each element
 						double prevReal = 0;
 						for(int i=0; i<relativeAbundancesReal.length; i++){
-							double[] power = complexPower(relativeAbundancesReal[i],relativeAbundancesImag[i],el.count); // TESTED
+							double[] power = complexPower(relativeAbundancesReal[i],relativeAbundancesImag[i],el.count); 
 							if(firstGo){
 								fftAbundancesReal[i] = power[0];
 								fftAbundancesImag[i] = power[1];
@@ -1562,7 +1562,6 @@ public class MassSpec {
 				JOptionPane.showMessageDialog(null, "Error serializing centroids.", "Error", JOptionPane.ERROR_MESSAGE);
 				return false;
 			}
-//			outputScans.remove(keys[i]);
 		}	
 		outputScans = new HashMap();
 		System.gc();
