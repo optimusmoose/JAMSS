@@ -1039,18 +1039,20 @@ public class MassSpec {
 					// sdShareX is kept the same for all isotope intensities to maintain the maximal elution RT across all traces
 					double sdShareX = 0.10 + randomFactory.rand.nextDouble() * 0.05; // random between 0.10-0.15
 					int rtFloor = getRTFloor(predictedRt);
+					double traceLength = 300.0 * (predictedIntensity / maxIntensity);
+					//FWHM = 2.35 sigma, we approximate the width of the Gaussian at 5 sigma
+					// therefore we set sigma to be the desired width / 5
+					// also we assume the highest intensity items will have an elapsed RT of 300s
+					// while less intense items will have much smaller RTs
+					double sdEstimate = traceLength/3.0;
+					int rtCeil = getRTCeil(predictedRt + traceLength);
+					
 					for (int i = 0; i < isotopeIntensities.size(); i++){
+						//////////////////////////////////////////////////////////
 						// figure out expansion for each mz value
 						// add noise for predictedIntensity
 						// add noise for mz
-
-						//FWHM = 2.35 sigma, we approximate the width of the Gaussian at 5 sigma
-						// therefore we set sigma to be the desired width / 5
-						// also we assume the highest intensity items will have an elapsed RT of 300s
-						// while less intense items will have much smaller RTs
-						double traceLength = 300.0 * (predictedIntensity / maxIntensity);
-						double sdEstimate = traceLength/3.0;
-						int rtCeil = getRTCeil(predictedRt + traceLength);					
+						//////////////////////////////////////////////////////////
 						double sdShareY = 0.35 + randomFactory.rand.nextDouble() * 0.15; // random between 0.35-0.50
 						double sdShareZ = 1.0 - (sdShareY + sdShareX);
 						double sdX = sdShareX * sdEstimate;
@@ -1076,7 +1078,7 @@ public class MassSpec {
 										centroidIntensity = predictedIntensity * isotopeIntensities.get(i) * oneDIntensityFactor;
 									}
 								} else { // normal chromotography (not 1 d)
-									double gaussianX = predictedIntensity * isotopeIntensities.get(i) * (1.0/(sdX*Math.sqrt(TWOPI)))	* Math.exp(-(Math.pow(rtArray[j]-muGaussian,2)/(2.0 * Math.pow(sdX,2))));
+									double gaussianX = predictedIntensity * isotopeIntensities.get(i) * (1.0/(sdX*Math.sqrt(TWOPI))) * Math.exp(-(Math.pow(rtArray[j]-muGaussian,2)/(2.0 * Math.pow(sdX,2))));
 									double gaussianY = normalizingConstantY * (1.0/(sdY*Math.sqrt(TWOPI))) * Math.exp(-(Math.pow(rtArray[j]-muGaussian,2)/(2.0 * Math.pow(sdY,2)))); 
 									double gaussianZ = normalizingConstantZ * (1.0/(sdZ*Math.sqrt(TWOPI))) * Math.exp(-(Math.pow(rtArray[j]-muGaussian,2)/(2.0 * Math.pow(sdZ,2)))); 
 									if (rtArray[j] < predictedRt + sdShareX * traceLength){ // first half treated as a more narrow Gaussian
