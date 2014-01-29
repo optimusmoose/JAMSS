@@ -74,7 +74,7 @@ public class Digester {
 		int numCores = MassSpec.numCpus;
 		MassSpec.intensityModelLocation = intensityModelLocation;
 		MassSpec.rtModelLocation = rtModelLocation;
-		MassSpec.setUpRTList();
+		MassSpec.setUpRTArray();
 		final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 		// one thread per core
 		MSThread[] threads = new MSThread[numCores];

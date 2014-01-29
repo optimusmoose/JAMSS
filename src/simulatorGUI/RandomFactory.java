@@ -18,18 +18,16 @@
 
 package simulatorGUI;
 
-import java.util.Random;
-
 /**
  *
  * @author rob
  */
 public class RandomFactory {
 	public static long cloneSeed;
-	public static Random rand;
+	public static XORShiftRandom rand;
 	public RandomFactory() {}
 	public static void setSeed(){
-		rand = new Random();
+		rand = new XORShiftRandom();
 		if (cloneSeed == 0){
 			cloneSeed = System.currentTimeMillis();
 		}

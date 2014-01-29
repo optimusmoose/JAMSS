@@ -17,6 +17,8 @@
 */
 package simulatorGUI;
  
+import java.util.HashMap;
+
 public class FFTbase {
 	int n, m;
   
@@ -24,6 +26,9 @@ public class FFTbase {
   double[] cos;
   double[] sin;
 
+  static HashMap cosHash = new HashMap();
+  static HashMap sinHash = new HashMap();
+  
   //double[] window;
 	public static void main(String [ ] args)
 	{
@@ -60,23 +65,30 @@ public class FFTbase {
 		System.out.println(sb.toString());
 	}
   
-  public FFTbase(int n) {
-    this.n = n;
-    this.m = (int)(Math.log(n) / Math.log(2));
+	public FFTbase(int n) {
+		this.n = n;
+		this.m = (int)(Math.log(n) / Math.log(2));
+		
+		// Make sure n is a power of 2
+		if(n != (1<<m))
+			throw new RuntimeException("FFT length must be power of 2");
 
-    // Make sure n is a power of 2
-    if(n != (1<<m))
-      throw new RuntimeException("FFT length must be power of 2");
+		if(cosHash.containsKey(n)){
+			cos = (double[]) cosHash.get(n);
+			sin = (double[]) sinHash.get(n);
+		} else{
+			// precompute tables
+			cos = new double[n/2];
+			sin = new double[n/2];
 
-    // precompute tables
-    cos = new double[n/2];
-    sin = new double[n/2];
-
-    for(int i=0; i<n/2; i++) {
-      cos[i] = Math.cos(-2*Math.PI*i/n);
-      sin[i] = Math.sin(-2*Math.PI*i/n);
-    }
-  }
+			for(int i=0; i<n/2; i++) {
+				cos[i] = Math.cos(-2*Math.PI*i/n);
+				sin[i] = Math.sin(-2*Math.PI*i/n);
+			}
+			cosHash.put(n,cos);
+			sinHash.put(n,sin);
+		}
+	}
 
    /***************************************************************
   * fft.c

@@ -73,6 +73,8 @@ public class MassSpec {
 	private final double NEUTRON_MASS = 1.0086649156;
 	private final double ELECTRON_MASS = 0.0005486;
 	private final double ABUNDANCE_THRESHOLD = 0.0001;
+	private final double TWOPI = Math.PI * 2.0;
+	private final double EXPZERO = Math.exp(0.0000000000000001);
 	
 	// used for file ops
 	private static String pathToClass;
@@ -237,8 +239,7 @@ public class MassSpec {
 	private static final double CTERMMASS = 27.99491 - 10.9742;
 
 	private static List<String> peptides = Collections.synchronizedList(new ArrayList<String>());
-	private static List<Integer> proteinIDs = Collections.synchronizedList(new ArrayList<Integer>());;
-	
+	private static List<Integer> proteinIDs = Collections.synchronizedList(new ArrayList<Integer>());
 	
 	//
 	// VARS FOR COMPUTING THE ISOTOPIC DISTRIBUTION (MZS AND INTENSITIES) (NIST)
@@ -286,37 +287,37 @@ public class MassSpec {
 	//
 	//create the retention times for the run
 	//
-	private static ArrayList<Double> rtList;
-	private static int[] rtArray;
+	private static double[] rtArray;
+	private static int[] rtArrayShifted;
 	
 	private static final Modifications modifications = new Modifications();
 	
-	public static void setUpRTList(){
+	public static void setUpRTArray(){
 		int numScans = (int) (samplingRate * runTime);
 		double specTime = 0;
 		double sampleTime = 1.0 / samplingRate;
-		rtList = new ArrayList<Double>(numScans);
+		rtArray = new double[numScans];
 		for(int i = 0; i < numScans; i++){
 			if(randomFactory.rand.nextDouble() > dropoutRate){
 				double tempRT = specTime - sampleTime/6.0 + randomFactory.rand.nextDouble() * sampleTime/3.0;
 				tempRT = (tempRT < 0 ? 0.0 : tempRT);
-				rtList.add(tempRT);
+				rtArray[i] = tempRT;
 			}
 			specTime += 1.0/samplingRate;
 		}
 
-		rtArray = new int[(int)(rtList.get(rtList.size()-1) * 10)+1];
-		for (int i=0; i<rtList.size(); i++){
-			rtArray[(int) (rtList.get(i) * 10)] = i;
+		rtArrayShifted = new int[(int)(rtArray[rtArray.length-1] * 10.0)+1];
+		for (int i=0; i<rtArray.length; i++){
+			rtArrayShifted[(int) (rtArray[i] * 10)] = i;
 		}
 
 		// retrace array and back fill blank entries with last entry
-		int lastEntry = rtList.size()-1;
-		for (int i=rtArray.length-1; i>=0; i--){
-			if (rtArray[i] == 0){
-				rtArray[i] = lastEntry;
+		int lastEntry = rtArray.length-1;
+		for (int i=rtArrayShifted.length-1; i>=0; i--){
+			if (rtArrayShifted[i] == 0){
+				rtArrayShifted[i] = lastEntry;
 			} else {
-				lastEntry = rtArray[i];
+				lastEntry = rtArrayShifted[i];
 			}
 		}
 	}
@@ -928,19 +929,9 @@ public class MassSpec {
 					boolean firstGo = true;
 					for (Element el : elements){
 						// reset the arrays to compute the relative abundances
-						for (int i=0; i< relativeAbundancesReal.length; i++){
-							relativeAbundancesReal[i] = 0;
-							relativeAbundancesImag[i] = 0;
-						}
-
-						// set the relative abundance at this mass number to the element's relative abundance
-						for (int i=0; i<el.massNumberArray.length; i++){
-							relativeAbundancesReal[el.massNumberArray[i]] = el.relativeAbundanceArray[i];
-						}
-
-						// convert to frequency domain
-						fftBase = new FFTbase(relativeAbundancesReal.length);
-						fftBase.fft(relativeAbundancesReal, relativeAbundancesImag);
+						double[][] relativeAbundances = el.getRelativeAbundanceFFT(nextPow2);
+						relativeAbundancesReal = relativeAbundances[0];
+						relativeAbundancesImag = relativeAbundances[1];
 
 						// convolve the frequencies of each element
 						double prevReal = 0;
@@ -1047,6 +1038,7 @@ public class MassSpec {
 					
 					// sdShareX is kept the same for all isotope intensities to maintain the maximal elution RT across all traces
 					double sdShareX = 0.10 + randomFactory.rand.nextDouble() * 0.05; // random between 0.10-0.15
+					int rtFloor = getRTFloor(predictedRt);
 					for (int i = 0; i < isotopeIntensities.size(); i++){
 						// figure out expansion for each mz value
 						// add noise for predictedIntensity
@@ -1056,26 +1048,25 @@ public class MassSpec {
 						// therefore we set sigma to be the desired width / 5
 						// also we assume the highest intensity items will have an elapsed RT of 300s
 						// while less intense items will have much smaller RTs
-						double traceLength = 1000.0 * (predictedIntensity / maxIntensity);
+						double traceLength = 300.0 * (predictedIntensity / maxIntensity);
 						double sdEstimate = traceLength/3.0;
-						
+						int rtCeil = getRTCeil(predictedRt + traceLength);					
 						double sdShareY = 0.35 + randomFactory.rand.nextDouble() * 0.15; // random between 0.35-0.50
 						double sdShareZ = 1.0 - (sdShareY + sdShareX);
 						double sdX = sdShareX * sdEstimate;
 						double sdY = sdShareY * sdEstimate;
 						double sdZ = sdShareZ * sdEstimate;
 						
-						int rtFloor = getRTFloor(predictedRt);
-						int rtCeil = getRTCeil(predictedRt + traceLength);
-						
 						double centroidIntensity=0;
 						boolean oneDDropout;
 						double oneDIntensityFactor;
 						double mzWobble; // this will be the final noisified mz
 						//this is the apex of this isotopic trace; used for mixing the two Gaussians
-						double maxXIntensity = predictedIntensity * isotopeIntensities.get(i) * (1.0/(sdX*Math.sqrt(2.0*Math.PI))) * Math.exp(0.0000000000000001);
-						double normalizingConstantY = maxXIntensity / (2*(1.0/(sdY*Math.sqrt(2.0*Math.PI))) * Math.exp(0.0000000000000001));
-						double normalizingConstantZ = maxXIntensity / (2*(1.0/(sdZ*Math.sqrt(2.0*Math.PI))) * Math.exp(0.0000000000000001));
+						double maxXIntensity = predictedIntensity * isotopeIntensities.get(i) * (1.0/(sdX*Math.sqrt(TWOPI))) * EXPZERO;
+						double normalizingConstantY = maxXIntensity / (2*(1.0/(sdY*Math.sqrt(TWOPI))) * EXPZERO);
+						double normalizingConstantZ = maxXIntensity / (2*(1.0/(sdZ*Math.sqrt(TWOPI))) * EXPZERO);
+						double muGaussian = predictedRt + traceLength*sdShareX;
+
 						for (int j = rtFloor; j < rtCeil; j++){
 							if (true){ //TODO drop points w/greater probability toward lower intensities
 								if (oneD) { 
@@ -1085,10 +1076,10 @@ public class MassSpec {
 										centroidIntensity = predictedIntensity * isotopeIntensities.get(i) * oneDIntensityFactor;
 									}
 								} else { // normal chromotography (not 1 d)
-									double gaussianX = predictedIntensity * isotopeIntensities.get(i) * (1.0/(sdX*Math.sqrt(2.0*Math.PI)))	* Math.exp(-(Math.pow(rtList.get(j)-(predictedRt + traceLength*sdShareX),2)/(2.0 * Math.pow(sdX,2))));
-									double gaussianY = normalizingConstantY * (1.0/(sdY*Math.sqrt(2.0*Math.PI))) * Math.exp(-(Math.pow(rtList.get(j)-(predictedRt + traceLength*sdShareX),2)/(2.0 * Math.pow(sdY,2)))); 
-									double gaussianZ = normalizingConstantZ * (1.0/(sdZ*Math.sqrt(2.0*Math.PI))) * Math.exp(-(Math.pow(rtList.get(j)-(predictedRt + traceLength*sdShareX),2)/(2.0 * Math.pow(sdZ,2)))); 
-									if (rtList.get(j) < predictedRt + sdShareX * traceLength){ // first half treated as a more narrow Gaussian
+									double gaussianX = predictedIntensity * isotopeIntensities.get(i) * (1.0/(sdX*Math.sqrt(TWOPI)))	* Math.exp(-(Math.pow(rtArray[j]-muGaussian,2)/(2.0 * Math.pow(sdX,2))));
+									double gaussianY = normalizingConstantY * (1.0/(sdY*Math.sqrt(TWOPI))) * Math.exp(-(Math.pow(rtArray[j]-muGaussian,2)/(2.0 * Math.pow(sdY,2)))); 
+									double gaussianZ = normalizingConstantZ * (1.0/(sdZ*Math.sqrt(TWOPI))) * Math.exp(-(Math.pow(rtArray[j]-muGaussian,2)/(2.0 * Math.pow(sdZ,2)))); 
+									if (rtArray[j] < predictedRt + sdShareX * traceLength){ // first half treated as a more narrow Gaussian
 										centroidIntensity = gaussianX + (gaussianY + gaussianZ)*(gaussianX / maxXIntensity);
 									} else { // second half treated as a wider Gaussian
 										centroidIntensity = gaussianX + gaussianY + gaussianZ;
@@ -1115,12 +1106,12 @@ public class MassSpec {
 										newCent.ionFeatureID = i;
 										newCent.pepID = peptideID;
 										newCent.proteinID = proteinID;
-										if (outputScans.containsKey(rtList.get(j))){
-											((LinkedList) outputScans.get(rtList.get(j))).add(newCent);
+										if (outputScans.containsKey(rtArray[j])){
+											((LinkedList) outputScans.get(rtArray[j])).add(newCent);
 										} else { // not yet in rt scan output list
 											LinkedList<Centroid> tempScan = new LinkedList<>();
 											tempScan.add(newCent);
-											outputScans.put(rtList.get(j), tempScan);
+											outputScans.put(rtArray[j], tempScan);
 										}
 										totalCentroids++;
 										if (maxMZ < mzWobble){maxMZ = mzWobble;}
@@ -1130,35 +1121,35 @@ public class MassSpec {
 										// include it in the list of sequences to be targeted
 										// for MS/MS.
 										if (highestNMS2 > 0){
-											if (!highestNSequences.containsKey(rtList.get(j))){
+											if (!highestNSequences.containsKey(rtArray[j])){
 												// if RT not in highestNSequences, add it
 												String[] sequences = new String[highestNMS2];
 												sequences[0] = sequence;
-												highestNSequences.put(rtList.get(j), sequences);
+												highestNSequences.put(rtArray[j], sequences);
 												int[] highestCharges = new int[highestNMS2];
 												highestCharges[0] = charges[1]; //charges[1] is the highest charge for this seq
-												highestNCharges.put(rtList.get(j), highestCharges);
+												highestNCharges.put(rtArray[j], highestCharges);
 												double[] intensities = new double[highestNMS2];
 												intensities[0] = centroidIntensity;
-												highestNIntensities.put(rtList.get(j), intensities);
+												highestNIntensities.put(rtArray[j], intensities);
 												double[] mzs = new double[highestNMS2];
 												mzs[0] = mzWobble;
-												highestNMzs.put(rtList.get(j), mzs);
+												highestNMzs.put(rtArray[j], mzs);
 											}
 											int lowestIntensity = 0;
 											//find lowest intensity in highest intensities in this scan
 											for (int k=0; k<highestNMS2; k++){ 
-												if (((double[]) highestNIntensities.get(rtList.get(j)))[k] < lowestIntensity ){
+												if (((double[]) highestNIntensities.get(rtArray[j]))[k] < lowestIntensity ){
 													lowestIntensity = k;
 												}
 											}
 
 											// if intensity of this centroid is >= lowest intensity in highestNSequences
-											if (centroidIntensity > ((double[]) highestNIntensities.get(rtList.get(j)))[lowestIntensity]){
-												((double[]) highestNIntensities.get(rtList.get(j)))[lowestIntensity] = centroidIntensity;
-												((String[]) highestNSequences.get(rtList.get(j)))[lowestIntensity] = sequence;
-												((int[]) highestNCharges.get(rtList.get(j)))[lowestIntensity] = charges[1];
-												((double[]) highestNMzs.get(rtList.get(j)))[lowestIntensity] = mzWobble;
+											if (centroidIntensity > ((double[]) highestNIntensities.get(rtArray[j]))[lowestIntensity]){
+												((double[]) highestNIntensities.get(rtArray[j]))[lowestIntensity] = centroidIntensity;
+												((String[]) highestNSequences.get(rtArray[j]))[lowestIntensity] = sequence;
+												((int[]) highestNCharges.get(rtArray[j]))[lowestIntensity] = charges[1];
+												((double[]) highestNMzs.get(rtArray[j]))[lowestIntensity] = mzWobble;
 											}
 										}
 									}
@@ -1200,16 +1191,19 @@ public class MassSpec {
 	}
 		
 	private int getRTCeil(double value){
-		// find first rtList index greater than value (or rtList.size-1 if at tail)
+		// find first rtArray index greater than value (or rtArray.size-1 if at tail)
 		int start = (int)(value * 10);
-		return (value > rtList.get(rtList.size()-1) ? rtList.size()-1 : rtArray[start]);
+		if (value > rtArray[rtArray.length-1]){
+			return rtArray.length-1;
+		}
+		return rtArrayShifted[start];
 	}
 	
 	private int getRTFloor(double value){
-		// find first rtList index less than value (or 0 if at head)
+		// find first rtArray index less than value (or 0 if at head)
 		int start = (int)(value * 10);
-		if(start > rtArray.length-1){return Integer.MAX_VALUE;}
-		return (start > 0 ? rtArray[start] : rtArray[0]);
+		if(start > rtArrayShifted.length-1){return Integer.MAX_VALUE;}
+		return (start > 0 ? rtArrayShifted[start] : rtArrayShifted[0]);
 	}
 	
 	// Here each RT scan's centroids are merged if they are within the
@@ -1571,13 +1565,13 @@ public class MassSpec {
 	
 	public static void finish(){
 		// write the beginning of the output and truth files
-		if(!outputPre(rtList.size())){return;}
+		if(!outputPre(rtArray.length)){return;}
 		if (!printTruthPre()){return;}
 		int scanIdx = 0;
 		// for each RT
-		for(Double rt : rtList){
-			simulatorGUI.progressMonitor.setNote("Preparing output: RT Scan " + scanIdx + " of " + rtList.size());
-			simulatorGUI.progressMonitor.setProgress(75 + (int)(25.0 * (double) (scanIdx/rtList.size())));
+		for(Double rt : rtArray){
+			simulatorGUI.progressMonitor.setNote("Preparing output: RT Scan " + scanIdx + " of " + rtArray.length);
+			simulatorGUI.progressMonitor.setProgress(75 + (int)(25.0 * (double) (scanIdx/rtArray.length)));
 			LinkedList<Centroid> masterScan = new LinkedList<Centroid>();
 			
 			File directory = new File(pathToClass + "JAMSSfiles");
