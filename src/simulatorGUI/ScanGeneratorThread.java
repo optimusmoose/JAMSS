@@ -17,6 +17,7 @@
 
 package simulatorGUI;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
@@ -24,7 +25,7 @@ import java.util.LinkedList;
  * @author Rob.Smith
  */
 public class ScanGeneratorThread extends Thread{
-	LinkedList<Integer> queue;
+	ArrayList<Integer> queue;
 	LinkedList<Centroid> masterScan;
 	boolean finished = false;
 	int rtIdx;
@@ -32,7 +33,7 @@ public class ScanGeneratorThread extends Thread{
 	int numRts;
 	static int numFinished = 0;
 	int numIEs;
-	public ScanGeneratorThread(LinkedList<Integer> q, double _rt, int _rtIdx, int _numRts, int _numIEs){
+	public ScanGeneratorThread(ArrayList<Integer> q, double _rt, int _rtIdx, int _numRts, int _numIEs){
 		rtIdx = _rtIdx;
 		rt = _rt;
 		queue = q;

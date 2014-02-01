@@ -31,6 +31,7 @@ public class IEGeneratorThread extends Thread{
 	static int proteinCount=0;
 	public boolean finished = false;
 	public MassSpec massSpec;
+	static public int maxEnvelopes;
 	public IEGeneratorThread(BlockingQueue<String> q, Digester _digester){
 		queue = q;
 		digester = _digester;
@@ -38,20 +39,27 @@ public class IEGeneratorThread extends Thread{
 			maxQueueSize = queue.size();
 		}
 		massSpec = new MassSpec();
+		maxEnvelopes = (int) ((Runtime.getRuntime().maxMemory() - 1000000000) / 1000) / MassSpec.numCpus;
 	}
+	
 	
 	@Override
 	public void run() {
 		// create one mass spec object per thread
 		while (!queue.isEmpty()) {
-			String data = queue.poll();
-			if(data==null){return;}
-			String[] parts = data.split("_");
-			massSpec.processPeptides(digester.processProtein(parts[0], Integer.parseInt(parts[1])), Double.parseDouble(parts[2]), Integer.parseInt(parts[3]));
-			proteinCount++;
-			simulatorGUI.progressMonitor.setNote("Simulating protein "+proteinCount + " of " + maxQueueSize + "           ");
-			simulatorGUI.progressMonitor.setProgress((int) (((double) proteinCount/(double) maxQueueSize) * 40.0)+4);
+			if(massSpec.isotopicEnvelopesInstance.size() > maxEnvelopes){
+				massSpec.writeEnvelopes();
+			} else{
+				String data = queue.poll();
+				if(data==null){return;}
+				String[] parts = data.split("_");
+				massSpec.processPeptides(digester.processProtein(parts[0], Integer.parseInt(parts[1])), Double.parseDouble(parts[2]), Integer.parseInt(parts[3]));
+				proteinCount++;
+				simulatorGUI.progressMonitor.setNote("Simulating protein "+proteinCount + " of " + maxQueueSize + "           ");
+				simulatorGUI.progressMonitor.setProgress((int) (((double) proteinCount/(double) maxQueueSize) * 40.0)+4);
+			}
 		}
+		massSpec.writeEnvelopes();
 		finished = true;
 		return;
 	}

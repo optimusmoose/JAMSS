@@ -183,9 +183,9 @@ public class MassSpec {
 	// this the hash of the centroids generated for the specific
 	// thread containing this mass spec object
 	public static LinkedList<IsotopicEnvelope> isotopicEnvelopes = new LinkedList<IsotopicEnvelope>();
-	public LinkedList<IsotopicEnvelope> isotopicEnvelopesInstance;
-	public static Object[] ieByRtIdx;
-	public Object[] ieByRtIdxInstance;
+	public LinkedList<IsotopicEnvelope> isotopicEnvelopesInstance = new LinkedList<IsotopicEnvelope>();
+//	public static Object[] ieByRtIdx;
+//	public Object[] ieByRtIdxInstance;
 	
 	// this is used to define the window for noise points
 	// while allowing threaded operations
@@ -283,8 +283,8 @@ public class MassSpec {
 	//
 	//create the retention times for the run
 	//
-	private static double[] rtArray;
-	private static int[] rtArrayShifted;
+	public static double[] rtArray;
+	public static int[] rtArrayShifted;
 	
 	private static final Modifications modifications = new Modifications();
 	
@@ -316,18 +316,17 @@ public class MassSpec {
 				lastEntry = rtArrayShifted[i];
 			}
 		}
-		ieByRtIdx = new Object[rtArray.length];
-		for (int i=0; i<rtArray.length; i++){
-			ieByRtIdx[i] = new LinkedList<Integer>();
-		}
+//		ieByRtIdx = new Object[rtArray.length];
+//		for (int i=0; i<rtArray.length; i++){
+//			ieByRtIdx[i] = new LinkedList<Integer>();
+//		}
 	}
 	private double monoMZ;
 	public MassSpec(){
-		isotopicEnvelopesInstance = new LinkedList<IsotopicEnvelope>();
-		ieByRtIdxInstance = new Object[rtArray.length];
-		for (int i=0; i<rtArray.length; i++){
-			ieByRtIdxInstance[i] = new LinkedList<Integer>();
-		}
+//		ieByRtIdxInstance = new Object[rtArray.length];
+//		for (int i=0; i<rtArray.length; i++){
+//			ieByRtIdxInstance[i] = new LinkedList<Integer>();
+//		}
 		
 		// create a unique ID for this MS (used to prevent race conditions on output files)
 		msIdx = msIdxMaster++;
@@ -1031,14 +1030,14 @@ public class MassSpec {
 					if (predictedRt > 0) { // check this upfront so as not to waste time
 						// sdShareX is kept the same for all isotope intensities to maintain the maximal elution RT across all traces
 						double sdShareX = 0.10 + randomFactory.rand.nextDouble() * 0.05; // random between 0.10-0.15
-						double rtFloor = getRTFloor(predictedRt);
-						double traceLength = 300.0 * (predictedIntensity / maxIntensity);
+						int rtFloor = getRTFloor(predictedRt);
+						int traceLength = (int) (300.0 * (predictedIntensity / maxIntensity));
 						//FWHM = 2.35 sigma, we approximate the width of the Gaussian at 5 sigma
 						// therefore we set sigma to be the desired width / 5
 						// also we assume the highest intensity items will have an elapsed RT of 300s
 						// while less intense items will have much smaller RTs
 						double sdEstimate = traceLength/3.0;
-						double rtCeil = getRTCeil(predictedRt + traceLength);
+						int rtCeil = getRTCeil(predictedRt + traceLength);
 					
 						IsotopicEnvelope isotopicEnvelope = new IsotopicEnvelope(isotopeIntensities, 
 																				isotopeMasses, 
@@ -1058,13 +1057,13 @@ public class MassSpec {
 						isotopicEnvelopesInstance.add(isotopicEnvelope);
 
 						// Mark this isotopicEnvelope as needing expansion for all rt scans in its range
-						int start = (int)(rtFloor * 10);
-						if (start < rtArrayShifted[0]){start = 0;}
-						int end = (int)(rtCeil * 10);
-						if (end > rtArrayShifted[rtArrayShifted.length-1]){end = rtArrayShifted[rtArrayShifted.length-1];}
-						for(int i=start; i<end; i++){
-							((LinkedList<Integer>) ieByRtIdxInstance[i]).add(isotopicEnvelopesInstance.size()-1);
-						}
+//						int start = (int)(rtFloor * 10);
+//						if (start < rtArrayShifted[0]){start = 0;}
+//						int end = (int)(rtCeil * 10);
+//						if (end > rtArrayShifted[rtArrayShifted.length-1]){end = rtArrayShifted[rtArrayShifted.length-1];}
+//						for(int i=start; i<end; i++){
+//							((LinkedList<Integer>) ieByRtIdxInstance[i]).add(isotopicEnvelopesInstance.size()-1);
+//						}
 				}
 			}
 		}
@@ -1099,20 +1098,20 @@ public class MassSpec {
 		return result;
 	}
 		
-	private double getRTCeil(double value){
+	private int getRTCeil(double value){
 		// find first rtArray index greater than value (or rtArray.size-1 if at tail)
 		int start = (int)(value * 10);
 		if (value > rtArray[rtArray.length-1]){
 			return rtArray.length-1;
 		}
-		return rtArray[rtArrayShifted[start]];
+		return rtArrayShifted[start];
 	}
 	
-	private double getRTFloor(double value){
+	private int getRTFloor(double value){
 		// find first rtArray index less than value (or 0 if at head)
 		int start = (int)(value * 10);
 		if(start > rtArrayShifted.length-1){return Integer.MAX_VALUE;}
-		return (start > 0 ? rtArray[rtArrayShifted[start]] : rtArray[0]);
+		return (start > 0 ? rtArrayShifted[start] : 0);
 	}
 	
 	// Here each RT scan's centroids are merged if they are within the
@@ -1466,15 +1465,33 @@ public class MassSpec {
 			simulatorGUI.progressMonitor.setNote("Calculating/writing RT scans: scan "+ i + " of " + rtArray.length);
 			simulatorGUI.progressMonitor.setProgress((int) (((double) i/(double) rtArray.length) * 56.0)+25);
 			ScanGeneratorThread.numFinished = 0; //reset each RT
+			
+			// for each current RT, get rid of any out of range
+			ArrayList<Integer> iesToRemove = new ArrayList<Integer>(isotopicEnvelopes.size());
+			for(int j=0; j<isotopicEnvelopes.size(); j++){
+				if(!isotopicEnvelopes.get(j).isInRange(i)){
+					iesToRemove.add(j);
+				}
+			}
+
+			for(int ieIdx : iesToRemove){
+				isotopicEnvelopes.remove(ieIdx);
+			}
+
+			// get ies that start at current scan from disk			
+			LinkedList<IsotopicEnvelope> iesFromFile = IsotopicEnvelope.getIEsFromFile(pathToClass, i);
+			if(iesFromFile != null){
+				isotopicEnvelopes.addAll(iesFromFile);
+			}
 
 			// spin up #cpu threads to create centriods for this scan
-			int chunk = ((LinkedList<Integer>) ieByRtIdx[i]).size() / numCpus;
+			int chunk = isotopicEnvelopes.size() / numCpus;
 			int chunkIdx = 0;
 			ScanGeneratorThread[] threads = new ScanGeneratorThread[numCpus];
 			for(int j = 0; j < numCpus; j++){
-				LinkedList<Integer> ieIds = new LinkedList<Integer>();
-				for(int k=chunkIdx; k<((LinkedList<Integer>) ieByRtIdx[i]).size() && k<chunk*(j+1); k++){
-					ieIds.add(((LinkedList<Integer>) ieByRtIdx[i]).get(k));
+				ArrayList<Integer> ieIds = new ArrayList<Integer>(chunk);
+				for(int k=chunkIdx; k<isotopicEnvelopes.size() && k<chunk*(j+1); k++){
+					ieIds.add(j);
 				}
 				chunkIdx += chunk;
 				threads[j] = new ScanGeneratorThread(ieIds, rtArray[i], i,rtArray.length,isotopicEnvelopes.size());
@@ -1540,5 +1557,13 @@ public class MassSpec {
 		if(createTruthFile){printSequences();}
 		// write the end of the output and truth files
 		outputPost();
+	}
+	
+	public void writeEnvelopes(){
+		// TODO remove ieByRtIdxInstance and ieByRtIdx. Don't need them anymore
+		for(IsotopicEnvelope ie : isotopicEnvelopesInstance){
+			ie.serialize(pathToClass);
+		}
+		isotopicEnvelopesInstance = new LinkedList<IsotopicEnvelope>();
 	}
 }
