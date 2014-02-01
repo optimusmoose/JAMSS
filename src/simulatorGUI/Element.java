@@ -56,7 +56,7 @@ public class Element {
 	
 	// Find the FFT for this element at the given length and
 	// save it so we don't have to ever recompute it.
-	public double[][] getRelativeAbundanceFFT(int length){
+	public double[][] getRelativeAbundanceFFT(int length, FFTbase fftBase){
 		if(!fftArrayHash.containsKey(length)){
 			double[] relativeAbundancesReal= new double[length];
 			double[] relativeAbundancesImag= new double[length];
@@ -67,7 +67,6 @@ public class Element {
 			}
 
 			// convert to frequency domain
-			FFTbase fftBase = new FFTbase(relativeAbundancesReal.length);
 			fftBase.fft(relativeAbundancesReal, relativeAbundancesImag);
 
 			double[][] fftArrays = new double[2][];

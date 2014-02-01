@@ -19,14 +19,10 @@
 package simulatorGUI;
 
 import java.io.File;
-import java.io.FileInputStream;
 import org.apache.commons.codec.binary.Base64;
-import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.ByteBuffer;
@@ -66,21 +62,18 @@ public class MassSpec {
 	public static String rtModelLocation;
 	public static int numCpus;
 	public static String simOptions;
+	public static boolean createTruthFile;
 	
 	//
 	// constants
 	//
 	private final double NEUTRON_MASS = 1.0086649156;
-	private final double ELECTRON_MASS = 0.0005486;
 	private final double ABUNDANCE_THRESHOLD = 0.0001;
-	private final double TWOPI = Math.PI * 2.0;
-	private final double EXPZERO = Math.exp(0.0000000000000001);
 	
 	// used for file ops
 	private static String pathToClass;
 	public int msIdx;
 	static private int msIdxMaster = 0;
-	private int totalCentroids;
 	
 	//
 	// WEKA ATTRIBUTES
@@ -129,31 +122,31 @@ public class MassSpec {
 		
 	// These are used for charge calculation
 	// missing last values are intentional---non-existant
-	private final double[] RESIDUE_K = {2.18,8.95,10.53};
-	private final double[] RESIDUE_E = {2.19,9.67,4.25};
-	private final double[] RESIDUE_D = {1.88,9.60,3.65};
-	private final double[] RESIDUE_H = {1.82,9.17,6.00};
-	private final double[] RESIDUE_R = {2.17,9.04,12.48};
-	private final double[] RESIDUE_Q = {2.17,9.13};
-	private final double[] RESIDUE_N = {2.02,8.80};
-	private final double[] RESIDUE_C = {1.96,10.28,8.18};
-	private final double[] RESIDUE_T = {2.11,9.62};
-	private final double[] RESIDUE_S = {2.21,9.15};
-	private final double[] RESIDUE_W = {2.38,9.39};
-	private final double[] RESIDUE_Y = {2.20,9.11,10.07};
-	private final double[] RESIDUE_F = {1.83,9.13};
-	private final double[] RESIDUE_M = {2.28,9.21};
-	private final double[] RESIDUE_I = {2.36,9.68};
-	private final double[] RESIDUE_L = {2.36,9.60};
-	private final double[] RESIDUE_V = {2.32,9.62};
-	private final double[] RESIDUE_P = {1.99,10.96};
-	private final double[] RESIDUE_A = {2.34,9.69};
-	private final double[] RESIDUE_G = {2.34,9.60};
-	private final double[] RESIDUE_B = {1.95,9.20,3.65};
-	private final double[] RESIDUE_Z = {2.18,9.40,4.25};
-	private final double[] RESIDUE_X = {2.20,9.40};
-	private final double[] RESIDUE_U = {1.96,10.28,5.20};
-	private HashMap<Character,double[]> residueTable = new HashMap<>();
+	private final static double[] RESIDUE_K = {2.18,8.95,10.53};
+	private final static double[] RESIDUE_E = {2.19,9.67,4.25};
+	private final static double[] RESIDUE_D = {1.88,9.60,3.65};
+	private final static double[] RESIDUE_H = {1.82,9.17,6.00};
+	private final static double[] RESIDUE_R = {2.17,9.04,12.48};
+	private final static double[] RESIDUE_Q = {2.17,9.13};
+	private final static double[] RESIDUE_N = {2.02,8.80};
+	private final static double[] RESIDUE_C = {1.96,10.28,8.18};
+	private final static double[] RESIDUE_T = {2.11,9.62};
+	private final static double[] RESIDUE_S = {2.21,9.15};
+	private final static double[] RESIDUE_W = {2.38,9.39};
+	private final static double[] RESIDUE_Y = {2.20,9.11,10.07};
+	private final static double[] RESIDUE_F = {1.83,9.13};
+	private final static double[] RESIDUE_M = {2.28,9.21};
+	private final static double[] RESIDUE_I = {2.36,9.68};
+	private final static double[] RESIDUE_L = {2.36,9.60};
+	private final static double[] RESIDUE_V = {2.32,9.62};
+	private final static double[] RESIDUE_P = {1.99,10.96};
+	private final static double[] RESIDUE_A = {2.34,9.69};
+	private final static double[] RESIDUE_G = {2.34,9.60};
+	private final static double[] RESIDUE_B = {1.95,9.20,3.65};
+	private final static double[] RESIDUE_Z = {2.18,9.40,4.25};
+	private final static double[] RESIDUE_X = {2.20,9.40};
+	private final static double[] RESIDUE_U = {1.96,10.28,5.20};
+	private static HashMap<Character,double[]> residueTable = new HashMap<>();
 	
 	//
 	// Amino acid counts, used to build WEKA instances
@@ -183,23 +176,26 @@ public class MassSpec {
 	private int aaV;
 	private int aaJ;
 	
-	private FFTbase fftBase;
 	private static RandomFactory randomFactory = new RandomFactory();
 	public static double maxIntensity; 
+	FFTbase fftBase = new FFTbase();
 	
 	// this the hash of the centroids generated for the specific
 	// thread containing this mass spec object
-	public HashMap outputScans;
+	public static LinkedList<IsotopicEnvelope> isotopicEnvelopes = new LinkedList<IsotopicEnvelope>();
+	public LinkedList<IsotopicEnvelope> isotopicEnvelopesInstance;
+	public static Object[] ieByRtIdx;
+	public Object[] ieByRtIdxInstance;
 	
 	// this is used to define the window for noise points
 	// while allowing threaded operations
 	public static double maxMZ = 0;
 	
 	// these are used for generating MS2 distributions
-	private static Map highestNSequences = Collections.synchronizedMap( new HashMap());
-	private static Map highestNCharges = Collections.synchronizedMap( new HashMap());
-	private static Map highestNIntensities = Collections.synchronizedMap( new HashMap());
-	private static Map highestNMzs = Collections.synchronizedMap( new HashMap());
+	public static Map highestNSequences = Collections.synchronizedMap( new HashMap());
+	public static Map highestNCharges = Collections.synchronizedMap( new HashMap());
+	public static Map highestNIntensities = Collections.synchronizedMap( new HashMap());
+	public static Map highestNMzs = Collections.synchronizedMap( new HashMap());
 	
 	private static final HashMap<Character, Double> monoResidueMasses = new HashMap<>();
 	// build monoResidueMasses table
@@ -320,12 +316,18 @@ public class MassSpec {
 				lastEntry = rtArrayShifted[i];
 			}
 		}
+		ieByRtIdx = new Object[rtArray.length];
+		for (int i=0; i<rtArray.length; i++){
+			ieByRtIdx[i] = new LinkedList<Integer>();
+		}
 	}
 	private double monoMZ;
 	public MassSpec(){
-		// this counter allows us to write out to file intermittently
-		// thus giving an absolute RAM limit
-		totalCentroids = 0;
+		isotopicEnvelopesInstance = new LinkedList<IsotopicEnvelope>();
+		ieByRtIdxInstance = new Object[rtArray.length];
+		for (int i=0; i<rtArray.length; i++){
+			ieByRtIdxInstance[i] = new LinkedList<Integer>();
+		}
 		
 		// create a unique ID for this MS (used to prevent race conditions on output files)
 		msIdx = msIdxMaster++;
@@ -356,11 +358,6 @@ public class MassSpec {
 				file.delete();
 			}
 		}
-
-		// Create thread-specific list of output
-		outputScans = new HashMap();
-		
-		fftBase = new FFTbase(1);
 		
 		// build residueTable
 		residueTable.put('K',RESIDUE_K);
@@ -498,7 +495,7 @@ public class MassSpec {
 	
 	// The purpose of this helper is to 
 	// handle the variable PTMs by spinning off
-	// one processPeptideHelper for each possible
+	// one computeIsotopicEnvelopes for each possible
 	// combination of PTMs, based on their respective
 	// percentages of occurrence given by the user
 	public boolean processPeptide(String sequence, double abundance, int proteinID){
@@ -508,11 +505,11 @@ public class MassSpec {
 		proteinIDs.add(proteinID);
 		
 		if (modifications.powerSet.size() == 0){ // no variable mods
-			if(!processPeptideHelper(sequence, null,abundance, proteinID, peptideID)){return false;}
+			if(!computeIsotopicEnvelopes(sequence, null,abundance, proteinID, peptideID)){return false;}
 		} else {
 			for (int i=0; i < modifications.powerSet.size(); i++){ // for each combination of mods
 				// create peptide with the proper intensity
-				if(!processPeptideHelper(sequence, modifications.powerSet.get(i),abundance * ((Modification)modifications.powerSet.get(i).get(0)).percent, proteinID, peptideID)){ // get(0) because the percents are all the same.
+				if(!computeIsotopicEnvelopes(sequence, modifications.powerSet.get(i),abundance * ((Modification)modifications.powerSet.get(i).get(0)).percent, proteinID, peptideID)){ // get(0) because the percents are all the same.
 						return false;
 				}
 			}
@@ -530,7 +527,7 @@ public class MassSpec {
 	//
 	// Has to reset all atom counts
 	//	
-	public boolean processPeptideHelper(String sequence, ArrayList<Modification> mods, double abundance, int proteinID, int peptideID){	
+	public boolean computeIsotopicEnvelopes(String sequence, ArrayList<Modification> mods, double abundance, int proteinID, int peptideID){	
 			int chargeFloor = 0;
 			int chargeCeil = 0; 
 			
@@ -884,7 +881,7 @@ public class MassSpec {
 			chargeCeil = (int) Math.ceil(preCharge);
 
 			int[] charges;
-			if (chargeFloor == 0){
+			if (chargeFloor == 0 || chargeFloor == chargeCeil){
 				charges = new int[1];
 				charges[0] = chargeCeil;
 			} else {
@@ -900,7 +897,6 @@ public class MassSpec {
 					// Tweak H count based on charge
 					//
 					elementH.count = origHCount + (int) charge;
-
 					//
 					// compute the isotopic distribution (MZs and intensities)
 					//
@@ -929,7 +925,7 @@ public class MassSpec {
 					boolean firstGo = true;
 					for (Element el : elements){
 						// reset the arrays to compute the relative abundances
-						double[][] relativeAbundances = el.getRelativeAbundanceFFT(nextPow2);
+						double[][] relativeAbundances = el.getRelativeAbundanceFFT(nextPow2, fftBase);
 						relativeAbundancesReal = relativeAbundances[0];
 						relativeAbundancesImag = relativeAbundances[1];
 
@@ -948,222 +944,133 @@ public class MassSpec {
 						}
 						firstGo = false;
 						monoMass += el.count * el.getMonoIsotopicmass();
-				}
-
-				fftBase.fft(fftAbundancesImag, fftAbundancesReal); // Inverse FFT
-				
-				double maxAbundance = 0;
-				double totalAbundance = 0;
-				int monoMZIndex = 0;
-				for(int i=lowNominal; i<highNominal-1; i++){
-					if(fftAbundancesReal[i] > 0){
-					totalAbundance += fftAbundancesReal[i];
-						if (fftAbundancesReal[i] > maxAbundance ) {
-							monoMZIndex = i;
-						}
 					}
-				}
-				double normalizedAbundance = 0;
-				double newMass = 0;
-				double lastMass = (monoMass + charge)/charge - NEUTRON_MASS/charge;
-				LinkedList<Double> isotopeMasses = new LinkedList<Double>();
-				LinkedList<Double> isotopeIntensities = new LinkedList<Double>();
 
-				// we only want entries with index between lowNominal and highNominal
-				for(int i=lowNominal; i<highNominal-1; i++){
-					// normalize
-					normalizedAbundance = fftAbundancesReal[i] / totalAbundance;
-					newMass = lastMass + 1 / charge;
-					isotopeMasses.add(newMass); 
-					lastMass = newMass;
-
-					// keep if above threshold
-					if (normalizedAbundance > ABUNDANCE_THRESHOLD) {
-						isotopeIntensities.add(normalizedAbundance);
-						if (i == monoMZIndex) {monoMZ = newMass;}
-					}
-				}
+					fftBase.fft(fftAbundancesImag, fftAbundancesReal); // Inverse FFT
 				
-				// calculate RT: create weka instance and run on model to get RTs
-				Instance rtInstance = new Instance(rtData.numAttributes());
-				rtInstance.setValue(rtAttA, aaA);
-				rtInstance.setValue(rtAttR, aaR);
-				rtInstance.setValue(rtAttN, aaN);
-				rtInstance.setValue(rtAttD, aaD);
-				rtInstance.setValue(rtAttB, aaB);
-				rtInstance.setValue(rtAttC, aaC);
-				rtInstance.setValue(rtAttE, aaE);
-				rtInstance.setValue(rtAttQ, aaQ);
-				rtInstance.setValue(rtAttZ, aaZ);
-				rtInstance.setValue(rtAttG, aaG);
-				rtInstance.setValue(rtAttH, aaH);
-				rtInstance.setValue(rtAttI, aaI);
-				rtInstance.setValue(rtAttL, aaL);
-				rtInstance.setValue(rtAttK, aaK);
-				rtInstance.setValue(rtAttM, aaM);
-				rtInstance.setValue(rtAttF, aaF);
-				rtInstance.setValue(rtAttP, aaP);
-				rtInstance.setValue(rtAttS, aaS);
-				rtInstance.setValue(rtAttT, aaT);
-				rtInstance.setValue(rtAttW, aaW);
-				rtInstance.setValue(rtAttY, aaY);
-				rtInstance.setValue(rtAttV, aaV);
-				rtInstance.setValue(rtAttJ, aaJ);
-				rtData.add(rtInstance);
-				double predictedRt=0;
-				try{
-					predictedRt = rtCls.classifyInstance(rtInstance) + Math.abs(randomFactory.rand.nextGaussian() * runTime);
-				} catch (Exception ex){
-					JOptionPane.showMessageDialog(null, "WEKA error 1", "Error", JOptionPane.ERROR_MESSAGE);
-					return false;
-				}
-				
-				// get absolute instensity of this peptide
-				double predictedIntensity = 0.0;
-				if (abundance != 0){
-					predictedIntensity = maxIntensity * abundance;
-				} else { 
-					// get a random value between minWhiteNoise - maxIntensity, skewed towards a smaller value
-					double paretoFirst = Pareto.paretoBounded(randomFactory.rand, 0.00001, minWhiteNoiseIntensity, maxIntensity);
-					double paretoSecond = Pareto.paretoBounded(randomFactory.rand, 0.00001, minWhiteNoiseIntensity, maxIntensity);
-					double uniform = minWhiteNoiseIntensity + randomFactory.rand.nextDouble() * (maxIntensity/2.0 - minWhiteNoiseIntensity);
-					predictedIntensity = Math.max(paretoFirst, uniform/2.0 + paretoFirst + paretoSecond / 3.0);
-				}
-				//
-				// expand slice to a Gaussian
-				//
-				if (predictedRt > 0) { // check this upfront so as not to waste time
-					// for each ion feature in theoretical isotopic envelope slice, apply shape and noisify
-					//guesstimate sd of elution time as a function of the predicted RT
-					
-					// sdShareX is kept the same for all isotope intensities to maintain the maximal elution RT across all traces
-					double sdShareX = 0.10 + randomFactory.rand.nextDouble() * 0.05; // random between 0.10-0.15
-					int rtFloor = getRTFloor(predictedRt);
-					double traceLength = 300.0 * (predictedIntensity / maxIntensity);
-					//FWHM = 2.35 sigma, we approximate the width of the Gaussian at 5 sigma
-					// therefore we set sigma to be the desired width / 5
-					// also we assume the highest intensity items will have an elapsed RT of 300s
-					// while less intense items will have much smaller RTs
-					double sdEstimate = traceLength/3.0;
-					int rtCeil = getRTCeil(predictedRt + traceLength);
-					
-					for (int i = 0; i < isotopeIntensities.size(); i++){
-						//////////////////////////////////////////////////////////
-						// figure out expansion for each mz value
-						// add noise for predictedIntensity
-						// add noise for mz
-						//////////////////////////////////////////////////////////
-						double sdShareY = 0.35 + randomFactory.rand.nextDouble() * 0.15; // random between 0.35-0.50
-						double sdShareZ = 1.0 - (sdShareY + sdShareX);
-						double sdX = sdShareX * sdEstimate;
-						double sdY = sdShareY * sdEstimate;
-						double sdZ = sdShareZ * sdEstimate;
-						
-						double centroidIntensity=0;
-						boolean oneDDropout;
-						double oneDIntensityFactor;
-						double mzWobble; // this will be the final noisified mz
-						//this is the apex of this isotopic trace; used for mixing the two Gaussians
-						double maxXIntensity = predictedIntensity * isotopeIntensities.get(i) * (1.0/(sdX*Math.sqrt(TWOPI))) * EXPZERO;
-						double normalizingConstantY = maxXIntensity / (2*(1.0/(sdY*Math.sqrt(TWOPI))) * EXPZERO);
-						double normalizingConstantZ = maxXIntensity / (2*(1.0/(sdZ*Math.sqrt(TWOPI))) * EXPZERO);
-						double muGaussian = predictedRt + traceLength*sdShareX;
-
-						for (int j = rtFloor; j < rtCeil; j++){
-							if (true){ //TODO drop points w/greater probability toward lower intensities
-								if (oneD) { 
-									oneDDropout = randomFactory.rand.nextBoolean();
-									if (!oneDDropout){
-										oneDIntensityFactor = 0.05 + 0.45 * randomFactory.rand.nextFloat(); // between 0.05 and 1
-										centroidIntensity = predictedIntensity * isotopeIntensities.get(i) * oneDIntensityFactor;
-									}
-								} else { // normal chromotography (not 1 d)
-									double gaussianX = predictedIntensity * isotopeIntensities.get(i) * (1.0/(sdX*Math.sqrt(TWOPI))) * Math.exp(-(Math.pow(rtArray[j]-muGaussian,2)/(2.0 * Math.pow(sdX,2))));
-									double gaussianY = normalizingConstantY * (1.0/(sdY*Math.sqrt(TWOPI))) * Math.exp(-(Math.pow(rtArray[j]-muGaussian,2)/(2.0 * Math.pow(sdY,2)))); 
-									double gaussianZ = normalizingConstantZ * (1.0/(sdZ*Math.sqrt(TWOPI))) * Math.exp(-(Math.pow(rtArray[j]-muGaussian,2)/(2.0 * Math.pow(sdZ,2)))); 
-									if (rtArray[j] < predictedRt + sdShareX * traceLength){ // first half treated as a more narrow Gaussian
-										centroidIntensity = gaussianX + (gaussianY + gaussianZ)*(gaussianX / maxXIntensity);
-									} else { // second half treated as a wider Gaussian
-										centroidIntensity = gaussianX + gaussianY + gaussianZ;
-									}
-								}
-
-								if (centroidIntensity > minWhiteNoiseIntensity){ //filter points that are too small
-									// jaggedness - insert predictedIntensity noise
-									centroidIntensity -= (centroidIntensity/2.0) * randomFactory.rand.nextDouble() * randomFactory.rand.nextDouble();
-									// mz wobble - insert mz noise. Two types: Universal and intensity specific. 
-									// universal:
-									double universalNoised = isotopeMasses.get(i) - 0.001 + randomFactory.rand.nextDouble() * 0.002; //rand amt between -0.001 and 0.001
-
-									// intensity-specific:
-									double maxWobble = 0.03 * (minWhiteNoiseIntensity / centroidIntensity);
-									
-									// get random noise amount between min mz and max mz
-									mzWobble = universalNoised + (randomFactory.rand.nextBoolean() ? -1 : 1)* (randomFactory.rand.nextDouble() * maxWobble);
-
-									if (mzWobble > 0){
-										// TADA! finished centroid. Add to output map.		
-										Centroid newCent = new Centroid(mzWobble, centroidIntensity);
-										newCent.charge = (int) charge;
-										newCent.ionFeatureID = i;
-										newCent.pepID = peptideID;
-										newCent.proteinID = proteinID;
-										if (outputScans.containsKey(rtArray[j])){
-											((LinkedList) outputScans.get(rtArray[j])).add(newCent);
-										} else { // not yet in rt scan output list
-											LinkedList<Centroid> tempScan = new LinkedList<>();
-											tempScan.add(newCent);
-											outputScans.put(rtArray[j], tempScan);
-										}
-										totalCentroids++;
-										if (maxMZ < mzWobble){maxMZ = mzWobble;}
-
-										//////////////////////////////////////////////////////
-										// If this intensity is in the top N for this scan, 
-										// include it in the list of sequences to be targeted
-										// for MS/MS.
-										if (highestNMS2 > 0){
-											if (!highestNSequences.containsKey(rtArray[j])){
-												// if RT not in highestNSequences, add it
-												String[] sequences = new String[highestNMS2];
-												sequences[0] = sequence;
-												highestNSequences.put(rtArray[j], sequences);
-												int[] highestCharges = new int[highestNMS2];
-												highestCharges[0] = charges[1]; //charges[1] is the highest charge for this seq
-												highestNCharges.put(rtArray[j], highestCharges);
-												double[] intensities = new double[highestNMS2];
-												intensities[0] = centroidIntensity;
-												highestNIntensities.put(rtArray[j], intensities);
-												double[] mzs = new double[highestNMS2];
-												mzs[0] = mzWobble;
-												highestNMzs.put(rtArray[j], mzs);
-											}
-											int lowestIntensity = 0;
-											//find lowest intensity in highest intensities in this scan
-											for (int k=0; k<highestNMS2; k++){ 
-												if (((double[]) highestNIntensities.get(rtArray[j]))[k] < lowestIntensity ){
-													lowestIntensity = k;
-												}
-											}
-
-											// if intensity of this centroid is >= lowest intensity in highestNSequences
-											if (centroidIntensity > ((double[]) highestNIntensities.get(rtArray[j]))[lowestIntensity]){
-												((double[]) highestNIntensities.get(rtArray[j]))[lowestIntensity] = centroidIntensity;
-												((String[]) highestNSequences.get(rtArray[j]))[lowestIntensity] = sequence;
-												((int[]) highestNCharges.get(rtArray[j]))[lowestIntensity] = charges[1];
-												((double[]) highestNMzs.get(rtArray[j]))[lowestIntensity] = mzWobble;
-											}
-										}
-									}
-								}
+					double maxAbundance = 0;
+					double totalAbundance = 0;
+					int monoMZIndex = 0;
+					for(int i=lowNominal; i<highNominal-1; i++){
+						if(fftAbundancesReal[i] > 0){
+						totalAbundance += fftAbundancesReal[i];
+							if (fftAbundancesReal[i] > maxAbundance ) {
+								monoMZIndex = i;
 							}
 						}
 					}
+					double normalizedAbundance = 0;
+					double newMass = 0;
+					double lastMass = (monoMass + charge)/charge - NEUTRON_MASS/charge;
+					ArrayList<Double> isotopeMasses = new ArrayList<Double>(10);
+					ArrayList<Double> isotopeIntensities = new ArrayList<Double>(10);
+
+					// we only want entries with index between lowNominal and highNominal
+					for(int i=lowNominal; i<highNominal-1; i++){
+						// normalize
+						normalizedAbundance = fftAbundancesReal[i] / totalAbundance;
+						newMass = lastMass + NEUTRON_MASS / charge;
+						isotopeMasses.add(newMass); 
+						lastMass = newMass;
+
+						// keep if above threshold
+						if (normalizedAbundance > ABUNDANCE_THRESHOLD) {
+							isotopeIntensities.add(normalizedAbundance);
+							if (i == monoMZIndex) {monoMZ = newMass;}
+						}
+					}
+				
+					// calculate RT: create weka instance and run on model to get RTs
+					Instance rtInstance = new Instance(rtData.numAttributes());
+					rtInstance.setValue(rtAttA, aaA);
+					rtInstance.setValue(rtAttR, aaR);
+					rtInstance.setValue(rtAttN, aaN);
+					rtInstance.setValue(rtAttD, aaD);
+					rtInstance.setValue(rtAttB, aaB);
+					rtInstance.setValue(rtAttC, aaC);
+					rtInstance.setValue(rtAttE, aaE);
+					rtInstance.setValue(rtAttQ, aaQ);
+					rtInstance.setValue(rtAttZ, aaZ);
+					rtInstance.setValue(rtAttG, aaG);
+					rtInstance.setValue(rtAttH, aaH);
+					rtInstance.setValue(rtAttI, aaI);
+					rtInstance.setValue(rtAttL, aaL);
+					rtInstance.setValue(rtAttK, aaK);
+					rtInstance.setValue(rtAttM, aaM);
+					rtInstance.setValue(rtAttF, aaF);
+					rtInstance.setValue(rtAttP, aaP);
+					rtInstance.setValue(rtAttS, aaS);
+					rtInstance.setValue(rtAttT, aaT);
+					rtInstance.setValue(rtAttW, aaW);
+					rtInstance.setValue(rtAttY, aaY);
+					rtInstance.setValue(rtAttV, aaV);
+					rtInstance.setValue(rtAttJ, aaJ);
+					rtData.add(rtInstance);
+					double predictedRt=0;
+					try{
+						predictedRt = rtCls.classifyInstance(rtInstance) + Math.abs(randomFactory.rand.nextGaussian() * runTime);
+					} catch (Exception ex){
+						JOptionPane.showMessageDialog(null, "WEKA error 1", "Error", JOptionPane.ERROR_MESSAGE);
+						return false;
+					}
+
+					// get absolute instensity of this peptide
+					double predictedIntensity = 0.0;
+					if (abundance != 0){
+						predictedIntensity = maxIntensity * abundance;
+					} else { 
+						// get a random value between minWhiteNoise - maxIntensity, skewed towards a smaller value
+						double paretoFirst = Pareto.paretoBounded(randomFactory.rand, 0.00001, minWhiteNoiseIntensity, maxIntensity);
+						double paretoSecond = Pareto.paretoBounded(randomFactory.rand, 0.00001, minWhiteNoiseIntensity, maxIntensity);
+						double uniform = minWhiteNoiseIntensity + randomFactory.rand.nextDouble() * (maxIntensity/2.0 - minWhiteNoiseIntensity);
+						predictedIntensity = Math.max(paretoFirst, uniform/2.0 + paretoFirst + paretoSecond / 3.0);
+					}
+					//
+					// Create isotopic envelope
+					//
+					if (predictedRt > 0) { // check this upfront so as not to waste time
+						// sdShareX is kept the same for all isotope intensities to maintain the maximal elution RT across all traces
+						double sdShareX = 0.10 + randomFactory.rand.nextDouble() * 0.05; // random between 0.10-0.15
+						double rtFloor = getRTFloor(predictedRt);
+						double traceLength = 300.0 * (predictedIntensity / maxIntensity);
+						//FWHM = 2.35 sigma, we approximate the width of the Gaussian at 5 sigma
+						// therefore we set sigma to be the desired width / 5
+						// also we assume the highest intensity items will have an elapsed RT of 300s
+						// while less intense items will have much smaller RTs
+						double sdEstimate = traceLength/3.0;
+						double rtCeil = getRTCeil(predictedRt + traceLength);
+					
+						IsotopicEnvelope isotopicEnvelope = new IsotopicEnvelope(isotopeIntensities, 
+																				isotopeMasses, 
+																				sdShareX, 
+																				sdEstimate, 
+																				predictedIntensity, 
+																				predictedRt, 
+																				traceLength, 
+																				rtFloor, 
+																				rtCeil, 
+																				charge, 
+																				peptideID, 
+																				proteinID,
+																				sequence,
+																				charges);
+						// Add this isotopicEnvelope to the list of all envelopes
+						isotopicEnvelopesInstance.add(isotopicEnvelope);
+
+						// Mark this isotopicEnvelope as needing expansion for all rt scans in its range
+						int start = (int)(rtFloor * 10);
+						if (start < rtArrayShifted[0]){start = 0;}
+						int end = (int)(rtCeil * 10);
+						if (end > rtArrayShifted[rtArrayShifted.length-1]){end = rtArrayShifted[rtArrayShifted.length-1];}
+						for(int i=start; i<end; i++){
+							((LinkedList<Integer>) ieByRtIdxInstance[i]).add(isotopicEnvelopesInstance.size()-1);
+						}
 				}
 			}
 		}
 		return true;
 	}
+	
 	public boolean processPeptides(ArrayList<String> peptides, double abundance, int proteinID) {
 		for (String peptide : peptides) {
 			if(!processPeptide(peptide, abundance, proteinID)){return false;}
@@ -1192,27 +1099,27 @@ public class MassSpec {
 		return result;
 	}
 		
-	private int getRTCeil(double value){
+	private double getRTCeil(double value){
 		// find first rtArray index greater than value (or rtArray.size-1 if at tail)
 		int start = (int)(value * 10);
 		if (value > rtArray[rtArray.length-1]){
 			return rtArray.length-1;
 		}
-		return rtArrayShifted[start];
+		return rtArray[rtArrayShifted[start]];
 	}
 	
-	private int getRTFloor(double value){
+	private double getRTFloor(double value){
 		// find first rtArray index less than value (or 0 if at head)
 		int start = (int)(value * 10);
 		if(start > rtArrayShifted.length-1){return Integer.MAX_VALUE;}
-		return (start > 0 ? rtArrayShifted[start] : rtArrayShifted[0]);
+		return (start > 0 ? rtArray[rtArrayShifted[start]] : rtArray[0]);
 	}
 	
 	// Here each RT scan's centroids are merged if they are within the
 	// user-defined mz threshold for merging
 	public static void merge(LinkedList<Centroid> masterScan){
 		// sort the array list
-		Collections.sort(masterScan, new CentroidMZComparator());
+		//Collections.sort(masterScan, new CentroidMZComparator());
 
 		double mergeEnd = mergeThreshold;
 		LinkedList<Centroid> mergeGroup = new LinkedList<>();
@@ -1240,7 +1147,7 @@ public class MassSpec {
 						//keep other properties from last centriod in merged group
 						mergedCent.centroidID = oldCent.centroidID;
 						mergedCent.charge = oldCent.charge;
-						mergedCent.ionFeatureID = oldCent.ionFeatureID;
+						mergedCent.isotopeTraceID = oldCent.isotopeTraceID;
 						mergedCent.pepID = oldCent.pepID;
 						mergedCent.proteinID = oldCent.proteinID;
 						merged.add(mergedCent);
@@ -1314,6 +1221,7 @@ public class MassSpec {
 			outputWriter.write("\t\t</dataProcessingList>"+ System.getProperty("line.separator"));
 			outputWriter.write("\t\t<run id=\"simulated_run\" defaultInstrumentConfigurationRef=\"IC\">"+ System.getProperty("line.separator"));
 			outputWriter.write("\t\t<spectrumList count=\"" + totalScans + "\" defaultDataProcessingRef=\"did_nothing\">"+ System.getProperty("line.separator"));
+			outputWriter.flush();
 			outputWriter.close();
 		} catch (IOException ex) {
 			JOptionPane.showMessageDialog(null, "Error writing heading of mzML file.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -1369,7 +1277,7 @@ public class MassSpec {
 			mzMLWriter.write("\t\t\t\t\t</binaryDataArray>"+ System.getProperty("line.separator"));
 			mzMLWriter.write("\t\t\t\t</binaryDataArrayList>"+ System.getProperty("line.separator"));
 			mzMLWriter.write("\t\t\t</spectrum>"+ System.getProperty("line.separator"));
-
+			mzMLWriter.flush();
 			precursorIdx = scanIdx;
 			scanIdx++;
 			// put MS2 here for the N highest intensity sequences in the scan
@@ -1444,6 +1352,7 @@ public class MassSpec {
 				mzMLWriter.write("</spectrum>"+ System.getProperty("line.separator"));
 				scanIdx++;
 			}
+			mzMLWriter.flush();
 			mzMLWriter.close();
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(null, "Error writing mzML content.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -1482,7 +1391,7 @@ public class MassSpec {
 		return decrypted;
 	}
 	
-	static void createWhiteNoise(LinkedList<Centroid> masterScan, double maxMZ){
+	static void createWhiteNoise(LinkedList<Centroid> masterScan){
 		// create white noise
 		for(int j=0; j<whiteNoiseCount; j++){
 			double mz = randomFactory.rand.nextDouble() * (maxMZ);
@@ -1510,28 +1419,14 @@ public class MassSpec {
 	}
 	
 	static boolean printTruth(LinkedList<Centroid> masterScan, double rt){
-		// print peptide file 
-		try {
-			//contains list of peptide sequences and IDs
-			FileWriter peptideWriter = new FileWriter("JAMSSfiles" + File.separator + "output_truth_peptides.csv",true); // append
-
-			for(int pepIdx = 0; pepIdx < peptides.size(); pepIdx++){
-				//proteinID (pos in fasta file), peptideID, peptide sequence
-				peptideWriter.write(proteinIDs.get(pepIdx) + "," + pepIdx + "," + peptides.get(pepIdx));
-			}
-			peptideWriter.close();
-		} catch (IOException e){
-			JOptionPane.showMessageDialog(null, "Error appending to peptide truth file.", "Error", JOptionPane.ERROR_MESSAGE);
-			return false;
-		}
-		
 		// print regular truth file
 		try {
-			// centroidID, ionFeatureID, charge, pepID, proteinID, m/z, RT, intensity
+			// centroidID, isotopeTraceID, charge, pepID, proteinID, m/z, RT, intensity
 			FileWriter truthWriter = new FileWriter("JAMSSfiles" + File.separator + "output_truth.csv",true); // append
 			for (Centroid cent : masterScan){
-				truthWriter.write(cent.centroidID + "," + cent.ionFeatureID + "," + cent.charge +"," + cent.pepID + "," + cent.proteinID + "," + cent.mz + "," + rt + "," + cent.abundance);
+				truthWriter.append(cent.centroidID + "," + cent.isotopeTraceID + "," + cent.charge +"," + cent.pepID + "," + cent.proteinID + "," + cent.mz + "," + rt + "," + cent.abundance  + System.getProperty("line.separator"));
 			}
+			truthWriter.flush();
 			truthWriter.close();
  		} catch (IOException e) {
 			JOptionPane.showMessageDialog(null, "Error writing to truth file.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -1539,102 +1434,111 @@ public class MassSpec {
 		}
 		return true;
 	}
-	
-	public boolean writeTempFile(){
-		// write out each RT scan as a serialized list of centroids
-		// and empty the linked list at this RT
-		Object[] keys = outputScans.keySet().toArray();
-		int i = 0;
-		for (Object scan : outputScans.values()){
-			try{
-				// create a filename with the RT followed by time to distinguish it from other files at this RT
-				FileOutputStream fileOut = new FileOutputStream(pathToClass + "JAMSSfiles" + File.separator + keys[i] + "_" + msIdx + ".ser",true);
-				ObjectOutputStream out = new ObjectOutputStream(fileOut);
-				out.writeObject((LinkedList<Centroid>) scan);
-				out.close();
-				fileOut.close();
-				i++;
-			} catch (IOException ex){
-				JOptionPane.showMessageDialog(null, "Error serializing centroids.", "Error", JOptionPane.ERROR_MESSAGE);
-				return false;
+
+	static boolean printSequences(){
+		try {
+			//contains list of peptide sequences and IDs
+			FileWriter peptideWriter = new FileWriter("JAMSSfiles" + File.separator + "output_truth_peptides.csv",true); // append
+
+			for(int pepIdx = 0; pepIdx < peptides.size(); pepIdx++){
+				//proteinID (pos in fasta file), peptideID, peptide sequence
+				peptideWriter.append(proteinIDs.get(pepIdx) + "," + pepIdx + "," + peptides.get(pepIdx) + System.getProperty("line.separator"));
 			}
-		}	
-		outputScans = new HashMap();
-		System.gc();
-		totalCentroids = 0;
+			peptideWriter.flush();
+			peptideWriter.close();
+		} catch (IOException e){
+			JOptionPane.showMessageDialog(null, "Error appending to peptide truth file.", "Error", JOptionPane.ERROR_MESSAGE);
+			return false;
+		}
 		return true;
 	}
 	
-	public static void finish(){
+	public static void finishController(){
 		// write the beginning of the output and truth files
 		if(!outputPre(rtArray.length)){return;}
-		if (!printTruthPre()){return;}
-		int scanIdx = 0;
-		// for each RT
-		for(Double rt : rtArray){
-			simulatorGUI.progressMonitor.setNote("Preparing output: RT Scan " + scanIdx + " of " + rtArray.length);
-			simulatorGUI.progressMonitor.setProgress(75 + (int)(25.0 * (double) (scanIdx/rtArray.length)));
-			LinkedList<Centroid> masterScan = new LinkedList<Centroid>();
-			
-			File directory = new File(pathToClass + "JAMSSfiles");
-
-			// get all .ser files
-			String[] myFiles = directory.list(new FilenameFilter() {
-				@Override
-				public boolean accept(File directory, String fileName) {
-					return fileName.endsWith(".ser");
-				}
-			});
-			
-			for (String fileName : myFiles){
-				if (fileName.replace(pathToClass + "JAMSSfiles" + File.separator,"").split("_")[0].equals(rt.toString())){
-					// open file and deserialize objects in file
-					LinkedList<Centroid> thisScan = null;
-					try
-					{
-					   FileInputStream fileIn = new FileInputStream(pathToClass + "JAMSSfiles" + File.separator + fileName);
-					   ObjectInputStream in = new ObjectInputStream(fileIn);
-					   thisScan = (LinkedList<Centroid>) in.readObject();
-					   in.close();
-					   fileIn.close();
-					   // delete file
-					   File file = new File(pathToClass + "JAMSSfiles" + File.separator + fileName);
-					   file.delete();
-					}catch(IOException i)
-					{
-					   JOptionPane.showMessageDialog(null, "Error deserializing scan", "Error", JOptionPane.ERROR_MESSAGE);
-					   return;
-					}catch(ClassNotFoundException c)
-					{
-					   JOptionPane.showMessageDialog(null, "Error deserializing scan: Class not found.", "Error", JOptionPane.ERROR_MESSAGE);
-					   return;
-					}catch(Exception e){
-						e.printStackTrace();
-					}
-					
-					// add scan to master scan
-					for (Centroid cent : thisScan){
-						masterScan.add(cent);
-					}
-				}
-			}
-			
-			if(masterScan.size() > 0){
-				createWhiteNoise(masterScan, maxMZ);
-				merge(masterScan);
-				scanIdx = output(masterScan, rt, scanIdx);
-				if (scanIdx == -1){
-					return;
-				}
-				if(!printTruth(masterScan, rt)){return;}
-			}
-			
+		if(createTruthFile){
+			if (!printTruthPre()){return;}
 		}
-		// write the end of the output and truth files
-		outputPost();
+		
+		FileWriterThread writeThread = new FileWriterThread();
+		
+		for(int i=0; i<rtArray.length; i++){
+			simulatorGUI.progressMonitor.setNote("Calculating/writing RT scans: scan "+ i + " of " + rtArray.length);
+			simulatorGUI.progressMonitor.setProgress((int) (((double) i/(double) rtArray.length) * 56.0)+25);
+			ScanGeneratorThread.numFinished = 0; //reset each RT
+
+			// spin up #cpu threads to create centriods for this scan
+			int chunk = ((LinkedList<Integer>) ieByRtIdx[i]).size() / numCpus;
+			int chunkIdx = 0;
+			ScanGeneratorThread[] threads = new ScanGeneratorThread[numCpus];
+			for(int j = 0; j < numCpus; j++){
+				LinkedList<Integer> ieIds = new LinkedList<Integer>();
+				for(int k=chunkIdx; k<((LinkedList<Integer>) ieByRtIdx[i]).size() && k<chunk*(j+1); k++){
+					ieIds.add(((LinkedList<Integer>) ieByRtIdx[i]).get(k));
+				}
+				chunkIdx += chunk;
+				threads[j] = new ScanGeneratorThread(ieIds, rtArray[i], i,rtArray.length,isotopicEnvelopes.size());
+				threads[j].start();
+			}
+
+			LinkedList<Centroid> masterScan = new LinkedList<Centroid>();
+			// wait till they are done
+			for(int j = 0; j < numCpus; j++){
+				while(!threads[j].finished){
+					try{
+						Thread.sleep(1000);
+					} catch(Exception e){
+						JOptionPane.showMessageDialog(null, "Error writing out RT scans.", "Error", JOptionPane.ERROR_MESSAGE);
+					}
+				}
+				// read out this threads centroids into master scan
+				for(Centroid cent : threads[j].masterScan){
+					masterScan.add(cent);
+				}
+			}
+
+			// only allow one scan to be writing at a time to maintain order
+			if(writeThread.rt!=-1 && !writeThread.finished){ // will = -1 on first time through
+				while(!writeThread.finished){
+					try{Thread.sleep(2000);
+					}catch(Exception e){}
+				}
+			}
+
+			// spin a thread to write it out and move on to the next rt 
+			writeThread = new FileWriterThread(masterScan, rtArray[i], i);
+			writeThread.start();
+
+			// if there isn't at least 2 GB of free RAM, wait until
+			// previous writing threads finish up to make room for new
+			// Scans
+			while(!((Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory()) > 2147374182)){
+				try{
+					Thread.sleep(2000);
+				} catch(Exception e){}
+			}
+		}
+		if(!writeThread.finished){
+			try{Thread.sleep(2000);} catch(Exception e){}
+		}
+		MassSpec.postFinish();
+	}
+	public static void finish(double rt, LinkedList<Centroid> masterScan,int scanIdx){
+		if(!masterScan.isEmpty()){
+			createWhiteNoise(masterScan);
+			merge(masterScan);
+			scanIdx = output(masterScan, rt, scanIdx);
+			if (scanIdx == -1){
+				return;
+			}
+			if(createTruthFile){if(!printTruth(masterScan, rt)){return;}}
+		}
 	}
 	
-	public int getTotalCentroids(){
-		return totalCentroids;
+	public static void postFinish(){
+		// write out the peptide sequences
+		if(createTruthFile){printSequences();}
+		// write the end of the output and truth files
+		outputPost();
 	}
 }

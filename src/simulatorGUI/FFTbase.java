@@ -17,24 +17,25 @@
 */
 package simulatorGUI;
  
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class FFTbase {
-	int n, m;
+	int n;
+	int m;
   
-  // Lookup tables.  Only need to recompute when size of FFT changes.
-  double[] cos;
-  double[] sin;
+	// Lookup tables.  Only need to recompute when size of FFT changes.
+	double[] cos;
+	double[] sin;
 
-  static HashMap cosHash = new HashMap();
-  static HashMap sinHash = new HashMap();
-  
-  //double[] window;
+	static ConcurrentHashMap cosHash = new ConcurrentHashMap();
+	static ConcurrentHashMap sinHash = new ConcurrentHashMap();
+
+	//double[] window;
 	public static void main(String [ ] args)
-	{
-      double[] inputReal1 = {6.4,5.2,1.3,5.3,0,0,0,0};
+	{}
+/*      double[] inputReal1 = {6.4,5.2,1.3,5.3,0,0,0,0};
 	  double[] inputImag1 = {0,0,0,0,0,0,0,0};
-/*	  
+	  
 	 double[] inputReal1 = {5,2,0,0};
 	  double[] inputImag1 = {0,0,0,0};
 	  double[] inputReal2 = {0,0,2,5};
@@ -48,7 +49,7 @@ public class FFTbase {
 		inputReal1[i] = inputReal1[i]*inputReal2[i]-inputImag1[i]*inputImag2[i];
 		inputImag1[i] = prevReal*inputImag2[i]+inputImag1[i]*inputReal2[i];
 	  }
-*/  
+  
 	FFTbase me = new FFTbase(inputReal1.length);
 	me.fft(inputReal1, inputImag1);
 	  me.fft(inputImag1,inputReal1);
@@ -64,10 +65,11 @@ public class FFTbase {
 		sb.deleteCharAt(sb.length()-1);
 		System.out.println(sb.toString());
 	}
-  
-	public FFTbase(int n) {
-		this.n = n;
-		this.m = (int)(Math.log(n) / Math.log(2));
+*/  
+	public FFTbase(){n=-1; m=-1;}
+	private void recomputeN(int _n){
+		n = _n;
+		m = (int)(Math.log(n) / Math.log(2));
 		
 		// Make sure n is a power of 2
 		if(n != (1<<m))
@@ -111,6 +113,9 @@ public class FFTbase {
   ****************************************************************/  
 	public void fft(double[] x, double[] y)
 	{
+		if(n != x.length){
+			recomputeN(x.length);
+		}
 		int i,j,k,n1,n2,a;
 		double c,s,t1,t2;
 
@@ -138,7 +143,7 @@ public class FFTbase {
 		// FFT
 		n1 = 0;
 		n2 = 1;
-
+//try{
 		for (i=0; i < m; i++) {
 			n1 = n2;
 			n2 = n2 + n2;
@@ -159,5 +164,6 @@ public class FFTbase {
 				}
 			}
 		}
+//}catch(Exception e){System.out.println("n " + n + " m " + m + " x " + x.length + " y " + y.length);}
 	}                          
 }

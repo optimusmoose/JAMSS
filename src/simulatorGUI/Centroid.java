@@ -22,12 +22,12 @@ package simulatorGUI;
  *
  * @author rob
  */
-public class Centroid implements java.io.Serializable{
+public class Centroid{
 	public double mz;
 	public double abundance;
 	public static int totalCentroids=0;
 	public int centroidID;
-	public int ionFeatureID;
+	public int isotopeTraceID;
 	public int charge;
 	public int pepID;
 	public int proteinID;
@@ -51,7 +51,7 @@ public class Centroid implements java.io.Serializable{
 		cent.abundance = this.abundance;
 		cent.centroidID = this.centroidID;
 		cent.charge = this.charge;
-		cent.ionFeatureID = this.ionFeatureID;
+		cent.isotopeTraceID = this.isotopeTraceID;
 		cent.mz = this.mz;
 		cent.pepID = this.pepID;
 		cent.proteinID = this.pepID;

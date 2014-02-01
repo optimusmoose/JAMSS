@@ -26,6 +26,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import javax.swing.JOptionPane;
@@ -66,19 +67,11 @@ public class Digester {
 
 	public void processFile(File file, int missedCleavages, String intensityModelLocation, String rtModelLocation) {
 		simulatorGUI.progressMonitor.setNote("Reading .fasta file");
+		final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
 		
 		// set up the random seed
 		RandomFactory.setSeed();
-		MassSpec.maxIntensity = 99999999.0 + RandomFactory.rand.nextDouble() * (900000.0);
-		
-		int numCores = MassSpec.numCpus;
-		MassSpec.intensityModelLocation = intensityModelLocation;
-		MassSpec.rtModelLocation = rtModelLocation;
-		MassSpec.setUpRTArray();
-		final BlockingQueue<String> queue = new LinkedBlockingQueue<String>();
-		// one thread per core
-		MSThread[] threads = new MSThread[numCores];
-		
+				
 		Charset encoding = Charset.defaultCharset();
 		Reader reader;
 		int fastaCTR = 0;
@@ -143,11 +136,20 @@ public class Digester {
 			JOptionPane.showMessageDialog(null, "Error: Select a fasta file.", "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-
+		
+		MassSpec.maxIntensity = 99999999.0 + RandomFactory.rand.nextDouble() * (900000.0);
+		MassSpec.numCpus = Math.min(Runtime.getRuntime().availableProcessors(), queue.size()); // to avoid case where #fastas < #cores
+		MassSpec.intensityModelLocation = intensityModelLocation;
+		MassSpec.rtModelLocation = rtModelLocation;
+		MassSpec.setUpRTArray();
+		
+		// one thread per core
+		IEGeneratorThread[] threads = new IEGeneratorThread[MassSpec.numCpus];
 		simulatorGUI.progressMonitor.setNote("Digesting and running sample through mass spectrometer.");
 		simulatorGUI.progressMonitor.setProgress(2);
-		for(int i = 0; i < numCores; i++){
-			threads[i] = new MSThread(queue, this);
+		
+		for(int i = 0; i < MassSpec.numCpus; i++){
+			threads[i] = new IEGeneratorThread(queue, this);
 			threads[i].start();
 		}
 		for(int i = 0; i < threads.length; i++){
@@ -156,8 +158,19 @@ public class Digester {
 					JOptionPane.showMessageDialog(null, "Error finishing mass spec.", "Error", JOptionPane.ERROR_MESSAGE);
 				}
 			}
+			for(IsotopicEnvelope ie : threads[i].massSpec.isotopicEnvelopesInstance){
+				MassSpec.isotopicEnvelopes.add(ie);
+			}
+			for (int j=0; j<threads[i].massSpec.ieByRtIdxInstance.length; j++){
+				LinkedList<Integer> ieIdxs = (LinkedList<Integer>) threads[i].massSpec.ieByRtIdxInstance[j];
+				for (Integer integer : ieIdxs){
+					((LinkedList<Integer>) MassSpec.ieByRtIdx[j]).add(integer);
+				}
+			}
+			threads[i] = null;
 		}
-		MassSpec.finish();
+		System.gc();
+		MassSpec.finishController();
 	}
 
 	public ArrayList<String> processProtein(String protein, int missedCleavages) {
