@@ -632,7 +632,7 @@ private void buttonRunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
 		}
 		else{
 			JOptionPane.showMessageDialog(null, "Error: Clone option selected but options from previous mzML file have not been loaded.", "Error", JOptionPane.ERROR_MESSAGE);
-			return;
+			System.exit(1);
 		}
 	}
 		
@@ -668,6 +668,7 @@ private void buttonRunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
 		// digest & modifications //
 		 // open fasta file
 		String fastaFile = textFastaFilename.getText();
+		MassSpec.fastaFile = fastaFile;
 		File file = new File(fastaFile);
 		String digesterName = comboDigester.getSelectedItem().toString();
 		Digester digester = DigesterOpts.getDigester(digesterName);

@@ -22,86 +22,53 @@ package simulatorGUI;
  * @author Rob.Smith
  */
 public class IsotopeTrace {
-	private static final double TWOPI = Math.PI * 2.0;
-	private static final double EXPZERO = Math.exp(0.0000000000000001);
-	
-	double sdShareY;
-	double sdShareZ;
-	double sdX;
-	double sdY;
-	double sdZ;
+	int rtIndex;
 	double centroidIntensity;
 	double oneDIntensityFactor;
 	double maxXIntensity;
 	double normalizingConstantY;
 	double normalizingConstantZ;
-	double muGaussian;
-	double sdShareX;
-	double sdEstimate;
-	double predictedIEIntensity;
-	double isotopeTraceIntensityRatio;
-	double traceLength;
+	int traceLength; // in terms of number of scans
 	double predictedRt;
 	double isotopeTraceMass;
-	public IsotopeTrace(double _sdShareX, 
-						double _sdEstimate, 
-						double _predictedIEIntensity, 
+	double rand1;
+	public IsotopeTrace(double _predictedIEIntensity, 
 						double _isotopeTraceIntensityRatio, 
-						double _traceLength, 
+						int _traceLength, 
 						double _predictedRt, 
-						double _isotopeTraceMass){
-		sdShareX = _sdShareX;
-		sdEstimate = _sdEstimate;
-		predictedIEIntensity = _predictedIEIntensity;
+						double _isotopeTraceMass,
+						double _rand1){
 		isotopeTraceMass = _isotopeTraceMass;
-		isotopeTraceIntensityRatio = _isotopeTraceIntensityRatio;
 		traceLength = _traceLength;
 		predictedRt = _predictedRt;
-		sdShareY = 0.35 + RandomFactory.rand.nextDouble() * 0.15; // random between 0.35-0.50
-		sdShareZ = 1.0 - (sdShareY + sdShareX);
-		sdX = sdShareX * sdEstimate;
-		sdY = sdShareY * sdEstimate;
-		sdZ = sdShareZ * sdEstimate;
-
+		rtIndex = 1;
+		rand1 = _rand1 * 0.20;
 		centroidIntensity=0;
-		maxXIntensity = predictedIEIntensity * isotopeTraceIntensityRatio * (1.0/(sdX*Math.sqrt(TWOPI))) * EXPZERO;
-		normalizingConstantY = maxXIntensity / (2*(1.0/(sdY*Math.sqrt(TWOPI))) * EXPZERO);
-		normalizingConstantZ = maxXIntensity / (2*(1.0/(sdZ*Math.sqrt(TWOPI))) * EXPZERO);
-		muGaussian = predictedRt + traceLength*sdShareX;
+		maxXIntensity = _predictedIEIntensity * _isotopeTraceIntensityRatio;
 
 	}
 	
-	public Centroid getCentroidAtRT(double rt){
+	public Centroid getCentroidAtRT(double rt, RandomFactory localRandomFactory){
 		Centroid result = new Centroid(0,0);
 		if (MassSpec.oneD) {
-			oneDIntensityFactor = 0.05 + 0.45 * RandomFactory.rand.nextFloat(); // between 0.05 and 1
-			centroidIntensity = predictedIEIntensity * isotopeTraceIntensityRatio * oneDIntensityFactor;
+			oneDIntensityFactor = 0.05 + 0.45 * localRandomFactory.localRand.nextFloat(); // between 0.05 and 1
+			centroidIntensity = maxXIntensity * oneDIntensityFactor;
 		} else { // normal chromotography (not 1 d)
-			double gaussianX = predictedIEIntensity * isotopeTraceIntensityRatio * (1.0/(sdX*Math.sqrt(TWOPI))) * Math.exp(-(Math.pow(rt-muGaussian,2)/(2.0 * Math.pow(sdX,2))));
-			double gaussianY = normalizingConstantY * (1.0/(sdY*Math.sqrt(TWOPI))) * Math.exp(-(Math.pow(rt-muGaussian,2)/(2.0 * Math.pow(sdY,2)))); 
-			double gaussianZ = normalizingConstantZ * (1.0/(sdZ*Math.sqrt(TWOPI))) * Math.exp(-(Math.pow(rt-muGaussian,2)/(2.0 * Math.pow(sdZ,2)))); 
-			if (rt < predictedRt + sdShareX * traceLength){ // first half treated as a more narrow Gaussian
-				centroidIntensity = gaussianX + (gaussianY + gaussianZ)*(gaussianX / maxXIntensity);
-			} else { // second half treated as a wider Gaussian
-				centroidIntensity = gaussianX + gaussianY + gaussianZ;
-			}
+			//centroidIntensity = maxXIntensity * Math.exp(-Math.pow(rtIndex - predictedRt,2.0) / ( ((double) rtIndex / (double) traceLength) * (traceLength + 14.66692)));
+			centroidIntensity = maxXIntensity * Math.exp(-Math.pow(rtIndex - predictedRt,2.0) / Math.pow(((double) rtIndex / (double) traceLength) * traceLength * 0.14,2.0));
 		}
-		if (centroidIntensity > MassSpec.minWhiteNoiseIntensity){ //filter points that are too small
-			// jaggedness - insert predictedIntensity noise
-			centroidIntensity -= (centroidIntensity/2.0) * RandomFactory.rand.nextDouble() * RandomFactory.rand.nextDouble();
-			// mz wobble - insert mz noise. Two types: Universal and intensity specific. 
-			// universal:
-			double universalNoised = isotopeTraceMass - 0.001 + RandomFactory.rand.nextDouble() * 0.002; //rand amt between -0.001 and 0.001
-			// intensity-specific:
-			double maxWobble = 0.03 * (MassSpec.minWhiteNoiseIntensity / centroidIntensity);
-			// get random noise amount between min mz and max mz
-			double mzWobble = universalNoised + (RandomFactory.rand.nextBoolean() ? -1 : 1)* (RandomFactory.rand.nextDouble() * maxWobble);
-			if (mzWobble > 0){
+
+		if (centroidIntensity > MassSpec.minWhiteNoiseIntensity){
+			double wobbleJaggedRand = localRandomFactory.localRand.nextDouble();
+			double minWobble = 0.001;
+			double maxWobble = 0.02;
+			double maxIntScaled = 5.0 / MassSpec.maxIntensity * centroidIntensity;
+			double mzWobble = Math.max(minWobble,maxWobble * Math.exp(-maxIntScaled));
+			mzWobble = isotopeTraceMass - mzWobble + mzWobble * 2.0 * wobbleJaggedRand; 
 				// TADA! finished centroid. Add to output map.		
-				result = new Centroid(mzWobble, centroidIntensity);
-				if (mzWobble > MassSpec.maxMZ){MassSpec.maxMZ = mzWobble;}
-			}
+				result = new Centroid(mzWobble, centroidIntensity - 0.30 * centroidIntensity + 0.60 * centroidIntensity * wobbleJaggedRand);
 		}
+		rtIndex++;
 		return result;
 	}
 }

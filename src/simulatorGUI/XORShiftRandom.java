@@ -33,7 +33,7 @@ import java.util.Random;
 }
  */
 public class XORShiftRandom extends Random{
-	private long seed;
+	public long seed;
 
 	public XORShiftRandom() {
 		seed = System.nanoTime();
@@ -43,7 +43,7 @@ public class XORShiftRandom extends Random{
 	}
 	@Override protected int next(int nbits) {
 		// N.B. Not thread-safe!
-		long x = this.seed;
+		long x = seed;
 		x ^= (x << 21);
 		x ^= (x >>> 35);
 		x ^= (x << 4);

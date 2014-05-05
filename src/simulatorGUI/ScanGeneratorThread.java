@@ -28,31 +28,32 @@ public class ScanGeneratorThread extends Thread{
 	ArrayList<Integer> queue;
 	LinkedList<Centroid> masterScan;
 	boolean finished = false;
-	int rtIdx;
 	double rt;
-	int numRts;
 	static int numFinished = 0;
-	int numIEs;
-	public ScanGeneratorThread(ArrayList<Integer> q, double _rt, int _rtIdx, int _numRts, int _numIEs){
-		rtIdx = _rtIdx;
+	RandomFactory localRandomFactory;
+	public ScanGeneratorThread(ArrayList<Integer> q, double _rt, RandomFactory _localRandomFactory){
 		rt = _rt;
 		queue = q;
 		masterScan = new LinkedList<Centroid>();
-		numRts = _numRts;
-		numIEs = _numIEs;
+		localRandomFactory = _localRandomFactory;
 	}
 	
 	@Override
 	public void run() {
 		for(int poll : queue) {
 			IsotopicEnvelope thisEnvelope = (IsotopicEnvelope) MassSpec.isotopicEnvelopes.get(poll);
-			Centroid[] centroids = thisEnvelope.getTraceAtRT(rt);
-			for(int i=0; i<centroids.length; i++){
-				if(centroids[i] != null){masterScan.add(centroids[i]);}
+			if (rt > 0){
+				Centroid[] centroids = thisEnvelope.getIEAtRT(rt, localRandomFactory);
+				for(int i=0; i<centroids.length; i++){
+					if(centroids[i] != null){masterScan.add(centroids[i]);}
+				}
+				numFinished++;
 			}
-			numFinished++;
 		}
 		finished = true;
 		return;
+	}
+	public void freeMemory(){
+		masterScan = null;
 	}
 }

@@ -25,13 +25,19 @@ package simulatorGUI;
 public class RandomFactory {
 	public static long cloneSeed;
 	public static XORShiftRandom rand;
-	public RandomFactory() {}
+	public XORShiftRandom localRand;
+	public RandomFactory(int massSpecThreadID) { // for a local instance
+		localRand = new XORShiftRandom();
+		localRand.setSeed(cloneSeed * (massSpecThreadID+1));
+	}
 	public static void setSeed(){
 		rand = new XORShiftRandom();
-		if (cloneSeed == 0){
+		if (cloneSeed == 0){ // if not cloning
 			cloneSeed = System.currentTimeMillis();
-		}
+		} 
 		rand.setSeed(cloneSeed);
+		
+		// add to options so it is added to mzML file
 		MassSpec.simOptions = MassSpec.simOptions + "," + cloneSeed;
 	}
 }
