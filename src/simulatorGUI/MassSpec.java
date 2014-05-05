@@ -341,18 +341,17 @@ public class MassSpec {
 			pathToClass = MassSpec.class.getProtectionDomain().getCodeSource().getLocation().toURI().getRawPath().replace("JAMSS.jar","");
 			// Java has a bug in that it gives an erroneous leading slash in windows on the above command. Workaround:
 			pathToClass = pathToClass.replace("/",File.separator).substring(1); 
-			FileOutputStream f = new FileOutputStream(pathToClass); //trigger exception if not on windows
+			FileOutputStream f = new FileOutputStream(pathToClass + File.separator + "test", true); //trigger exception if not on windows
 			
 		} catch (Exception ex) {
+ex.printStackTrace();
 			try {
 				pathToClass = MassSpec.class.getProtectionDomain().getCodeSource().getLocation().toURI().getRawPath().replace("JAMSS.jar","");
 			} catch (URISyntaxException ex1) {
 				JOptionPane.showMessageDialog(null, "Error obtaining JAR directory.", "Error", JOptionPane.ERROR_MESSAGE);
 			}
-			directory = new File(pathToClass + "JAMSSfiles" + File.separator);
 //			JOptionPane.showMessageDialog(null, "Error: encoding error when finding path to JAR file.", "Error", JOptionPane.ERROR_MESSAGE);
 		}
-System.out.println("pathtoclass " + pathToClass);
 		// check for extant RT files and delete them
 		directory = new File(pathToClass + "JAMSSfiles" + File.separator);
 		directory.mkdir(); // create a new directory if doesn't exist

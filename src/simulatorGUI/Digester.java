@@ -153,9 +153,9 @@ public class Digester {
 			finished = true;
 			for(int i = 0; i < MassSpec.numCpus; i++){
 				if(threads[i] == null){
+					to = Math.min(queue.size()-1,from + chunk);
 					if(to < queue.size()-1){
 						finished = false;
-						to = Math.min(queue.size()-1,from + chunk);
 						threads[i] = new IEGeneratorThread(new ArrayList<String>(queue.subList(from,to+1)), this, i); //must do to+1 because to is exclusive
 						threads[i].start();
 						from = to;
