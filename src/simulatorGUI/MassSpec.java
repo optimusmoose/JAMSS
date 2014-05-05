@@ -342,6 +342,7 @@ public class MassSpec {
 			// Java has a bug in that it gives an erroneous leading slash in windows on the above command. Workaround:
 			pathToClass = pathToClass.replace("/",File.separator).substring(1); 
 			FileOutputStream f = new FileOutputStream(pathToClass); //trigger exception if not on windows
+			
 		} catch (Exception ex) {
 			try {
 				pathToClass = MassSpec.class.getProtectionDomain().getCodeSource().getLocation().toURI().getRawPath().replace("JAMSS.jar","");
@@ -351,7 +352,7 @@ public class MassSpec {
 			directory = new File(pathToClass + "JAMSSfiles" + File.separator);
 //			JOptionPane.showMessageDialog(null, "Error: encoding error when finding path to JAR file.", "Error", JOptionPane.ERROR_MESSAGE);
 		}
-
+System.out.println("pathtoclass " + pathToClass);
 		// check for extant RT files and delete them
 		directory = new File(pathToClass + "JAMSSfiles" + File.separator);
 		directory.mkdir(); // create a new directory if doesn't exist
