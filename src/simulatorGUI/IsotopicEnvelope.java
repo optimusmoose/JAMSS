@@ -360,12 +360,15 @@ public class IsotopicEnvelope {
 		}
 
 		try{
+System.out.println(pathToClass);			
 			FileOutputStream f = new FileOutputStream(pathToClass + "JAMSSfiles" + File.separator + rtFloor + "_" + id + ".ser", true);
 			bb.flip();
 			byte[] data = new byte[bb.limit()];
 			bb.get(data);
 			f.write(data);
 			f.close();
-		}catch(IOException e){e.printStackTrace();}
+		}catch(IOException e){e.printStackTrace();
+System.exit(1);		
+		}
 	}
 }

@@ -20,11 +20,13 @@ package simulatorGUI;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import org.apache.commons.codec.binary.Base64;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -34,6 +36,8 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.Deflater;
 import javax.swing.JOptionPane;
 import weka.classifiers.Classifier;
@@ -335,18 +339,21 @@ public class MassSpec {
 		File directory;
 		try {
 			pathToClass = MassSpec.class.getProtectionDomain().getCodeSource().getLocation().toURI().getRawPath().replace("JAMSS.jar","");
-System.out.println("Try: " + pathToClass);			
-			// check for extant RT files and delete them
-			directory = new File(pathToClass + "JAMSSfiles" + File.separator);
-		} catch (Exception ex) {
 			// Java has a bug in that it gives an erroneous leading slash in windows on the above command. Workaround:
 			pathToClass = pathToClass.replace("/",File.separator).substring(1); 
+			FileOutputStream f = new FileOutputStream(pathToClass); //trigger exception if not on windows
+		} catch (Exception ex) {
+			try {
+				pathToClass = MassSpec.class.getProtectionDomain().getCodeSource().getLocation().toURI().getRawPath().replace("JAMSS.jar","");
+			} catch (URISyntaxException ex1) {
+				JOptionPane.showMessageDialog(null, "Error obtaining JAR directory.", "Error", JOptionPane.ERROR_MESSAGE);
+			}
 			directory = new File(pathToClass + "JAMSSfiles" + File.separator);
-System.out.println("catch: " + pathToClass);			
 //			JOptionPane.showMessageDialog(null, "Error: encoding error when finding path to JAR file.", "Error", JOptionPane.ERROR_MESSAGE);
 		}
-		
-		
+
+		// check for extant RT files and delete them
+		directory = new File(pathToClass + "JAMSSfiles" + File.separator);
 		directory.mkdir(); // create a new directory if doesn't exist
 		// get all .ser files
 		String[] myFiles = directory.list(new FilenameFilter() {
