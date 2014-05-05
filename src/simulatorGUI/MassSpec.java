@@ -331,12 +331,14 @@ public class MassSpec {
 		
 		localRandomFactory = new RandomFactory(_msIdx);
 		
-		String path = MassSpec.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		//String path = MassSpec.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+		
 		try {
-			pathToClass = URLDecoder.decode(path, "UTF-8").replace("JAMSS.jar", "");
-			pathToClass = pathToClass.replace("/",File.separator);
-		} catch (UnsupportedEncodingException ex) {
-			JOptionPane.showMessageDialog(null, "Error: encoding error when finding path to JAR file.", "Error", JOptionPane.ERROR_MESSAGE);
+			pathToClass = MassSpec.class.getProtectionDomain().getCodeSource().getLocation().toURI().getRawPath().replace("JAMSS.jar","");
+
+		} catch (Exception ex) {
+			// Java has a bug in that it gives an erroneous leading slash in windows on the above command. Workaround:
+			pathToClass = pathToClass.replace("/",File.separator).substring(1); 
 		}
 		
 		// check for extant RT files and delete them
