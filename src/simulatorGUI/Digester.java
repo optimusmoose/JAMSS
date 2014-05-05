@@ -148,7 +148,7 @@ public class Digester {
 		int from = 0;
 		boolean finished = false;
 		int chunk = (queue.size() / MassSpec.numCpus)/2;
-		IEGeneratorThread.maxQueueSize = queue.size();
+		IEGeneratorThread.setQueueSize(queue.size());
 		while(!finished){
 			finished = true;
 			for(int i = 0; i < MassSpec.numCpus; i++){

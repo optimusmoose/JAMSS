@@ -334,6 +334,7 @@ public class MassSpec {
 		String path = MassSpec.class.getProtectionDomain().getCodeSource().getLocation().getPath();
 		try {
 			pathToClass = URLDecoder.decode(path, "UTF-8").replace("JAMSS.jar", "");
+			pathToClass = pathToClass.replace("/",File.separator);
 		} catch (UnsupportedEncodingException ex) {
 			JOptionPane.showMessageDialog(null, "Error: encoding error when finding path to JAR file.", "Error", JOptionPane.ERROR_MESSAGE);
 		}

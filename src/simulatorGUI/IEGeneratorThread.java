@@ -29,7 +29,7 @@ public class IEGeneratorThread extends Thread{
 	Digester digester;
 	static int totalThreads = 0;
 	private int threadId;
-	static int maxQueueSize;
+	static int maxQueueSize = 0;
 	static int proteinCount=0;
 	public boolean finished = false;
 	public MassSpec massSpec;
@@ -38,13 +38,15 @@ public class IEGeneratorThread extends Thread{
 		threadId = totalThreads++;
 		queue = q;
 		digester = _digester;
-//		if (maxQueueSize < queue.size()){
-//			maxQueueSize = queue.size();
-//		}
 		massSpec = new MassSpec(threadIdx);
 		maxEnvelopes = (int) ((Runtime.getRuntime().maxMemory() - 1000000000) / 1000) / MassSpec.numCpus;
 	}
 	
+	static public void setQueueSize(int size){
+		if (size > maxQueueSize){
+			maxQueueSize = size;
+		}
+	}
 	
 	@Override
 	public void run() {
