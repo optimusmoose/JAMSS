@@ -67,6 +67,7 @@ public class IsotopeTrace {
 			mzWobble = isotopeTraceMass - mzWobble + mzWobble * 2.0 * wobbleJaggedRand; 
 				// TADA! finished centroid. Add to output map.		
 				result = new Centroid(mzWobble, centroidIntensity - 0.30 * centroidIntensity + 0.60 * centroidIntensity * wobbleJaggedRand);
+				MassSpec.thisSimulationHasPoints = true;
 		}
 		rtIndex++;
 		return result;

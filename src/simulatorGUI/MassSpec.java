@@ -25,9 +25,7 @@ import org.apache.commons.codec.binary.Base64;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
-import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
@@ -37,8 +35,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.Deflater;
 import javax.swing.JOptionPane;
 import weka.classifiers.Classifier;
@@ -81,6 +77,7 @@ public class MassSpec {
 	private static String pathToClass;
 	public int msIdx;
 	static private int msIdxMaster = 0;
+	static public boolean thisSimulationHasPoints = false;
 	
 	//
 	// WEKA ATTRIBUTES
@@ -1505,21 +1502,21 @@ public class MassSpec {
 	}
 	
 	public static void finishController(){
+		
 		// write the beginning of the output and truth files
 		if(!outputPre(rtArray.length)){return;}
 		if(createTruthFile){
 			if (!printTruthPre()){return;}
 		}
-		
+
 		FileWriterThread writeThread = new FileWriterThread();
-		
+
 		//create local randoms for each thread to ensure reproducibility when cloning
 		RandomFactory[] localRandoms = new RandomFactory[numCpus];
 		for(int j = 0; j < numCpus; j++){
 			localRandoms[j] = new RandomFactory(j);
 		}
-			
-		int numScanThreads = numCpus * 2;
+
 		for(int i=0; i<rtArray.length; i++){
 			simulatorGUI.progressMonitor.setNote("Calculating/writing RT scans: scan "+ i + " of " + rtArray.length);
 			simulatorGUI.progressMonitor.setProgress((int) (((double) i/(double) rtArray.length) * 75.0)+25);
@@ -1603,7 +1600,6 @@ public class MassSpec {
 			// if there isn't at least 2 GB of free RAM, wait until
 			// previous writing threads finish up to make room for new
 			// Scans
-//			while(!((Runtime.getRuntime().maxMemory() - Runtime.getRuntime().totalMemory()) > 2147374182)){
 			while(Runtime.getRuntime().freeMemory() < 2147374182){
 				try{
 					System.gc();
@@ -1617,11 +1613,14 @@ public class MassSpec {
 		while(!writeThread.finished){
 			try{Thread.sleep(2000);} catch(Exception e){}
 		}
-		
-		// write out the peptide sequences
-		if(createTruthFile){printSequences();}
-		// write the end of the output and truth files
-		outputPost();
+		if(thisSimulationHasPoints){
+			// write out the peptide sequences
+			if(createTruthFile){printSequences();}
+			// write the end of the output and truth files
+			outputPost();
+		} else{
+			JOptionPane.showMessageDialog(null, "Sorry, no peptides with above-noise intensity appear within the m/z range of this simulation.", "Finished", JOptionPane.ERROR_MESSAGE);
+		}
 	}
 	public static void finish(double rt, LinkedList<Centroid> masterScan,int scanIdx){
 		if(!masterScan.isEmpty()){
