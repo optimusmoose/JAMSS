@@ -58,9 +58,9 @@ public class IEGeneratorThread extends Thread{
 			if(data==null){return;}
 			String[] parts = data.split("_");
 			massSpec.processPeptides(digester.processProtein(parts[0], Integer.parseInt(parts[1])), Double.parseDouble(parts[2]), Integer.parseInt(parts[3]));
-			proteinCount++;
 			simulatorGUI.progressMonitor.setNote("Simulating protein "+proteinCount + " of " + maxQueueSize);
 			simulatorGUI.progressMonitor.setProgress((int) (((double) proteinCount/(double) maxQueueSize) * 21.0)+4);
+			proteinCount++;
 		}
 		massSpec.writeEnvelopes(threadId);
 		finished = true;

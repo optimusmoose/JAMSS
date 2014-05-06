@@ -167,7 +167,7 @@ public class IsotopicEnvelope {
 							for(int i=0; i<sequenceLength; i++){
 								seqCharArray[i] = ieCollection.getChar();
 							}
-							String _sequence = seqCharArray.toString();
+							String _sequence = new String(seqCharArray);
 
 							// int charge length
 							int[] _charges = new int[ieCollection.getInt()];
@@ -192,7 +192,7 @@ public class IsotopicEnvelope {
 							newIE.isotopeTraces = new IsotopeTrace[newIE.isotopeIntensities.size()];
 							for (int i = 0; i < newIE.isotopeIntensities.size(); i++){
 								newIE.isotopeTraces[i] = new IsotopeTrace(newIE.predictedIntensity, newIE.isotopeIntensities.get(i), newIE.traceLength, newIE.predictedRt, newIE.isotopeMasses.get(i),rand.nextDouble());
-								if (newIE.isotopeTraces[i].isotopeTraceMass > MassSpec.maxMZ){MassSpec.maxMZ = newIE.isotopeTraces[i].isotopeTraceMass;}
+//								if (newIE.isotopeTraces[i].isotopeTraceMass > MassSpec.maxMZ){MassSpec.maxMZ = newIE.isotopeTraces[i].isotopeTraceMass;}
 							}	
 							ieList.add(newIE);
 						}
@@ -242,52 +242,57 @@ public class IsotopicEnvelope {
 	public Centroid[] getIEAtRT(double rt, RandomFactory localRandomFactory){
 		Centroid[] result = new Centroid[isotopeTraces.length];
 		for (int i=0; i<isotopeTraces.length; i++){
-			if (MassSpec.oneD && localRandomFactory.localRand.nextBoolean()) {result[i] = null;} // random drop for 1-d
-			Centroid tempCent = isotopeTraces[i].getCentroidAtRT(rt, localRandomFactory);
-			if (tempCent.abundance > MassSpec.minWhiteNoiseIntensity){
-				tempCent.charge = (int) charge;
-				tempCent.pepID = peptideID;
-				tempCent.proteinID = proteinID;
-				tempCent.isotopeTraceID = i;
-				result[i] = tempCent;
+			if(isotopeTraces[i].isotopeTraceMass > MassSpec.minMZ && isotopeTraces[i].isotopeTraceMass < MassSpec.maxMZ){
+				if (MassSpec.oneD && localRandomFactory.localRand.nextBoolean()) {result[i] = null;} // random drop for 1-d
+				Centroid tempCent = isotopeTraces[i].getCentroidAtRT(rt, localRandomFactory);
+				if (tempCent.abundance > MassSpec.minWhiteNoiseIntensity){
+					tempCent.charge = (int) charge;
+					tempCent.pepID = peptideID;
+					tempCent.proteinID = proteinID;
+					tempCent.isotopeTraceID = i;
+					result[i] = tempCent;
 
-				//////////////////////////////////////////////////////
-				// If this intensity is in the top N for this scan, 
-				// include it in the list of sequences to be targeted
-				// for MS/MS.
-				if (MassSpec.highestNMS2 > 0){
-					if (!MassSpec.highestNSequences.containsKey(rt)){
-						// if RT not in highestNSequences, add it
-						String[] sequences = new String[MassSpec.highestNMS2];
-						sequences[0] = sequence;
-						MassSpec.highestNSequences.put(rt, sequences);
+					//////////////////////////////////////////////////////
+					// If this intensity is in the top N for this scan, 
+					// include it in the list of sequences to be targeted
+					// for MS/MS.
+					if (MassSpec.highestNMS2 > 0){
 						int[] highestCharges = new int[MassSpec.highestNMS2];
-						highestCharges[0] = charges[1]; //charges[1] is the highest charge for this seq
-						MassSpec.highestNCharges.put(rt, highestCharges);
-						double[] intensities = new double[MassSpec.highestNMS2];
-						intensities[0] = tempCent.abundance;
-						MassSpec.highestNIntensities.put(rt, intensities);
-						double[] mzs = new double[MassSpec.highestNMS2];
-						mzs[0] = tempCent.mz;
-						MassSpec.highestNMzs.put(rt, mzs);
-					}
-					int lowestIntensity = 0;
-					//find lowest intensity in highest intensities in this scan
-					for (int k=0; k<MassSpec.highestNMS2; k++){ 
-						if (((double[]) MassSpec.highestNIntensities.get(rt))[k] < lowestIntensity ){
-							lowestIntensity = k;
+						highestCharges[0] = charges[charges.length-1]; //the highest charge for this seq
+						if (!MassSpec.highestNSequences.containsKey(rt)){
+							// if RT not in highestNSequences, add it
+							String[] sequences = new String[MassSpec.highestNMS2];
+							sequences[0] = sequence;
+							MassSpec.highestNSequences.put(rt, sequences);
+							MassSpec.highestNCharges.put(rt, highestCharges);
+							double[] intensities = new double[MassSpec.highestNMS2];
+							intensities[0] = tempCent.abundance;
+							for(int l=1; l<MassSpec.highestNMS2;l++){intensities[l]=-1;} //this is a flag in the case of less than highestNMS2 points in scan
+							MassSpec.highestNIntensities.put(rt, intensities);
+							double[] mzs = new double[MassSpec.highestNMS2];
+							mzs[0] = tempCent.mz;
+							MassSpec.highestNMzs.put(rt, mzs);
+						}
+						int lowestIntensityIdx = 0;
+						double lowestIntensity = 0;
+						//find lowest intensity in highest intensities in this scan
+						for (int k=0; k<MassSpec.highestNMS2; k++){ 
+							if (((double[]) MassSpec.highestNIntensities.get(rt))[k] < lowestIntensity ){
+								lowestIntensityIdx = k;
+								lowestIntensity = ((double[]) MassSpec.highestNIntensities.get(rt))[k];
+							}
+						}
+
+						// if intensity of this centroid is >= lowest intensity in highestNSequences
+						if (tempCent.abundance > lowestIntensity){
+							((double[]) MassSpec.highestNIntensities.get(rt))[lowestIntensityIdx] = tempCent.abundance;
+							((String[]) MassSpec.highestNSequences.get(rt))[lowestIntensityIdx] = sequence;
+							((int[]) MassSpec.highestNCharges.get(rt))[lowestIntensityIdx] = charges[charges.length-1];
+							((double[]) MassSpec.highestNMzs.get(rt))[lowestIntensityIdx] = tempCent.mz;
 						}
 					}
-
-					// if intensity of this centroid is >= lowest intensity in highestNSequences
-					if (tempCent.abundance > ((double[]) MassSpec.highestNIntensities.get(rt))[lowestIntensity]){
-						((double[]) MassSpec.highestNIntensities.get(rt))[lowestIntensity] = tempCent.abundance;
-						((String[]) MassSpec.highestNSequences.get(rt))[lowestIntensity] = sequence;
-						((int[]) MassSpec.highestNCharges.get(rt))[lowestIntensity] = charges[1];
-						((double[]) MassSpec.highestNMzs.get(rt))[lowestIntensity] = tempCent.mz;
-					}
-				}
-			} 
+				} 
+			}
 		}
 		return result;
 	}
@@ -360,15 +365,12 @@ public class IsotopicEnvelope {
 		}
 
 		try{
-System.out.println(pathToClass);			
 			FileOutputStream f = new FileOutputStream(pathToClass + "JAMSSfiles" + File.separator + rtFloor + "_" + id + ".ser", true);
 			bb.flip();
 			byte[] data = new byte[bb.limit()];
 			bb.get(data);
 			f.write(data);
 			f.close();
-		}catch(IOException e){e.printStackTrace();
-System.exit(1);		
-		}
+		}catch(IOException e){e.printStackTrace();}
 	}
 }

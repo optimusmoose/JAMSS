@@ -53,7 +53,4 @@ public class ScanGeneratorThread extends Thread{
 		finished = true;
 		return;
 	}
-	public void freeMemory(){
-		masterScan = null;
-	}
 }

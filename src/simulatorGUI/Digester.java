@@ -147,18 +147,19 @@ public class Digester {
 		int to = 0;
 		int from = 0;
 		boolean finished = false;
-		int chunk = (queue.size() / MassSpec.numCpus)/2;
+		int chunk = (queue.size() / (MassSpec.numCpus+1));
 		IEGeneratorThread.setQueueSize(queue.size());
 		while(!finished){
 			finished = true;
 			for(int i = 0; i < MassSpec.numCpus; i++){
 				if(threads[i] == null){
-					to = Math.min(queue.size()-1,from + chunk);
-					if(to < queue.size()-1){
+					to = from + chunk;
+			
+					if(to <= queue.size()){
 						finished = false;
-						threads[i] = new IEGeneratorThread(new ArrayList<String>(queue.subList(from,to+1)), this, i); //must do to+1 because to is exclusive
-						threads[i].start();
+						threads[i] = new IEGeneratorThread(new ArrayList<String>(queue.subList(from,to)), this, i); //must do to+1 because to is exclusive
 						from = to;
+						threads[i].start();
 					}
 				} else{
 					if (threads[i].finished){
@@ -172,8 +173,8 @@ public class Digester {
 					}
 				}
 			}
-			try{Thread.sleep(5000);} catch(Exception e){
-				JOptionPane.showMessageDialog(null, "Error finishing mass spec.", "Error", JOptionPane.ERROR_MESSAGE);
+			try{Thread.sleep(500);} catch(Exception e){
+				JOptionPane.showMessageDialog(null, "Error simulating proteins.", "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		}
 		queue = null;

@@ -31,6 +31,7 @@ import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -199,7 +200,8 @@ public class MassSpec {
 	
 	// this is used to define the window for noise points
 	// while allowing threaded operations
-	public static double maxMZ = 0;
+	public static double maxMZ = 2000;
+	public static double minMZ = 1500;
 	
 	// these are used for generating MS2 distributions
 	public static Map highestNSequences = Collections.synchronizedMap( new HashMap());
@@ -311,7 +313,7 @@ public class MassSpec {
 			}
 			specTime += 1.0/samplingRate;
 		}
-
+		Arrays.sort(rtArray);
 		rtArrayShifted = new int[(int)(rtArray[rtArray.length-1] * 10.0)+2];
 		//rtArrayShifted = new int[(int)(rtArray[rtArray.length-1] * 10.0)+1];
 		for (int i=0; i<rtArray.length; i++){
@@ -344,7 +346,6 @@ public class MassSpec {
 			FileOutputStream f = new FileOutputStream(pathToClass + File.separator + "test", true); //trigger exception if not on windows
 			
 		} catch (Exception ex) {
-ex.printStackTrace();
 			try {
 				pathToClass = MassSpec.class.getProtectionDomain().getCodeSource().getLocation().toURI().getRawPath().replace("JAMSS.jar","");
 			} catch (URISyntaxException ex1) {
@@ -1054,20 +1055,22 @@ ex.printStackTrace();
 							
 						int rtFloor = Math.max(0,rtIndex-(int) (secondsToScans/4.0));
 						int rtCeil = Math.min(rtArray.length-1,rtIndex+(int) (secondsToScans/2.0));
-						IsotopicEnvelope isotopicEnvelope = new IsotopicEnvelope(isotopeIntensities, 
-																				isotopeMasses, 
-																				predictedIntensity, 
-																				predictedRt, 
-																				traceLength, 
-																				rtFloor, 
-																				rtCeil, 
-																				charge, 
-																				peptideID, 
-																				proteinID,
-																				sequence,
-																				charges);
-						// Add this isotopicEnvelope to the list of all envelopes
-						isotopicEnvelopesInstance.add(isotopicEnvelope);
+						if(isotopeMasses.size() > 0 && (isotopeMasses.get(0) > minMZ || isotopeMasses.get(isotopeMasses.size()-1) < maxMZ)){
+							IsotopicEnvelope isotopicEnvelope = new IsotopicEnvelope(isotopeIntensities, 
+																					isotopeMasses, 
+																					predictedIntensity, 
+																					predictedRt, 
+																					traceLength, 
+																					rtFloor, 
+																					rtCeil, 
+																					charge, 
+																					peptideID, 
+																					proteinID,
+																					sequence,
+																					charges);
+							// Add this isotopicEnvelope to the list of all envelopes
+							isotopicEnvelopesInstance.add(isotopicEnvelope);
+						}
 					}
 			}
 		}
@@ -1269,7 +1272,8 @@ ex.printStackTrace();
 			precursorIdx = scanIdx;
 			scanIdx++;
 			// put MS2 here for the N highest intensity sequences in the scan
-			for (int i=0; i < highestNMS2 && ((String[]) highestNSequences.get(rt))[i] != null; i++){ //have to add string catch in case of |scan| < highestNSequences 
+			//for (int i=0; i < highestNMS2 && ((String[]) highestNSequences.get(rt))[i] != null; i++){ //have to add string catch in case of |scan| < highestNSequences 
+			for (int i=0; i < highestNMS2 && ((double[]) highestNIntensities.get(rt))[i] != -1; i++){ //have to add string catch in case of |scan| < highestNSequences 
 				LinkedList<Centroid> ms2s = new LinkedList<>();
 				double mz = ((double[]) highestNMzs.get(rt))[i]; // the precursor's mz
 				int maxCharge = ((int[]) highestNCharges.get(rt))[i]; // the precursor's charge
@@ -1282,6 +1286,7 @@ ex.printStackTrace();
 				double runningMass = NTERMMASS;
 				for (int j=0; j<sequence.length-1; j++){ // n terms use indices from 0 to seq size-2
 					runningMass += monoResidueMasses.get(sequence[j]);
+				
 					for (int charge=1; charge<=maxCharge; charge++){
 						// n terms
 						for (double ionMassDelta : nTermIonMassDeltas){
@@ -1514,6 +1519,7 @@ ex.printStackTrace();
 			localRandoms[j] = new RandomFactory(j);
 		}
 			
+		int numScanThreads = numCpus * 2;
 		for(int i=0; i<rtArray.length; i++){
 			simulatorGUI.progressMonitor.setNote("Calculating/writing RT scans: scan "+ i + " of " + rtArray.length);
 			simulatorGUI.progressMonitor.setProgress((int) (((double) i/(double) rtArray.length) * 75.0)+25);
@@ -1537,7 +1543,7 @@ ex.printStackTrace();
 				isotopicEnvelopes.addAll(iesFromFile);
 			}
 			// spin up #cpu threads to create centriods for this scan
-			int chunk = (isotopicEnvelopes.size() / numCpus) / 2;
+			int chunk = Math.max(1, (isotopicEnvelopes.size() / numCpus / 2));
 			ScanGeneratorThread[] threads = new ScanGeneratorThread[numCpus];
 			ieIndex = 0;
 			LinkedList<Centroid> masterScan = new LinkedList<Centroid>();
@@ -1557,12 +1563,12 @@ ex.printStackTrace();
 								masterScan.add(cent);
 							}
 							threads[j] = null;
-							System.gc();
 						}
 					}
 				}
+				System.gc();
 				try{
-					Thread.sleep(2000);
+					Thread.sleep(100);
 				} catch(Exception e){
 					JOptionPane.showMessageDialog(null, "Error writing out RT scans.", "Error", JOptionPane.ERROR_MESSAGE);
 				}
