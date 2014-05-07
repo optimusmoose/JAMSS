@@ -42,6 +42,8 @@ public class FileWriterThread extends Thread{
 	@Override
 	public void run() {
 		MassSpec.finish(rt, masterScan, scanIdx);
+		masterScan = null;
+		System.gc();
 		finished = true;
 		return;
 	}
