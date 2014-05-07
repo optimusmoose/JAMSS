@@ -1518,6 +1518,7 @@ public class MassSpec {
 		}
 
 		for(int i=0; i<rtArray.length; i++){
+System.out.println("Start of scan");
 			simulatorGUI.progressMonitor.setNote("Calculating/writing RT scans: scan "+ i + " of " + rtArray.length);
 			simulatorGUI.progressMonitor.setProgress((int) (((double) i/(double) rtArray.length) * 75.0)+25);
 			ScanGeneratorThread.numFinished = 0; //reset each RT
@@ -1526,19 +1527,23 @@ public class MassSpec {
 			ArrayList<Integer> iesToRemove = new ArrayList<Integer>();
 			//for(int j=0; j<isotopicEnvelopes.size(); j++){
 			int ieIndex = 0;
+System.out.println("here1");			
 			for(IsotopicEnvelope ie : isotopicEnvelopes){
 				if(!ie.isInRange(i)){
 					iesToRemove.add(ieIndex);
 				}
 			}
+System.out.println("here2");						
 			for(int j=iesToRemove.size()-1; j>=0; j--){
 				isotopicEnvelopes.remove(j);	
 			}
+System.out.println("here3");						
 			// get ies that start at current scan from disk			
 			LinkedList<IsotopicEnvelope> iesFromFile = IsotopicEnvelope.getIEsFromFile(pathToClass, i, RandomFactory.rand);
 			if(iesFromFile != null){
 				isotopicEnvelopes.addAll(iesFromFile);
 			}
+System.out.println("here4");						
 			// spin up #cpu threads to create centriods for this scan
 			int chunk = Math.max(1, (isotopicEnvelopes.size() / numCpus / 2));
 			ScanGeneratorThread[] threads = new ScanGeneratorThread[numCpus];
@@ -1554,7 +1559,9 @@ public class MassSpec {
 						ieIndex += chunk;
 						threads[j] = new ScanGeneratorThread(ieIds, rtArray[i], localRandoms[j]);
 						threads[j].start();
+System.out.println("here5.1");			
 					} else { // thread is active
+System.out.println("here5.2");									
 						if (threads[j].finished){
 							for(Centroid cent : threads[j].masterScan){
 								masterScan.add(cent);
@@ -1563,6 +1570,7 @@ public class MassSpec {
 						}
 					}
 				}
+System.out.println("here6");													
 				System.gc();
 				try{
 					Thread.sleep(100);
