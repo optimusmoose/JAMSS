@@ -74,7 +74,6 @@ public class simulatorGUI extends javax.swing.JFrame {
         jLabel11 = new javax.swing.JLabel();
         textMinNoise = new javax.swing.JTextField();
         jLabel12 = new javax.swing.JLabel();
-        textWhiteNoise = new javax.swing.JTextField();
         jLabel13 = new javax.swing.JLabel();
         textDropout = new javax.swing.JTextField();
         jLabel15 = new javax.swing.JLabel();
@@ -109,6 +108,7 @@ public class simulatorGUI extends javax.swing.JFrame {
         cloneCheckBox = new javax.swing.JCheckBox();
         jLabel14 = new javax.swing.JLabel();
         createTruthCheckbox = new javax.swing.JCheckBox();
+        whiteNoisePerScanSpinner = new javax.swing.JSpinner();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setMinimumSize(null);
@@ -184,8 +184,6 @@ public class simulatorGUI extends javax.swing.JFrame {
         textMinNoise.setText("50");
 
         jLabel12.setText("White Noise Points Per Scan:");
-
-        textWhiteNoise.setText("10");
 
         jLabel13.setText("Dropout Percentage (1-100):");
 
@@ -269,6 +267,8 @@ public class simulatorGUI extends javax.swing.JFrame {
 
         jLabel14.setText("Create Truth File?");
 
+        whiteNoisePerScanSpinner.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(1), Integer.valueOf(1), null, Integer.valueOf(1)));
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -349,9 +349,9 @@ public class simulatorGUI extends javax.swing.JFrame {
                                     .addComponent(textMinNoise, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(textMaxNoise, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(sliderCleavages, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(textWhiteNoise, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(sliderNumCPUs, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(checkBoxOneD, javax.swing.GroupLayout.Alignment.TRAILING)))
+                                    .addComponent(checkBoxOneD, javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(whiteNoisePerScanSpinner, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(buttonRestoreDefaults)
                                 .addGap(6, 6, 6)
@@ -484,7 +484,7 @@ public class simulatorGUI extends javax.swing.JFrame {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel12, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(textWhiteNoise, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(whiteNoisePerScanSpinner, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel10, javax.swing.GroupLayout.Alignment.TRAILING)
@@ -542,7 +542,7 @@ private void buttonOptionsOpenMouseClicked(java.awt.event.MouseEvent evt) {//GEN
 			checkBoxOneD.setSelected(Boolean.parseBoolean(options[11]));
 			textPH.setText(options[12]);
 			textDropout.setText(options[13]);
-			textWhiteNoise.setText(options[14]);
+			whiteNoisePerScanSpinner.setValue(Integer.parseInt(options[14]));
 			textMaxNoise.setText(options[15]);
 			textMinNoise.setText(options[16]);
 			textChromOverlapRange.setText(options[17]);
@@ -590,7 +590,7 @@ private void resetDefaults(){
 	checkBoxOneD.setSelected(false);
 	textPH.setText("2.6");
 	textDropout.setText("1");
-	textWhiteNoise.setText("10");
+	whiteNoisePerScanSpinner.setValue(1);
 	textMaxNoise.setText("1000");
 	textMinNoise.setText("50");
 	textChromOverlapRange.setText("0.002");
@@ -620,7 +620,7 @@ private void buttonRunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
 	MassSpec.mergeThreshold = Double.parseDouble(textChromOverlapRange.getText());
 	MassSpec.highestNMS2 = sliderMS2PerScan.getValue();
 	MassSpec.mergeThreshold = Double.parseDouble(textChromOverlapRange.getText());
-	MassSpec.whiteNoiseCount = Integer.parseInt(textWhiteNoise.getText());
+	MassSpec.whiteNoiseCount = (int) whiteNoisePerScanSpinner.getValue();
 	MassSpec.minWhiteNoiseIntensity = Double.parseDouble(textMinNoise.getText());
 	MassSpec.maxWhiteNoiseIntensity = Double.parseDouble(textMaxNoise.getText());
 	MassSpec.truthFile = textTruthOutputFile.getText();
@@ -635,6 +635,8 @@ private void buttonRunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
 			System.exit(1);
 		}
 	}
+	MassSpec.mzmlFilename = textOutputFile.getText() + ".mzML";
+	MassSpec.truthFilename = textTruthOutputFile.getText() + ".csv";
 		
 	// set Ph
 	Modifications.pH = Double.parseDouble(textPH.getText());
@@ -655,7 +657,7 @@ private void buttonRunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
 	msOptions.append(checkBoxOneD.isSelected() + ",");
 	msOptions.append(textPH.getText() + ",");
 	msOptions.append(textDropout.getText() + ",");
-	msOptions.append(textWhiteNoise.getText() + ",");
+	msOptions.append(whiteNoisePerScanSpinner.getValue() + ",");
 	msOptions.append(textMaxNoise.getText() + ",");
 	msOptions.append(textMinNoise.getText() + ",");
 	msOptions.append(textChromOverlapRange.getText() + ",");
@@ -778,6 +780,6 @@ private void buttonRunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
     private javax.swing.JTextField textRuntime;
     private javax.swing.JTextField textSamplingRate;
     private javax.swing.JTextField textTruthOutputFile;
-    private javax.swing.JTextField textWhiteNoise;
+    private javax.swing.JSpinner whiteNoisePerScanSpinner;
     // End of variables declaration//GEN-END:variables
 }

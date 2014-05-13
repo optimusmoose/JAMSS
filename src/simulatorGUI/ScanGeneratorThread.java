@@ -18,6 +18,7 @@
 package simulatorGUI;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 
 /**
@@ -31,11 +32,13 @@ public class ScanGeneratorThread extends Thread{
 	double rt;
 	static int numFinished = 0;
 	RandomFactory localRandomFactory;
+	LinkedList<MS2> ms2s;
 	public ScanGeneratorThread(ArrayList<Integer> q, double _rt, RandomFactory _localRandomFactory){
 		rt = _rt;
 		queue = q;
 		masterScan = new LinkedList<Centroid>();
 		localRandomFactory = _localRandomFactory;
+		ms2s = new LinkedList<MS2>();
 	}
 	
 	@Override
@@ -43,13 +46,17 @@ public class ScanGeneratorThread extends Thread{
 		for(int poll : queue) {
 			IsotopicEnvelope thisEnvelope = (IsotopicEnvelope) MassSpec.isotopicEnvelopes.get(poll);
 			if (rt > 0){
-				Centroid[] centroids = thisEnvelope.getIEAtRT(rt, localRandomFactory);
+				Centroid[] centroids = thisEnvelope.getIEAtRT(rt, localRandomFactory, ms2s);
 				for(int i=0; i<centroids.length; i++){
 					if(centroids[i] != null){masterScan.add(centroids[i]);}
 				}
 				numFinished++;
 			}
 		}
+		// collect MS2s and sort
+		Collections.sort(ms2s, new MS2Comparator());
+		Collections.reverse(ms2s); // biggest intensity first
+
 		finished = true;
 		return;
 	}

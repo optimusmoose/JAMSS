@@ -60,7 +60,6 @@ How to simulate a non-chromatographic run:
 Advanced options to take caution with:
 1) Overlap Range. This controls the effective resolution of the mass spectrometer (higher number, lower resolution).
 
-
 Ways to make faster runs:
 1) Decrease modifications (significant).
 2) Increase number of CPUs (significant).
@@ -71,6 +70,11 @@ Ways to make faster runs:
 7) Increase minimum noise intensity, which is the global floor of points that are accepted in simulation (minor).
 8) Increase overlap range (careful with this one) (minor).
 
+OTHER THINGS YOU SHOULD KNOW:
+The truth files contain flat file lists of the peptides included in the .fasta file. Note that for any reasonably-sized .fasta file, these files will be very large. "output_truth.csv" contains one line per centroid in the mzML file with the following schema:
+centroidID,isotopeTraceID,charge,pepID,proteinID,mz,rt,abundance
 
+output_truth_peptides.csv" contains one line per peptide in the mzML file with the following schema:
+proteinIdx, peptideIdx, peptideSequence
 
 

@@ -66,6 +66,8 @@ public class MassSpec {
 	public static String simOptions;
 	public static boolean createTruthFile;
 	public static String fastaFile;
+	public static String mzmlFilename;
+	public static String truthFilename;
 	
 	//
 	// constants
@@ -78,6 +80,7 @@ public class MassSpec {
 	public int msIdx;
 	static private int msIdxMaster = 0;
 	static public boolean thisSimulationHasPoints = false;
+	static int scanIdx = 0;
 	
 	//
 	// WEKA ATTRIBUTES
@@ -201,10 +204,7 @@ public class MassSpec {
 	public static double minMZ = 1500;
 	
 	// these are used for generating MS2 distributions
-	public static Map highestNSequences = Collections.synchronizedMap( new HashMap());
-	public static Map highestNCharges = Collections.synchronizedMap( new HashMap());
-	public static Map highestNIntensities = Collections.synchronizedMap( new HashMap());
-	public static Map highestNMzs = Collections.synchronizedMap( new HashMap());
+	static MS2[][] masterMS2s;
 	
 	private static final HashMap<Character, Double> monoResidueMasses = new HashMap<>();
 	// build monoResidueMasses table
@@ -326,6 +326,7 @@ public class MassSpec {
 				lastEntry = rtArrayShifted[i];
 			}
 		}
+		masterMS2s = new MS2[rtArray.length][];
 	}
 	private double monoMZ;
 	public MassSpec(int _msIdx){
@@ -1164,8 +1165,7 @@ public class MassSpec {
 	}
 	
 	public static boolean outputPre(int totalScans){
-		String filename = "output.mzML";
-		File outputFile = new File("JAMSSfiles" + File.separator + filename);
+		File outputFile = new File("JAMSSfiles" + File.separator + mzmlFilename);
 		try{
 			outputFile.delete(); // overwrite any previous truth file
 			outputFile.createNewFile(); 
@@ -1174,7 +1174,7 @@ public class MassSpec {
 			return false;
 		}
 		try {
-			FileWriter outputWriter = new FileWriter("JAMSSfiles" + File.separator + filename, true);
+			FileWriter outputWriter = new FileWriter("JAMSSfiles" + File.separator + mzmlFilename, true);
 			outputWriter.write("<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + System.getProperty("line.separator"));
 			outputWriter.write("<mzML xmlns=\"http://psi.hupo.org/ms/mzml\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" xsi:schemaLocation=\"http://psi.hupo.org/ms/mzml http://psidev.info/files/ms/mzML/xsd/mzML1.1.0.xsd\" version=\"1.1.0\" id=\"ms1_and_ms2\">"+ System.getProperty("line.separator"));
 			outputWriter.write("\t<cvList count=\"3\">"+ System.getProperty("line.separator"));
@@ -1192,22 +1192,38 @@ public class MassSpec {
 			outputWriter.write("\t\t</sourceFileList>"+ System.getProperty("line.separator"));
 			outputWriter.write("\t</fileDescription>"+ System.getProperty("line.separator"));
 			outputWriter.write("\t<softwareList count=\"1\">"+ System.getProperty("line.separator"));
-			outputWriter.write("\t\t<software id=\"mspire_0.8.7\" version=\"0.8.7\">"+ System.getProperty("line.separator"));
+			outputWriter.write("\t\t<software id=\"JAMSS\" version=\"beta\">"+ System.getProperty("line.separator"));
 			outputWriter.write("\t\t</software>"+ System.getProperty("line.separator"));
 			outputWriter.write("\t</softwareList>"+ System.getProperty("line.separator"));
-			outputWriter.write("\t<instrumentConfigurationList count=\"1\">"+ System.getProperty("line.separator"));
+			outputWriter.write("\t<instrumentConfigurationList count=\"2\">"+ System.getProperty("line.separator"));
 			outputWriter.write("\t\t<instrumentConfiguration id=\"IC\">"+ System.getProperty("line.separator"));
 			outputWriter.write("\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000031\" name=\"instrument model\"/>"+ System.getProperty("line.separator"));
 			outputWriter.write("\t\t\t<componentList count=\"0\">"+ System.getProperty("line.separator"));
 			outputWriter.write("\t\t\t</componentList>"+ System.getProperty("line.separator"));
 			outputWriter.write("\t\t</instrumentConfiguration>"+ System.getProperty("line.separator"));
+			outputWriter.write("\t\t<instrumentConfiguration id=\"IC2\">" + System.getProperty("line.separator"));
+			outputWriter.write("\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000556\" name=\"LTQ Orbitrap XL\" value=\"\"/>" + System.getProperty("line.separator"));
+			outputWriter.write("\t\t\t<componentList count=\"3\">" + System.getProperty("line.separator"));
+			outputWriter.write("\t\t\t\t<source order=\"1\">" + System.getProperty("line.separator"));
+			outputWriter.write("\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000073\" name=\"electrospray ionization\" value=\"\"/>" + System.getProperty("line.separator"));
+			outputWriter.write("\t\t\t\t</source>" + System.getProperty("line.separator"));
+			outputWriter.write("\t\t\t\t<analyzer order=\"1\">" + System.getProperty("line.separator"));
+			outputWriter.write("\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000083\" name=\"radial ejection linear ion trap\" value=\"\"/>" + System.getProperty("line.separator"));
+			outputWriter.write("\t\t\t\t</analyzer>" + System.getProperty("line.separator"));
+			outputWriter.write("\t\t\t\t<detector order=\"1\">" + System.getProperty("line.separator"));
+			outputWriter.write("\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000253\" name=\"electron multiplier\" value=\"\"/>" + System.getProperty("line.separator"));
+			outputWriter.write("\t\t\t\t</detector>" + System.getProperty("line.separator"));
+			outputWriter.write("\t\t\t</componentList>" + System.getProperty("line.separator"));
+			outputWriter.write("\t\t<softwareRef ref=\"JAMSS\"/>" + System.getProperty("line.separator"));
+			outputWriter.write("\t\t</instrumentConfiguration>" + System.getProperty("line.separator"));
 			outputWriter.write("\t</instrumentConfigurationList>"+ System.getProperty("line.separator"));
 			outputWriter.write("\t<dataProcessingList count=\"1\">"+ System.getProperty("line.separator"));
 			outputWriter.write("\t\t<dataProcessing id=\"did_nothing\">"+ System.getProperty("line.separator"));
 			outputWriter.write("\t\t</dataProcessing>"+ System.getProperty("line.separator"));		
 			outputWriter.write("\t</dataProcessingList>"+ System.getProperty("line.separator"));
 			outputWriter.write("\t<run id=\"simulated_run\" defaultInstrumentConfigurationRef=\"IC\">"+ System.getProperty("line.separator"));
-			outputWriter.write("\t\t<spectrumList count=\"" + totalScans + "\" defaultDataProcessingRef=\"did_nothing\">"+ System.getProperty("line.separator"));
+			int spectrumCount = totalScans + totalScans * highestNMS2;
+			outputWriter.write("\t\t<spectrumList count=\"" + spectrumCount + "\" defaultDataProcessingRef=\"did_nothing\">"+ System.getProperty("line.separator"));
 			outputWriter.flush();
 			outputWriter.close();
 		} catch (IOException ex) {
@@ -1219,7 +1235,7 @@ public class MassSpec {
 	
 	public static boolean outputPost(){
 		try {
-			FileWriter mzMLWriter = new FileWriter("JAMSSfiles" + File.separator + "output.mzML",true); // append
+			FileWriter mzMLWriter = new FileWriter("JAMSSfiles" + File.separator + mzmlFilename,true); // append
 
 			// write tail
 			mzMLWriter.write("\t\t</spectrumList>"+ System.getProperty("line.separator"));
@@ -1234,15 +1250,17 @@ public class MassSpec {
 		return true;
 	}
 	// output mzml file
-	public static int output(LinkedList<Centroid> masterScan, double rt, int scanIdx){
+	public static int output(LinkedList<Centroid> masterScan, double rt, int rtIdx){
 		try {
-			FileWriter mzMLWriter = new FileWriter("JAMSSfiles" + File.separator + "output.mzML",true); // append
+			FileWriter mzMLWriter = new FileWriter("JAMSSfiles" + File.separator + mzmlFilename,true); // append
 			int precursorIdx;
 			
 			String encodedMZ = compressCentroids(masterScan,true);
 			String encodedINT = compressCentroids(masterScan,false);
+			
+//			int binaryMZlength = getBinaryLength(masterScan,true);
 			// write out lists in a spectrum tag
-			mzMLWriter.write("\t\t\t<spectrum index=\"" + scanIdx + "\" id=\"scan="+scanIdx + "\" defaultArrayLength=\""+ masterScan.size() + "\">" + System.getProperty("line.separator"));
+			mzMLWriter.write("\t\t\t<spectrum index=\"" + scanIdx + "\" id=\"scan="+rtIdx + "\" defaultArrayLength=\""+ masterScan.size() + "\">" + System.getProperty("line.separator"));
 			mzMLWriter.write("\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000127\" name=\"centroid spectrum\"/>"+ System.getProperty("line.separator"));
 			mzMLWriter.write("\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000511\" name=\"ms level\" value=\"1\"/>"+ System.getProperty("line.separator"));
 			mzMLWriter.write("\t\t\t\t<scanList count=\"1\">"+ System.getProperty("line.separator"));
@@ -1268,79 +1286,85 @@ public class MassSpec {
 			mzMLWriter.flush();
 			precursorIdx = scanIdx;
 			scanIdx++;
+			
 			// put MS2 here for the N highest intensity sequences in the scan
-			//for (int i=0; i < highestNMS2 && ((String[]) highestNSequences.get(rt))[i] != null; i++){ //have to add string catch in case of |scan| < highestNSequences 
-			for (int i=0; i < Math.min(highestNMS2,highestNIntensities.size()) && ((double[]) highestNIntensities.get(rt))[i] != -1; i++){ //have to add string catch in case of |scan| < highestNSequences 
-				LinkedList<Centroid> ms2s = new LinkedList<>();
-				double mz = ((double[]) highestNMzs.get(rt))[i]; // the precursor's mz
-				int maxCharge = ((int[]) highestNCharges.get(rt))[i]; // the precursor's charge
-				double intensity = ((double[]) highestNIntensities.get(rt))[i]; // the precursor's intensity TODO can do something relative to the overall intensity
-				char[] sequence = ((String[]) highestNSequences.get(rt))[i].toCharArray();
-				// for each nterm/cterm sequence substrings:
-				//		nterms: all consecutive substrings from the beginning of the sequence to the end (size - 2). E.g. [0], [0,1], [0,1,2], to [0,1,2,...,n-2]
-				//		cterms: all consecutive substrings from the end of the sequence to the beginning (index 1, not 0). E.g. [1],[1,2],...,[1,2,...,n-1]
-				// get mass associated with each char, generate an m/z for each nterm or cterm substring (as described above)
-				double runningMass = NTERMMASS;
-				for (int j=0; j<sequence.length-1; j++){ // n terms use indices from 0 to seq size-2
-					runningMass += monoResidueMasses.get(sequence[j]);
-				
-					for (int charge=1; charge<=maxCharge; charge++){
-						// n terms
-						for (double ionMassDelta : nTermIonMassDeltas){
-							ms2s.add(new Centroid(((runningMass + ionMassDelta + charge) / charge),500.0));
+			for (MS2 ms2 : masterMS2s[rtIdx]){
+				if(ms2 != null){
+					LinkedList<Centroid> ms2s = new LinkedList<>();
+					char[] sequence = ms2.getSequence().toCharArray();
+					// for each nterm/cterm sequence substrings:
+					//		nterms: all consecutive substrings from the beginning of the sequence to the end (size - 2). E.g. [0], [0,1], [0,1,2], to [0,1,2,...,n-2]
+					//		cterms: all consecutive substrings from the end of the sequence to the beginning (index 1, not 0). E.g. [1],[1,2],...,[1,2,...,n-1]
+					// get mass associated with each char, generate an m/z for each nterm or cterm substring (as described above)
+					double runningMass = NTERMMASS;
+					for (int j=0; j<sequence.length-1; j++){ // n terms use indices from 0 to seq size-2
+						runningMass += monoResidueMasses.get(sequence[j]);
+
+						for (int charge=1; charge<=ms2.getCharge(); charge++){
+							// n terms
+							for (double ionMassDelta : nTermIonMassDeltas){
+								ms2s.add(new Centroid(((runningMass + ionMassDelta + charge) / charge),500.0));
+							}
+						}
+					}			
+					runningMass = CTERMMASS;
+					for (int j=sequence.length-1; j>0; j--){ // c terms use indices from size-1 to 1
+						runningMass += monoResidueMasses.get(sequence[j]);
+						for (int charge=1; charge<=ms2.getCharge(); charge++){
+							// c terms
+							for (double ionMassDelta : cTermIonMassDeltas){
+								ms2s.add(new Centroid(((runningMass + ionMassDelta + charge) / charge),500.0)); // just use 500 for now. TODO do something better
+							}
 						}
 					}
-				}			
-				runningMass = CTERMMASS;
-				for (int j=sequence.length-1; j>0; j--){ // c terms use indices from size-1 to 1
-					runningMass += monoResidueMasses.get(sequence[j]);
-					for (int charge=1; charge<=maxCharge; charge++){
-						// c terms
-						for (double ionMassDelta : cTermIonMassDeltas){
-							ms2s.add(new Centroid(((runningMass + ionMassDelta + charge) / charge),500.0)); // just use 500 for now. TODO do something better
-						}
-					}
+
+					// encode MS2 data
+					String encodedMS2MZ = compressCentroids(ms2s,true);
+					String encodedMS2INT = compressCentroids(ms2s,false);
+					mzMLWriter.write("\t\t\t<spectrum index=\"" + scanIdx + "\" id=\"scan="+rtIdx + "\" defaultArrayLength=\""+ ms2s.size() + "\">" + System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000511\" name=\"ms level\" value=\"2\"/>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000130\" name=\"positive scan\" value=\"\"/>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000580\" name=\"MSn spectrum\" value=\"\"/>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000127\" name=\"centroid spectrum\"/>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t<scanList count=\"1\">"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000795\" name=\"no combination\" value=\"\"/>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t<scan instrumentConfigurationRef=\"IC2\">"+ System.getProperty("line.separator"));
+					//mzMLWriter.write("\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000498\" name=\"full scan\" value=\"\"/>" + System.getProperty("line.separator"));
+					double scanStartTime = rt + 0.01 + RandomFactory.rand.nextDouble() * (samplingRate - 0.11);
+					mzMLWriter.write("\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000016\" name=\"scan start time\" value=\"" + scanStartTime + "\" unitCvRef=\"UO\" unitAccession=\"UO:0000010\" unitName=\"second\"/>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t</scan>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t</scanList>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t<precursorList count=\"1\">"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t<precursor spectrumRef=\"scan=" + precursorIdx + "\">"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t\t<selectedIonList count=\"1\">"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t\t\t<selectedIon>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000042\" name=\"peak intensity\" value=\"" + ms2.getAbundance() + "\"/>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000041\" name=\"charge state\" value=\"" + ms2.getCharge() + "\"/>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000744\" name=\"selected ion m/z\" value=\"" + ms2.getMz() +"\"/>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t\t\t</selectedIon>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t\t</selectedIonList>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t\t<activation>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000133\" name=\"collision-induced dissociation\" value=\"\"/>");
+					mzMLWriter.write("\t\t\t\t\t\t</activation>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t</precursor>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t</precursorList>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t<binaryDataArrayList count=\"2\">"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t<binaryDataArray encodedLength=\"" + encodedMS2MZ.length() + "\">"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000523\" name=\"64-bit float\"/>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000574\" name=\"zlib compression\"/>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000514\" name=\"m/z array\"/>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t\t<binary>" + encodedMS2MZ + "</binary>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t</binaryDataArray>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t<binaryDataArray encodedLength=\"" + encodedMS2INT.length() + "\">"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000523\" name=\"64-bit float\"/>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000574\" name=\"zlib compression\"/>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000515\" name=\"intensity array\"/>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t\t<binary>" + encodedMS2INT + "</binary>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t\t</binaryDataArray>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t\t</binaryDataArrayList>"+ System.getProperty("line.separator"));
+					mzMLWriter.write("\t\t\t</spectrum>"+ System.getProperty("line.separator"));
+					scanIdx++;
 				}
-
-				// encode MS2 data
-				String encodedMS2MZ = compressCentroids(ms2s,true);
-				String encodedMS2INT = compressCentroids(ms2s,false);
-
-				mzMLWriter.write("\t\t\t<spectrum index=\"" + scanIdx + "\" id=\"scan=" + scanIdx + "\" defaultArrayLength=\"1872\">"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000127\" name=\"centroid spectrum\"/>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000511\" name=\"ms level\" value=\"2\"/>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t<scanList count=\"1\">"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t<scan>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000016\" name=\"scan start time\" value=\"" + rt + 0.01 + RandomFactory.rand.nextDouble() * (samplingRate - 0.11) + "\" unitCvRef=\"UO\" unitAccession=\"UO:0000010\" unitName=\"second\"/>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t</scan>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t</scanList>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t<precursorList count=\"1\">"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t<precursor spectrumRef=\"scan=" + precursorIdx + "\">"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t\t<selectedIonList count=\"1\">"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t\t\t<selectedIon>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000744\" name=\"selected ion m/z\" value=\"" + mz +"\"/>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000041\" name=\"charge state\" value=\"" + maxCharge + "\"/>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000042\" name=\"peak intensity\" value=\"" + intensity + "\"/>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t\t\t</selectedIon>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t\t</selectedIonList>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t</precursor>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t</precursorList>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t<binaryDataArrayList count=\"2\">"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t<binaryDataArray encodedLength=\"" + encodedMS2MZ.length() + "\">"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000514\" name=\"m/z array\"/>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000523\" name=\"64-bit float\"/>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000574\" name=\"zlib compression\"/>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t\t<binary>" + encodedMS2MZ + "</binary>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t</binaryDataArray>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t<binaryDataArray encodedLength=\"" + encodedMS2INT.length() + "\">"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000515\" name=\"intensity array\"/>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000523\" name=\"64-bit float\"/>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000574\" name=\"zlib compression\"/>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t\t<binary>" + encodedMS2INT + "</binary>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t\t</binaryDataArray>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t\t</binaryDataArrayList>"+ System.getProperty("line.separator"));
-				mzMLWriter.write("\t\t\t</spectrum>"+ System.getProperty("line.separator"));
-				scanIdx++;
 			}
 			mzMLWriter.flush();
 			mzMLWriter.close();
@@ -1381,9 +1405,27 @@ public class MassSpec {
 		return decrypted;
 	}
 	
+	static int getBinaryLength(LinkedList<Centroid> centroids, boolean isMz){
+		byte[] cinput = new byte[centroids.size() * 8];
+		ByteBuffer buf = ByteBuffer.wrap(cinput);
+		buf.order(ByteOrder.LITTLE_ENDIAN);
+		if (isMz){
+			for (Centroid cent : centroids){
+				buf.putDouble(cent.mz);
+			}
+		} else {
+			for (Centroid cent : centroids){
+				buf.putDouble(cent.abundance);
+			}			
+		}
+		
+		byte[] input = buf.array();
+		return input.length;
+	}
+	
 	static void createWhiteNoise(LinkedList<Centroid> masterScan){
 		// create white noise
-		if(whiteNoiseCount < 1){whiteNoiseCount = 1;} // this is necessary to prevent empty scans. Not ideal, but best way to deal with need to know how many scans up front for mzML file.
+		// NOTE: must have at least one noise point per scan to avoid empty scans
 		for(int j=0; j<whiteNoiseCount; j++){
 			double mz = RandomFactory.rand.nextDouble() * (maxMZ);
 			double abundance = minWhiteNoiseIntensity + RandomFactory.rand.nextDouble() * (maxWhiteNoiseIntensity - minWhiteNoiseIntensity);
@@ -1423,7 +1465,7 @@ public class MassSpec {
 			// centroidID, isotopeTraceID, charge, pepID, proteinID, m/z, RT, intensity
 			char[] lineEnd = System.getProperty("line.separator").toCharArray();
 			char comma = ',';
-			FileWriter writer = new FileWriter("JAMSSfiles" + File.separator + "output_truth.csv",true); // append
+			FileWriter writer = new FileWriter("JAMSSfiles" + File.separator + truthFilename ,true); // append
 			BufferedWriter truthWriter = new BufferedWriter(writer, masterScan.size() * 25);
 			int bufIndex = 0;
 			char[] lineBuf = new char[350];
@@ -1520,6 +1562,8 @@ public class MassSpec {
 			simulatorGUI.progressMonitor.setNote("Calculating/writing RT scans: scan "+ i + " of " + rtArray.length);
 			simulatorGUI.progressMonitor.setProgress((int) (((double) i/(double) rtArray.length) * 75.0)+25);
 			ScanGeneratorThread.numFinished = 0; //reset each RT
+			LinkedList<MS2> ms2s = new LinkedList<MS2>(); // highest intensity sequences from run
+			
 			// for each current RT, get rid of any out of range
 			//ArrayList<Integer> iesToRemove = new ArrayList<Integer>(isotopicEnvelopes.size());
 			ArrayList<Integer> iesToRemove = new ArrayList<Integer>();
@@ -1558,6 +1602,9 @@ public class MassSpec {
 							for(Centroid cent : threads[j].masterScan){
 								masterScan.add(cent);
 							}
+							for(int k=0; k<highestNMS2 && k < threads[j].ms2s.size(); k++){
+								ms2s.add(threads[j].ms2s.pop());
+							}
 							threads[j] = null;
 						}
 					}
@@ -1582,10 +1629,20 @@ public class MassSpec {
 					for(Centroid cent : threads[j].masterScan){
 						masterScan.add(cent);
 					}
+					for(int k=0; k<highestNMS2 && k < threads[j].ms2s.size(); k++){
+						ms2s.add(threads[j].ms2s.pop());
+					}
 					threads[j] = null;
 					System.gc();
 				}
 			}
+			// process the ms2s down to only highestNMS2
+			Collections.sort(ms2s, new MS2Comparator());
+			Collections.reverse(ms2s); // biggest intensity first
+			MS2[] ms2sArray = new MS2[highestNMS2];
+			for(int k=0;k<highestNMS2 && k<ms2s.size(); k++){ms2sArray[k] = ms2s.pop();}
+			masterMS2s[i] = ms2sArray;
+						
 			// only allow one scan to be writing at a time to maintain order
 			if(writeThread.rt!=-1 && !writeThread.finished){ // will = -1 on first time through
 				while(!writeThread.finished){
@@ -1622,20 +1679,18 @@ public class MassSpec {
 //			JOptionPane.showMessageDialog(null, "Sorry, no peptides with above-noise intensity appear within the m/z range of this simulation.", "Finished", JOptionPane.ERROR_MESSAGE);
 //		}
 	}
-	public static void finish(double rt, LinkedList<Centroid> masterScan,int scanIdx){
-		//if(!masterScan.isEmpty()){
-			createWhiteNoise(masterScan);
-			merge(masterScan);
-			scanIdx = output(masterScan, rt, scanIdx);
-			if (scanIdx == -1){
+	public static void finish(double rt, LinkedList<Centroid> masterScan,int rtIdx){
+		createWhiteNoise(masterScan);
+		merge(masterScan);
+		int status = output(masterScan, rt, rtIdx);
+		if (status == -1){
+			return;
+		}
+		if(createTruthFile){
+			if(!printTruth(masterScan, rt)){
 				return;
 			}
-			if(createTruthFile){
-				if(!printTruth(masterScan, rt)){
-					return;
-				}
-			}
-		//}
+		}
 	}
 	
 	public void writeEnvelopes(int id){

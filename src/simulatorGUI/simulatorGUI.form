@@ -120,9 +120,9 @@
                                   <Component id="textMinNoise" alignment="1" min="-2" max="-2" attributes="0"/>
                                   <Component id="textMaxNoise" alignment="1" min="-2" max="-2" attributes="0"/>
                                   <Component id="sliderCleavages" alignment="1" min="-2" max="-2" attributes="0"/>
-                                  <Component id="textWhiteNoise" alignment="1" min="-2" max="-2" attributes="0"/>
                                   <Component id="sliderNumCPUs" alignment="1" min="-2" max="-2" attributes="0"/>
                                   <Component id="checkBoxOneD" alignment="1" min="-2" max="-2" attributes="0"/>
+                                  <Component id="whiteNoisePerScanSpinner" alignment="1" min="-2" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                           <Group type="102" attributes="0">
@@ -301,7 +301,7 @@
                               <EmptySpace max="32767" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="jLabel12" alignment="1" min="-2" max="-2" attributes="0"/>
-                                  <Component id="textWhiteNoise" alignment="1" min="-2" max="-2" attributes="0"/>
+                                  <Component id="whiteNoisePerScanSpinner" alignment="1" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace max="32767" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
@@ -487,11 +487,6 @@
     <Component class="javax.swing.JLabel" name="jLabel12">
       <Properties>
         <Property name="text" type="java.lang.String" value="White Noise Points Per Scan:"/>
-      </Properties>
-    </Component>
-    <Component class="javax.swing.JTextField" name="textWhiteNoise">
-      <Properties>
-        <Property name="text" type="java.lang.String" value="10"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="jLabel13">
@@ -683,6 +678,13 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JCheckBox" name="createTruthCheckbox">
+    </Component>
+    <Component class="javax.swing.JSpinner" name="whiteNoisePerScanSpinner">
+      <Properties>
+        <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
+          <SpinnerModel initial="1" minimum="1" numberType="java.lang.Integer" stepSize="1" type="number"/>
+        </Property>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>

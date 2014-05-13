@@ -239,7 +239,7 @@ public class IsotopicEnvelope {
 		}
 		return false;
 	}
-	public Centroid[] getIEAtRT(double rt, RandomFactory localRandomFactory){
+	public Centroid[] getIEAtRT(double rt, RandomFactory localRandomFactory, LinkedList<MS2> ms2s){
 		Centroid[] result = new Centroid[isotopeTraces.length];
 		for (int i=0; i<isotopeTraces.length; i++){
 			if(isotopeTraces[i].isotopeTraceMass > MassSpec.minMZ && isotopeTraces[i].isotopeTraceMass < MassSpec.maxMZ){
@@ -252,45 +252,7 @@ public class IsotopicEnvelope {
 					tempCent.isotopeTraceID = i;
 					result[i] = tempCent;
 
-					//////////////////////////////////////////////////////
-					// If this intensity is in the top N for this scan, 
-					// include it in the list of sequences to be targeted
-					// for MS/MS.
-					if (MassSpec.highestNMS2 > 0){
-						int[] highestCharges = new int[MassSpec.highestNMS2];
-						highestCharges[0] = charges[charges.length-1]; //the highest charge for this seq
-						if (!MassSpec.highestNSequences.containsKey(rt)){
-							// if RT not in highestNSequences, add it
-							String[] sequences = new String[MassSpec.highestNMS2];
-							sequences[0] = sequence;
-							MassSpec.highestNSequences.put(rt, sequences);
-							MassSpec.highestNCharges.put(rt, highestCharges);
-							double[] intensities = new double[MassSpec.highestNMS2];
-							intensities[0] = tempCent.abundance;
-							for(int l=1; l<MassSpec.highestNMS2;l++){intensities[l]=-1;} //this is a flag in the case of less than highestNMS2 points in scan
-							MassSpec.highestNIntensities.put(rt, intensities);
-							double[] mzs = new double[MassSpec.highestNMS2];
-							mzs[0] = tempCent.mz;
-							MassSpec.highestNMzs.put(rt, mzs);
-						}
-						int lowestIntensityIdx = 0;
-						double lowestIntensity = 0;
-						//find lowest intensity in highest intensities in this scan
-						for (int k=0; k<MassSpec.highestNMS2; k++){ 
-							if (((double[]) MassSpec.highestNIntensities.get(rt))[k] < lowestIntensity ){
-								lowestIntensityIdx = k;
-								lowestIntensity = ((double[]) MassSpec.highestNIntensities.get(rt))[k];
-							}
-						}
-
-						// if intensity of this centroid is >= lowest intensity in highestNSequences
-						if (tempCent.abundance > lowestIntensity){
-							((double[]) MassSpec.highestNIntensities.get(rt))[lowestIntensityIdx] = tempCent.abundance;
-							((String[]) MassSpec.highestNSequences.get(rt))[lowestIntensityIdx] = sequence;
-							((int[]) MassSpec.highestNCharges.get(rt))[lowestIntensityIdx] = charges[charges.length-1];
-							((double[]) MassSpec.highestNMzs.get(rt))[lowestIntensityIdx] = tempCent.mz;
-						}
-					}
+					ms2s.add(new MS2(sequence, (int) charge, isotopeTraces[i].isotopeTraceMass, tempCent.abundance));
 				} 
 			}
 		}
