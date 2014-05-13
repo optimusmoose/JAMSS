@@ -15,31 +15,34 @@ JAMSS mass spec simulator.
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-To run the program:
+Basics
+-------
+
+**To run the program:**
 1) Download project
 2) Navigate to .../JAMSS/dist/
 3) Some OSs will allow the execution of the jar file with a double click (JAMSS.jar). For instance, on linux, right click the jar and select "run with Java" (or something like that).
 4) Alternative: navigate a terminal to the .jar and execute: "java -jar JAMSS.jar"
 5) Optionally, specify how much RAM you want to dedicate to the run: "java -Xmx10g -jar JAMSS.jar" will allocate 10GB of RAM. 
 
-To develop the program:
+**To develop the program:**
 1) Open as a netbeans project (easiest).
 
-Minimumalist run:
+**Minimumalist run:**
 1) Open a fasta file. (IMPORTANT: Make sure fasta headers do not contain a #. If they do, remove it.)
 2) Click run.
 
-How to clone a run: 
+**How to clone a run:**
 1) Open an mzML file created by JaMMS with the "Load Options" Open button. All parameters will be automatically populated in the GUI.
 2) Unclick the "Replicate?" box. This means you want to use the same random seed as was used in the original file, and you will get the same exact output file as you loaded options from, provided the .fasta file has not changed.
 3) Click run.
 
-How to replicate a run:
+**How to replicate a run:**
 1) Open an mzML file created by JaMMS with the "Load Options" Open button. All parameters will be automatically populated in the GUI.
 2) Optional: tweak options. The more things you change, the more different the "replicate" will be.
 3) Hit run.
 
-More involved run:
+**More involved run:**
 1) Open a fasta file.
 2) Turn mods on/off by selecting check box (static modifications) or adjusting percentage affected (variable modifications). NOTE: using variable modifications will significantly increase runtime, as it increases the number of simulation permutations that have to be calculated.
 3) Adjust how many cores you want to use. If you want to continue working on this machine at the same time, select at least one less than the total number available. 
@@ -53,14 +56,14 @@ More involved run:
 11) The intensities of each protein can be set in the fasta file. For each header, append a decimal value indicating the percent of the sample composed of this protein preceded by a pound sign. For example, #0.342. The percentages of the whole file should sum to 1.
 12) Hit run.
 
-How to simulate a non-chromatographic run:
+**How to simulate a non-chromatographic run:**
 1) Follow above instructions, but check the "One Dimension Simulation" box.
 2) Hit run.
 
-Advanced options to take caution with:
+**Advanced options to take caution with:**
 1) Overlap Range. This controls the effective resolution of the mass spectrometer (higher number, lower resolution).
 
-Ways to make faster runs:
+**Ways to make faster runs:**
 1) Decrease modifications (significant).
 2) Increase number of CPUs (significant).
 3) Increase amount of memory allocated to Java Virtual Machine. This can be done by adding "Xmx10g" onto the command line of your java run, where 10 is the number of GB of RAM you are allocating to the JVM (significant).
@@ -70,11 +73,14 @@ Ways to make faster runs:
 7) Increase minimum noise intensity, which is the global floor of points that are accepted in simulation (minor).
 8) Increase overlap range (careful with this one) (minor).
 
-OTHER THINGS YOU SHOULD KNOW:
-The truth files contain flat file lists of the peptides included in the .fasta file. Note that for any reasonably-sized .fasta file, these files will be very large. "output_truth.csv" contains one line per centroid in the mzML file with the following schema:
+Other things you should know:
+--------
+
+**Schema of output files**
+* The truth files contain flat file lists of the peptides included in the .fasta file. Note that for any reasonably-sized .fasta file, these files will be very large. "output_truth.csv" contains one line per centroid in the mzML file with the following schema:
 centroidID,isotopeTraceID,charge,pepID,proteinID,mz,rt,abundance
 
-output_truth_peptides.csv" contains one line per peptide in the mzML file with the following schema:
+* output_truth_peptides.csv" contains one line per peptide in the mzML file with the following schema:
 proteinIdx, peptideIdx, peptideSequence
 
 

@@ -60,7 +60,6 @@ How to simulate a non-chromatographic run:
 Advanced options to take caution with:
 1) Overlap Range. This controls the effective resolution of the mass spectrometer (higher number, lower resolution).
 
-
 Ways to make faster runs:
 1) Decrease modifications (significant).
 2) Increase number of CPUs (significant).
