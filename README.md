@@ -17,6 +17,12 @@ JAMSS mass spec simulator.
 
 Basics
 -------
+**Minimal test run:**
+1) Download project.
+2) Navigate to .../JAMSS/dist/
+3) Some OSs will allow the execution of the jar file with a double click (JAMSS.jar). For instance, on linux, right click the jar and select "run with Java" (or something like that).
+4) Open the included test FASTA file (.../JAMSS/hum\_multi\_noquant.fasta).
+5) Click run.
 
 **To run the program:**
 1) Download project
@@ -27,10 +33,6 @@ Basics
 
 **To develop the program:**
 1) Open as a netbeans project (easiest).
-
-**Minimumalist run:**
-1) Open a fasta file. (IMPORTANT: Make sure fasta headers do not contain a #. If they do, remove it.)
-2) Click run.
 
 **How to clone a run:**
 1) Open an mzML file created by JaMMS with the "Load Options" Open button. All parameters will be automatically populated in the GUI.
@@ -83,4 +85,10 @@ centroidID,isotopeTraceID,charge,pepID,proteinID,mz,rt,abundance
 * output_truth_peptides.csv" contains one line per peptide in the mzML file with the following schema:
 proteinIdx, peptideIdx, peptideSequence
 
-
+**FAQs**
+Q) Can I run more than one instance of JAMSS at a time?
+A) No. JAMSS creates intermittent files in a common location, and more than one instance will cause problems. Due to the computational complexity of JAMSS, running more than one instance is probably not a good idea, anyway, as a complex FASTA file will occupy a top of the line desktop for quite some time.
+Q) It seems no matter how few entries are in my FASTA file, I still get very long runtimes. Is something broken?
+A) No. In designing JAMSS, we had the option of optimizing for either small or large FASTA files. Due to internal constraints, the design possibilities that yielded quick runs on small FASTA files created significant slowdown and even out of memory errors on realistically large FASTA files. We opted to allow for a longer bottom limit of computation time, even on smaller files. We expect few people will run a FASTA file with only a few entries, so it should not be problematic.
+Q) Why does it take forever to run my FASTA file when the program says nothing is within the m/z range for the simulation?
+A) The current workflow for JAMSS creates an isotopic envelope pattern for each digested protein prior to generating the individual data points across the time dimension. So, before it is known whether a given isotopic envelope will yield data points, the entire FASTA file must be digested and the pattern for each peptide must be computed. This takes time, and for now we don't have a clever way of avoiding that for peptides that will not appear within the simulated m/z range.

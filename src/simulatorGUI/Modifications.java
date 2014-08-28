@@ -33,22 +33,37 @@ public class Modifications {
 	public ArrayList<ArrayList<Modification>> powerSet;
 	private ArrayList<Modification> modList;
 	
-	private void buildPowerSet(ArrayList<Modification> list, int count, double removeSum){
-		if (list.size() > 0){
+	public static void main(String [ ] args){
+		Modifications testMods = new Modifications();
+		testMods.powerSet = new ArrayList<>();
+		testMods.modList = new ArrayList<Modification>();
+		testMods.modList.add(new Modification("methionine",0.50));
+		testMods.modList.add(new Modification("phosphorylation",0.50));
+		testMods.modList.add(new Modification("pyroglutamate",0.50));
+		testMods.buildPowerSet(testMods.modList);
+		testMods.distributeIntensities();
+		for(ArrayList<Modification> modList : testMods.powerSet){
+			System.out.println("========");
+			for (Modification mod : modList){
+				System.out.println(mod.name + " " + mod.percent);
+			}
+		}
+	}
+	private void buildPowerSet(ArrayList<Modification> list){
+		if(powerSet.size() == 0){ // add singles
+			for(int i=0; i<list.size(); i++){
+				ArrayList<Modification> temp = new ArrayList<>();
+				temp.add(list.get(i));
+				powerSet.add(temp);
+			}
+		}
+		if (list.size() > 1){
 			powerSet.add(list);
-			double percentage = 1;
-			for (Modification mod : list){
-				percentage *= mod.percent;
-			}
-			for (Modification mod : list){
-				mod.percent = percentage - removeSum;
-			}
-
 			for(int i=0; i<list.size(); i++)
 			{
 				ArrayList<Modification> temp = new ArrayList<>(list);
 				temp.remove(i);
-				if (temp.size() > 0){buildPowerSet(temp, temp.size(), removeSum + percentage);}
+				if (temp.size() > 1){buildPowerSet(temp);}
 			}
 		}
 	}
@@ -58,6 +73,34 @@ public class Modifications {
 		if (spinnerOxidationMethioninePercent > 0){modList.add(new Modification("methionine",spinnerOxidationMethioninePercent));}
 		if (spinnerPhosphorylationGainPercent > 0){	modList.add(new Modification("phosphorylation",spinnerPhosphorylationGainPercent));}
 		if (spinnerPyroglutamateLossPercent > 0){modList.add(new Modification("pyroglutamate",spinnerPyroglutamateLossPercent));}
-		buildPowerSet(modList,modList.size(), 0);
+		buildPowerSet(modList);
+		distributeIntensities();
+	}
+	public void distributeIntensities(){
+		double[] products = new double[powerSet.size()];
+		double sum_products = 0.0;
+		int i = 0;
+		for(ArrayList<Modification> mods : powerSet){
+			double product = 1.0;
+			for(Modification mod : mods){
+				product*=mod.percent;
+			}
+			products[i] = product;
+			sum_products += product;
+			i++;
+		}
+		ArrayList<ArrayList<Modification>> newPowerSet = new ArrayList<ArrayList<Modification>>();
+		i=0;
+		for(ArrayList<Modification> mods : powerSet){
+			ArrayList<Modification> tempPowerElement = new ArrayList<Modification>();
+			double distributedIntensity = products[i] / sum_products;
+			for(Modification mod : mods){
+				Modification newMod = new Modification(mod.name, distributedIntensity);
+				tempPowerElement.add(newMod); // have to do deep copy because you can't modify an element of an array list
+			}
+			newPowerSet.add(tempPowerElement);
+			i++;
+		}
+		powerSet = newPowerSet;
 	}
 }
