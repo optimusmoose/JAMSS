@@ -64,10 +64,9 @@ public class MassSpec {
 	public static String rtModelLocation;
 	public static int numCpus;
 	public static String simOptions;
-	public static boolean createTruthFile;
 	public static String fastaFile;
 	public static String mzmlFilename;
-	public static String truthFilename;
+  public static int isotopeEnvelopeID=0;
 	
 	//
 	// constants
@@ -76,7 +75,7 @@ public class MassSpec {
 	private final double ABUNDANCE_THRESHOLD = 0.0001;
 	
 	// used for file ops
-	private static String pathToClass;
+	public static String pathToClass;
 	public int msIdx;
 	static private int msIdxMaster = 0;
 	static public boolean thisSimulationHasPoints = false;
@@ -295,7 +294,7 @@ public class MassSpec {
 	public static double[] rtArray;
 	public static int[] rtArrayShifted;
 	
-	private static final Modifications modifications = new Modifications();
+	public static final Modifications modifications = new Modifications();
 	
 	public static void setUpRTArray(){
 		int numScans = (int) (samplingRate * runTime);
@@ -334,9 +333,7 @@ public class MassSpec {
 		msIdx = _msIdx;
 		
 		localRandomFactory = new RandomFactory(_msIdx);
-		
-		//String path = MassSpec.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		File directory;
+		/* Now done in digster
 		try {
 			pathToClass = MassSpec.class.getProtectionDomain().getCodeSource().getLocation().toURI().getRawPath().replace("JAMSS.jar","");
 			// Java has a bug in that it gives an erroneous leading slash in windows on the above command. Workaround:
@@ -349,11 +346,10 @@ public class MassSpec {
 			} catch (URISyntaxException ex1) {
 				JOptionPane.showMessageDialog(null, "Error obtaining JAR directory.", "Error", JOptionPane.ERROR_MESSAGE);
 			}
-//			JOptionPane.showMessageDialog(null, "Error: encoding error when finding path to JAR file.", "Error", JOptionPane.ERROR_MESSAGE);
-		}
+		} */
 		// check for extant RT files and delete them
-		directory = new File(pathToClass + "JAMSSfiles" + File.separator);
-		directory.mkdir(); // create a new directory if doesn't exist
+    File directory = new File(pathToClass + "JAMSSfiles" + File.separator);
+		
 		// get all .ser files
 		String[] myFiles = directory.list(new FilenameFilter() {
 			@Override
@@ -505,30 +501,7 @@ public class MassSpec {
 		aaJ = 0;
 	}
 	
-	// The purpose of this helper is to 
-	// handle the variable PTMs by spinning off
-	// one computeIsotopicEnvelopes for each possible
-	// combination of PTMs, based on their respective
-	// percentages of occurrence given by the user
-	public boolean processPeptide(String sequence, double abundance, int proteinID){
-		// add pep to list of peptides
-		peptides.add(sequence);
-		int peptideID = peptides.size();
-		proteinIDs.add(proteinID);
-		
-		if (modifications.powerSet.size() == 0){ // no variable mods
-			if(!computeIsotopicEnvelopes(sequence, null,abundance, proteinID, peptideID)){return false;}
-		} else {
-			for (int i=0; i < modifications.powerSet.size(); i++){ // for each combination of mods
-				// create peptide with the proper intensity
-				if(!computeIsotopicEnvelopes(sequence, modifications.powerSet.get(i),abundance * ((Modification)modifications.powerSet.get(i).get(0)).percent, proteinID, peptideID)){ // get(0) because the percents are all the same.
-						return false;
-				}
-			}
-		}
-		
-		return true;
-	}
+
 		
 	//
 	// Create the isotopic distribution, yields an array
@@ -539,547 +512,544 @@ public class MassSpec {
 	//
 	// Has to reset all atom counts
 	//	
-	public boolean computeIsotopicEnvelopes(String sequence, ArrayList<Modification> mods, double abundance, int proteinID, int peptideID){	
-			int chargeFloor = 0;
-			int chargeCeil = 0; 
-			
-			resetCounts(); // this allows us to avoid re-allocating the elements for each new sequence
-	
-			// set modifications
-			boolean modMethionine = false;
-			boolean modPhosphorylation = false;
-			boolean modPyroglutamate = false;
-			if (mods != null){
-				for (int i=0; i < mods.size(); i++){
-					switch (mods.get(i).name){
-						case "methionine":
-							modMethionine = true;
-							break;
-						case "phosphorylation":
-							modPhosphorylation = true;
-							break;
-						case "pyroglutamate":
-							modPyroglutamate = true;
-							break;
-					}
-				}
-			}
-			
-			// 1. Modify poly amino acids to standard,
-			// 2. Get atom counts from the amino acid,
-			// 3. Apply post translational modifications to atom counts.
-			for (char rawAA : sequence.toCharArray()){
-				char aa = rawAA;
-				
-				// poly amino acids: "X" is for any (I exclude uncommon "U" and "O")
-				if (aa == 'X'){
-					// poly amino acids: "X" is for any (I exclude uncommon "U" and "O")
-					aa = aasX.charAt(localRandomFactory.localRand.nextInt(aasX.length()));
-				} else if (aa == 'B') { 
-					// poly amino acids: "B" is "N" or "D"
-					aa = aasB.charAt(localRandomFactory.localRand.nextInt(aasB.length()));
-					aaB += 1;
-				} else if (aa == 'Z') {
-					// poly amino acids: "Z" is "Q" or "E"
-					aa = aasZ.charAt(localRandomFactory.localRand.nextInt(aasZ.length()));
-					aaZ += 1;
-				}
-				switch (aa) {
-					// standard amino acids: (modifications included beneath case)
-					case 'A': //=> { :C =>3, :H =>5 , :O =>1 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
-						aaA += 1;
-						
-						// charge calculation
-						chargeHydrophobic += 1;
-						
-						elementC.count += 3;
-						elementH.count += 5;
-						elementO.count += 1;
-						elementN.count += 1;
-						break;
-					case 'C': // => { :C =>3, :H =>5 , :O =>1 , :N =>1 , :S =>1 , :P =>0, :Se =>0 },
-						aaC += 1;
-						
-						// charge calculation
-						chargeC += 1;
-						
-						// base:
-						elementC.count += 3;
-						elementH.count += 5;
-						elementO.count += 1;
-						elementN.count += 1;
-						elementS.count += 1;
-						
-						if (Modifications.CarbamidomethylationGain) {
-							// PTM: carbamidomethylation, gain, static, C 2 H 3 N 1 O 1 S 0
-							elementC.count += 2;
-							elementH.count += 3;
-							elementN.count += 1;
-							elementO.count += 1;
-						}
-						break;
-					case 'D': // => { :C =>4, :H =>5 , :O =>3 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
-						aaD += 1;
-						
-						// charge calculation
-						chargeD += 1;
-						
-						elementC.count += 4;
-						elementH.count += 5;
-						elementO.count += 3;
-						elementN.count += 1;
-						break;
-					case 'E': // => { :C =>5, :H =>7 , :O =>3 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
-						aaE += 1;
-						
-						// charge calculation
-						chargeE += 1;
-						
-						elementC.count += 5;
-						elementH.count += 7;
-						elementO.count += 3;
-						elementN.count += 1;
-						break;
-					case 'F': // => { :C =>9, :H =>9 , :O =>1 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
-						aaF += 1;
-						
-						// charge calculation
-						chargeHydrophobic += 1;
-						
-						elementC.count += 9;
-						elementH.count += 9;
-						elementO.count += 1;
-						elementN.count += 1;
-						break;
-					case 'G': //=> { :C =>2, :H =>3 , :O =>1 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
-						aaG += 1;
-						
-						// charge calculation
-						chargeHydrophobic += 1;
-						
-						elementC.count += 2;
-						elementH.count += 3;
-						elementO.count += 1;
-						elementN.count += 1;
-						break;
-					case 'I': // => { :C =>6, :H =>11 , :O =>1 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
-						aaI += 1;
-						
-						// charge calculation
-						chargeHydrophobic += 1;
-						
-						elementC.count += 6;
-						elementH.count += 11;
-						elementO.count += 1;
-						elementN.count += 1;
-						break;
-					case 'H': // => { :C =>6, :H =>7 , :O =>1 , :N =>3 , :S =>0 , :P =>0, :Se =>0 },
-						aaH += 1;
-						//charge calculation
-						chargeH += 1;
-						
-						elementC.count += 6;
-						elementH.count += 7;
-						elementO.count += 1;
-						elementN.count += 3;
-						break;
-					case 'K': // => { :C =>6, :H =>12 , :O =>1 , :N =>2 , :S =>0 , :P =>0, :Se =>0 },
-						aaK += 1;
-						
-						// charge calculation
-						chargeK += 1;
-						
-						elementC.count += 6;
-						elementH.count += 12;
-						elementO.count += 1;
-						elementN.count += 2;
-						break;
-					case 'L': // => { :C =>6, :H =>11 , :O =>1 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
-						aaL += 1;
-						
-						// charge calculation
-						chargeHydrophobic += 1;
-						
-						elementC.count += 6;
-						elementH.count += 11;
-						elementO.count += 1;
-						elementN.count += 1;
-						break;
-					case 'M': // => { :C =>5, :H =>9 , :O =>1 , :N =>1 , :S =>1 , :P =>0, :Se =>0 },
-						aaM += 1;
-						
-						// charge calculation
-						chargeHydrophobic += 1;
-						
-						// base:
-						elementC.count += 5;
-						elementH.count += 9;
-						elementO.count += 1;
-						elementN.count += 1;
-						elementS.count += 1;
-						
-						// PTM: M -> oxidation of methionine, gain, variable, O 1
-						// variable
-						if (modMethionine) {
-							elementO.count += 1;
-						}
-						break;
-					case 'N': // => { :C =>4, :H =>6 , :O =>2 , :N =>2 , :S =>0 , :P =>0, :Se =>0 },
-						aaN += 1;
-						
-						// charge calculation
-						chargePolar += 1;
-						
-						elementC.count += 4;
-						elementH.count += 6;
-						elementO.count += 2;
-						elementN.count += 2;
-						break;
-					case 'O': // => { :C =>12, :H =>19 , :O =>2 , :N =>3 , :S =>0 , :P =>0, :Se =>0 },
-						elementC.count += 12;
-						elementH.count += 19;
-						elementO.count += 2;
-						elementN.count += 3;
-						break;
-					case 'P': // => { :C =>5, :H =>7 , :O =>1 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
-						aaP += 1;
-						
-						// charge calculation
-						chargeHydrophobic += 1;
-						
-						elementC.count += 5;
-						elementH.count += 7;
-						elementO.count += 1;
-						elementN.count += 1;
-						break;
-					case 'Q': // => { :C =>5, :H =>8 , :O =>2 , :N =>2 , :S =>0 , :P =>0, :Se =>0 },
-						aaQ += 1;
-						
-						// charge calculation
-						chargePolar += 1;
-						
-						// base:
-						elementC.count += 5;
-						elementH.count += 8;
-						elementO.count += 2;
-						elementN.count += 2;
-						
-						if (modPyroglutamate) {
-							// Q -> pyroglutamate (or pyroglutamic acid) loss, variable, N 1 H 3
-							elementN.count -= 1;
-							elementH.count -= 3;
-						}
-						break;
-					case 'R': // => { :C =>6, :H =>12 , :O =>1 , :N =>4 , :S =>0 , :P =>0, :Se =>0 },
-						aaR += 1;
-						
-						// charge calculation
-						chargeR += 1;
-						
-						elementC.count += 6;
-						elementH.count += 12;
-						elementO.count += 1;
-						elementN.count += 4;
-						break;
-					case 'S': // => { :C =>3, :H =>5 , :O =>2 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
-						aaS += 1;
-						
-						// charge calculation
-						chargePolar += 1;
-						
-						// base:
-						elementC.count += 3;
-						elementH.count += 5;
-						elementO.count += 2;
-						elementN.count += 1;
-						
-						if (modPhosphorylation) {
-							// S,T,Y -> phosphorylation, gain, H 1 O 3 P 1
-							elementH.count += 1;
-							elementO.count += 3;
-							elementP.count += 1;
-						}
-						break;
-					case 'T': // => { :C =>4, :H =>7 , :O =>2 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
-						aaT += 1;
-						
-						// charge calculation
-						chargePolar += 1;
-						
-						// base:
-						elementC.count += 4;
-						elementH.count += 7;
-						elementO.count += 2;
-						elementN.count += 1;
-						
-						if (modPhosphorylation) {
-							// S,T,Y -> phosphorylation, gain, H 1 O 3 P 1
-							elementH.count += 1;
-							elementO.count += 3;
-							elementP.count += 1;
-						}
-						break;
-					case 'U': // => { :C =>3, :H =>5 , :O =>1 , :N =>1 , :S =>0 , :P =>0, :Se =>1 },
-						// charge calculation
-						chargeU += 1;
-						
-						elementC.count += 3;
-						elementH.count += 5;
-						elementO.count += 1;
-						elementN.count += 1;
-						elementSe.count += 1;
-						break;
-					case 'V': // => { :C =>5, :H =>9 , :O =>1 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
-						aaV += 1;
-						
-						// charge calculation
-						chargeHydrophobic += 1;
-						
-						elementC.count += 5;
-						elementH.count += 9;
-						elementO.count += 1;
-						elementN.count += 1;
-						break;
-					case 'W': // => { :C =>11, :H =>10 , :O =>1 , :N =>2 , :S =>0 , :P =>0, :Se =>0 },
-						aaW += 1;
-						
-						// charge calculation
-						chargeHydrophobic += 1;
-						
-						elementC.count += 11;
-						elementH.count += 10;
-						elementO.count += 1;
-						elementN.count += 2;
-						break;
-					case 'Y': // => { :C =>9, :H =>9 , :O =>2 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
-						aaY += 1;
-						
-						// charge calc
-						chargeY += 1;
-						
-						// base:
-						elementC.count += 9;
-						elementH.count += 9;
-						elementO.count += 2;
-						elementN.count += 1;
-						
-						if (modPhosphorylation) {
-							// S,T,Y -> phosphorylation, gain, H 1 O 3 P 1
-							elementH.count += 1;
-							elementO.count += 3;
-							elementP.count += 1;
-						}
-						break;
-					default:
-						JOptionPane.showMessageDialog(null, "Error: Amino acid in fasta not recognized.", "Error", JOptionPane.ERROR_MESSAGE);
-						return false;
-				}
-			}
-			
-			//
-			// Figure out charge
-			//
-			double preCharge = 0;
-			preCharge += -1.0 / (1.0 + Math.pow(10.0,residueTable.get(sequence.charAt(0))[1] - Modifications.pH));
-			preCharge += -chargeD / (1.0+Math.pow(10.0, 3.65-Modifications.pH));
-			preCharge += -chargeE / (1.0+Math.pow(10.0, 4.25-Modifications.pH));
-			preCharge += -chargeC / (1.0+Math.pow(10.0, 8.18-Modifications.pH));
-			preCharge += -chargeY / (1.0+Math.pow(10.0, 10.07-Modifications.pH));
-			preCharge += 1.0 / (1.0 + Math.pow(10.0, Modifications.pH - residueTable.get(sequence.charAt(sequence.length()-1))[0]));
-			preCharge += chargeH / (1.0+Math.pow(10.0, Modifications.pH-6.00));
-			preCharge += chargeK / (1.0+Math.pow(10.0, Modifications.pH-10.53));
-			preCharge += chargeR / (1.0+Math.pow(10.0, Modifications.pH-12.48));
-			chargeFloor = (int) Math.floor(preCharge);
-			chargeCeil = (int) Math.ceil(preCharge);
+	public boolean computeIsotopicEnvelopes(Peptide peptide, ArrayList<Modification> mods){
+    int chargeFloor = 0;
+    int chargeCeil = 0; 
 
-			int[] charges;
-			if (chargeFloor == 0 || chargeFloor == chargeCeil){
-				charges = new int[1];
-				charges[0] = chargeCeil;
-			} else {
-				charges = new int[2];
-				charges[0] = chargeFloor;
-				charges[1] = chargeCeil;
-			}
-			int origHCount = elementH.count;
-			for (double charge : charges){
-				if (charge > 0){
-					//
-					// Tweak H count based on charge
-					//
-					elementH.count = origHCount + (int) charge;
-					//
-					// compute the isotopic distribution (MZs and intensities)
-					//
+    resetCounts(); // this allows us to avoid re-allocating the elements for each new sequence
 
-					// calculate the isotopic slice based on the atom counts
-					// get the lowNominal and highNominal values
-					int lowNominal = 0;
-					int highNominal = 0;
-					for (Element el : elements){
-						lowNominal += el.getLowMassNumber() * el.count;
-						highNominal += el.getHighMassNumber() * el.count;
-					}
+    // set modifications
+    boolean modMethionine = false;
+    boolean modPhosphorylation = false;
+    boolean modPyroglutamate = false;
+    if (mods != null){
+      for (int i=0; i < mods.size(); i++){
+        switch (mods.get(i).name){
+          case "methionine":
+            modMethionine = true;
+            break;
+          case "phosphorylation":
+            modPhosphorylation = true;
+            break;
+          case "pyroglutamate":
+            modPyroglutamate = true;
+            break;
+        }
+      }
+    }
 
-					// get the fft of the vector of relative abundances for the isotopes of each element
-					int nextPow2 = 1024;
-					while (highNominal > nextPow2){
-						nextPow2 *= 2;
-					}
-					double[] relativeAbundancesReal= new double[nextPow2];
-					double[] relativeAbundancesImag= new double[nextPow2];
+    // 1. Modify poly amino acids to standard,
+    // 2. Get atom counts from the amino acid,
+    // 3. Apply post translational modifications to atom counts.
+    for (char rawAA : peptide.sequence.toCharArray()){
+      char aa = rawAA;
 
-					double[] fftAbundancesReal = new double[nextPow2];
-					double[] fftAbundancesImag = new double[nextPow2];
+      // poly amino acids: "X" is for any (I exclude uncommon "U" and "O")
+      if (aa == 'X'){
+        // poly amino acids: "X" is for any (I exclude uncommon "U" and "O")
+        aa = aasX.charAt(localRandomFactory.localRand.nextInt(aasX.length()));
+      } else if (aa == 'B') { 
+        // poly amino acids: "B" is "N" or "D"
+        aa = aasB.charAt(localRandomFactory.localRand.nextInt(aasB.length()));
+        aaB += 1;
+      } else if (aa == 'Z') {
+        // poly amino acids: "Z" is "Q" or "E"
+        aa = aasZ.charAt(localRandomFactory.localRand.nextInt(aasZ.length()));
+        aaZ += 1;
+      }
+      switch (aa) {
+        // standard amino acids: (modifications included beneath case)
+        case 'A': //=> { :C =>3, :H =>5 , :O =>1 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
+          aaA += 1;
 
-					double monoMass = 0;
-					boolean firstGo = true;
-					for (Element el : elements){
-						// reset the arrays to compute the relative abundances
-						double[][] relativeAbundances = el.getRelativeAbundanceFFT(nextPow2, fftBase);
-						relativeAbundancesReal = relativeAbundances[0];
-						relativeAbundancesImag = relativeAbundances[1];
+          // charge calculation
+          chargeHydrophobic += 1;
 
-						// convolve the frequencies of each element
-						double prevReal = 0;
-						for(int i=0; i<relativeAbundancesReal.length; i++){
-							double[] power = complexPower(relativeAbundancesReal[i],relativeAbundancesImag[i],el.count); 
-							if(firstGo){
-								fftAbundancesReal[i] = power[0];
-								fftAbundancesImag[i] = power[1];
-							} else {
-								prevReal = fftAbundancesReal[i];
-								fftAbundancesReal[i] = fftAbundancesReal[i]*power[0]-fftAbundancesImag[i]*power[1];
-								fftAbundancesImag[i] = prevReal*power[1]+fftAbundancesImag[i]*power[0];
-							}
-						}
-						firstGo = false;
-						monoMass += el.count * el.getMonoIsotopicmass();
-					}
+          elementC.count += 3;
+          elementH.count += 5;
+          elementO.count += 1;
+          elementN.count += 1;
+          break;
+        case 'C': // => { :C =>3, :H =>5 , :O =>1 , :N =>1 , :S =>1 , :P =>0, :Se =>0 },
+          aaC += 1;
 
-					fftBase.fft(fftAbundancesImag, fftAbundancesReal); // Inverse FFT
-				
-					double maxAbundance = 0;
-					double totalAbundance = 0;
-					int monoMZIndex = 0;
-					for(int i=lowNominal; i<highNominal-1; i++){
-						if(fftAbundancesReal[i] > 0){
-						totalAbundance += fftAbundancesReal[i];
-							if (fftAbundancesReal[i] > maxAbundance ) {
-								monoMZIndex = i;
-							}
-						}
-					}
-					double normalizedAbundance = 0;
-					double newMass = 0;
-					double lastMass = (monoMass + charge)/charge - NEUTRON_MASS/charge;
-					ArrayList<Double> isotopeMasses = new ArrayList<Double>(10);
-					ArrayList<Double> isotopeIntensities = new ArrayList<Double>(10);
-						
-					// we only want entries with index between lowNominal and highNominal
-					for(int i=lowNominal; i<highNominal-1; i++){
-						// normalize
-						normalizedAbundance = fftAbundancesReal[i] / totalAbundance;
-						newMass = lastMass + NEUTRON_MASS / charge;
-						lastMass = newMass;
+          // charge calculation
+          chargeC += 1;
 
-						// keep if above threshold
-						if (normalizedAbundance > ABUNDANCE_THRESHOLD) {
-							isotopeMasses.add(newMass); 
-							isotopeIntensities.add(normalizedAbundance);
-							if (i == monoMZIndex) {monoMZ = newMass;}
-						}
-					}
-					// calculate RT: create weka instance and run on model to get RTs
-					Instance rtInstance = new Instance(rtData.numAttributes());
-					rtInstance.setValue(rtAttA, aaA);
-					rtInstance.setValue(rtAttR, aaR);
-					rtInstance.setValue(rtAttN, aaN);
-					rtInstance.setValue(rtAttD, aaD);
-					rtInstance.setValue(rtAttB, aaB);
-					rtInstance.setValue(rtAttC, aaC);
-					rtInstance.setValue(rtAttE, aaE);
-					rtInstance.setValue(rtAttQ, aaQ);
-					rtInstance.setValue(rtAttZ, aaZ);
-					rtInstance.setValue(rtAttG, aaG);
-					rtInstance.setValue(rtAttH, aaH);
-					rtInstance.setValue(rtAttI, aaI);
-					rtInstance.setValue(rtAttL, aaL);
-					rtInstance.setValue(rtAttK, aaK);
-					rtInstance.setValue(rtAttM, aaM);
-					rtInstance.setValue(rtAttF, aaF);
-					rtInstance.setValue(rtAttP, aaP);
-					rtInstance.setValue(rtAttS, aaS);
-					rtInstance.setValue(rtAttT, aaT);
-					rtInstance.setValue(rtAttW, aaW);
-					rtInstance.setValue(rtAttY, aaY);
-					rtInstance.setValue(rtAttV, aaV);
-					rtInstance.setValue(rtAttJ, aaJ);
-					rtData.add(rtInstance);
-					double predictedRt=0;
-					try{
-						// TODO predictedRt = rtCls.classifyInstance(rtInstance);
-						predictedRt = localRandomFactory.localRand.nextDouble() * MassSpec.runTime; // TODO switch back - testing if weka model updates after evalution or is deterministic
-					} catch (Exception ex){
-						JOptionPane.showMessageDialog(null, "WEKA error 1", "Error", JOptionPane.ERROR_MESSAGE);
-						return false;
-					}
+          // base:
+          elementC.count += 3;
+          elementH.count += 5;
+          elementO.count += 1;
+          elementN.count += 1;
+          elementS.count += 1;
 
-					// get absolute instensity of this peptide
-					double predictedIntensity = maxIntensity;
-					if (abundance != 0){
-						predictedIntensity = maxIntensity * (abundance/100.0);
-					} else { 
-						double histRand = localRandomFactory.localRand.nextDouble();
-						int histIdx = 0;
-						while (histIdx < 9 && intensityHistogram[histIdx] <= histRand){histIdx++;}
-						// within the probable histogram bin with in-bin variability
-						predictedIntensity = MassSpec.minWhiteNoiseIntensity + ((double) (histIdx+1)) * intensityHistogramChunk + localRandomFactory.localRand.nextDouble() * intensityHistogramChunk;
-					}
-					
-					//
-					// Create isotopic envelope
-					//
-					if (predictedRt > 0) { // check this upfront so as not to waste time
-						double secondsToScans = 250.0 * (double) samplingRate * 60.0; //Convert # seconds (250 max) to # scans
-						int traceLength =  (int) (localRandomFactory.localRand.nextDouble() * secondsToScans);
-						
-						// find first rtArray index greater than value (or rtArray.size-1 if at tail)
-						int rtIndex = 0;
-						int start = (int)(predictedRt * 10.0);
-						if (predictedRt > rtArray[rtArray.length-1]){
-							rtIndex = rtArray.length-1;
-						} else {rtIndex = rtArrayShifted[start];}
-							
-						int rtFloor = Math.max(0,rtIndex-(int) (secondsToScans/4.0));
-						int rtCeil = Math.min(rtArray.length-1,rtIndex+(int) (secondsToScans/2.0));
-						if(isotopeMasses.size() > 0 && (isotopeMasses.get(0) > minMZ || isotopeMasses.get(isotopeMasses.size()-1) < maxMZ)){
-							IsotopicEnvelope isotopicEnvelope = new IsotopicEnvelope(isotopeIntensities, 
-																					isotopeMasses, 
-																					predictedIntensity, 
-																					predictedRt, 
-																					traceLength, 
-																					rtFloor, 
-																					rtCeil, 
-																					charge, 
-																					peptideID, 
-																					proteinID,
-																					sequence,
-																					charges);
-							// Add this isotopicEnvelope to the list of all envelopes
-							isotopicEnvelopesInstance.add(isotopicEnvelope);
-						}
-					}
-			}
-		}
-		return true;
-	}
-	
-	public boolean processPeptides(ArrayList<String> peptides, double abundance, int proteinID) {
-		for (String peptide : peptides) {
-			if(!processPeptide(peptide, abundance, proteinID)){return false;}
-		}
-		return true;
+          if (Modifications.CarbamidomethylationGain) {
+            // PTM: carbamidomethylation, gain, static, C 2 H 3 N 1 O 1 S 0
+            elementC.count += 2;
+            elementH.count += 3;
+            elementN.count += 1;
+            elementO.count += 1;
+          }
+          break;
+        case 'D': // => { :C =>4, :H =>5 , :O =>3 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
+          aaD += 1;
+
+          // charge calculation
+          chargeD += 1;
+
+          elementC.count += 4;
+          elementH.count += 5;
+          elementO.count += 3;
+          elementN.count += 1;
+          break;
+        case 'E': // => { :C =>5, :H =>7 , :O =>3 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
+          aaE += 1;
+
+          // charge calculation
+          chargeE += 1;
+
+          elementC.count += 5;
+          elementH.count += 7;
+          elementO.count += 3;
+          elementN.count += 1;
+          break;
+        case 'F': // => { :C =>9, :H =>9 , :O =>1 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
+          aaF += 1;
+
+          // charge calculation
+          chargeHydrophobic += 1;
+
+          elementC.count += 9;
+          elementH.count += 9;
+          elementO.count += 1;
+          elementN.count += 1;
+          break;
+        case 'G': //=> { :C =>2, :H =>3 , :O =>1 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
+          aaG += 1;
+
+          // charge calculation
+          chargeHydrophobic += 1;
+
+          elementC.count += 2;
+          elementH.count += 3;
+          elementO.count += 1;
+          elementN.count += 1;
+          break;
+        case 'I': // => { :C =>6, :H =>11 , :O =>1 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
+          aaI += 1;
+
+          // charge calculation
+          chargeHydrophobic += 1;
+
+          elementC.count += 6;
+          elementH.count += 11;
+          elementO.count += 1;
+          elementN.count += 1;
+          break;
+        case 'H': // => { :C =>6, :H =>7 , :O =>1 , :N =>3 , :S =>0 , :P =>0, :Se =>0 },
+          aaH += 1;
+          //charge calculation
+          chargeH += 1;
+
+          elementC.count += 6;
+          elementH.count += 7;
+          elementO.count += 1;
+          elementN.count += 3;
+          break;
+        case 'K': // => { :C =>6, :H =>12 , :O =>1 , :N =>2 , :S =>0 , :P =>0, :Se =>0 },
+          aaK += 1;
+
+          // charge calculation
+          chargeK += 1;
+
+          elementC.count += 6;
+          elementH.count += 12;
+          elementO.count += 1;
+          elementN.count += 2;
+          break;
+        case 'L': // => { :C =>6, :H =>11 , :O =>1 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
+          aaL += 1;
+
+          // charge calculation
+          chargeHydrophobic += 1;
+
+          elementC.count += 6;
+          elementH.count += 11;
+          elementO.count += 1;
+          elementN.count += 1;
+          break;
+        case 'M': // => { :C =>5, :H =>9 , :O =>1 , :N =>1 , :S =>1 , :P =>0, :Se =>0 },
+          aaM += 1;
+
+          // charge calculation
+          chargeHydrophobic += 1;
+
+          // base:
+          elementC.count += 5;
+          elementH.count += 9;
+          elementO.count += 1;
+          elementN.count += 1;
+          elementS.count += 1;
+
+          // PTM: M -> oxidation of methionine, gain, variable, O 1
+          // variable
+          if (modMethionine) {
+            elementO.count += 1;
+          }
+          break;
+        case 'N': // => { :C =>4, :H =>6 , :O =>2 , :N =>2 , :S =>0 , :P =>0, :Se =>0 },
+          aaN += 1;
+
+          // charge calculation
+          chargePolar += 1;
+
+          elementC.count += 4;
+          elementH.count += 6;
+          elementO.count += 2;
+          elementN.count += 2;
+          break;
+        case 'O': // => { :C =>12, :H =>19 , :O =>2 , :N =>3 , :S =>0 , :P =>0, :Se =>0 },
+          elementC.count += 12;
+          elementH.count += 19;
+          elementO.count += 2;
+          elementN.count += 3;
+          break;
+        case 'P': // => { :C =>5, :H =>7 , :O =>1 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
+          aaP += 1;
+
+          // charge calculation
+          chargeHydrophobic += 1;
+
+          elementC.count += 5;
+          elementH.count += 7;
+          elementO.count += 1;
+          elementN.count += 1;
+          break;
+        case 'Q': // => { :C =>5, :H =>8 , :O =>2 , :N =>2 , :S =>0 , :P =>0, :Se =>0 },
+          aaQ += 1;
+
+          // charge calculation
+          chargePolar += 1;
+
+          // base:
+          elementC.count += 5;
+          elementH.count += 8;
+          elementO.count += 2;
+          elementN.count += 2;
+
+          if (modPyroglutamate) {
+            // Q -> pyroglutamate (or pyroglutamic acid) loss, variable, N 1 H 3
+            elementN.count -= 1;
+            elementH.count -= 3;
+          }
+          break;
+        case 'R': // => { :C =>6, :H =>12 , :O =>1 , :N =>4 , :S =>0 , :P =>0, :Se =>0 },
+          aaR += 1;
+
+          // charge calculation
+          chargeR += 1;
+
+          elementC.count += 6;
+          elementH.count += 12;
+          elementO.count += 1;
+          elementN.count += 4;
+          break;
+        case 'S': // => { :C =>3, :H =>5 , :O =>2 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
+          aaS += 1;
+
+          // charge calculation
+          chargePolar += 1;
+
+          // base:
+          elementC.count += 3;
+          elementH.count += 5;
+          elementO.count += 2;
+          elementN.count += 1;
+
+          if (modPhosphorylation) {
+            // S,T,Y -> phosphorylation, gain, H 1 O 3 P 1
+            elementH.count += 1;
+            elementO.count += 3;
+            elementP.count += 1;
+          }
+          break;
+        case 'T': // => { :C =>4, :H =>7 , :O =>2 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
+          aaT += 1;
+
+          // charge calculation
+          chargePolar += 1;
+
+          // base:
+          elementC.count += 4;
+          elementH.count += 7;
+          elementO.count += 2;
+          elementN.count += 1;
+
+          if (modPhosphorylation) {
+            // S,T,Y -> phosphorylation, gain, H 1 O 3 P 1
+            elementH.count += 1;
+            elementO.count += 3;
+            elementP.count += 1;
+          }
+          break;
+        case 'U': // => { :C =>3, :H =>5 , :O =>1 , :N =>1 , :S =>0 , :P =>0, :Se =>1 },
+          // charge calculation
+          chargeU += 1;
+
+          elementC.count += 3;
+          elementH.count += 5;
+          elementO.count += 1;
+          elementN.count += 1;
+          elementSe.count += 1;
+          break;
+        case 'V': // => { :C =>5, :H =>9 , :O =>1 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
+          aaV += 1;
+
+          // charge calculation
+          chargeHydrophobic += 1;
+
+          elementC.count += 5;
+          elementH.count += 9;
+          elementO.count += 1;
+          elementN.count += 1;
+          break;
+        case 'W': // => { :C =>11, :H =>10 , :O =>1 , :N =>2 , :S =>0 , :P =>0, :Se =>0 },
+          aaW += 1;
+
+          // charge calculation
+          chargeHydrophobic += 1;
+
+          elementC.count += 11;
+          elementH.count += 10;
+          elementO.count += 1;
+          elementN.count += 2;
+          break;
+        case 'Y': // => { :C =>9, :H =>9 , :O =>2 , :N =>1 , :S =>0 , :P =>0, :Se =>0 },
+          aaY += 1;
+
+          // charge calc
+          chargeY += 1;
+
+          // base:
+          elementC.count += 9;
+          elementH.count += 9;
+          elementO.count += 2;
+          elementN.count += 1;
+
+          if (modPhosphorylation) {
+            // S,T,Y -> phosphorylation, gain, H 1 O 3 P 1
+            elementH.count += 1;
+            elementO.count += 3;
+            elementP.count += 1;
+          }
+          break;
+        default:
+          JOptionPane.showMessageDialog(null, "Error: Amino acid in fasta not recognized.", "Error", JOptionPane.ERROR_MESSAGE);
+          return false;
+      }
+    }
+
+    //
+    // Figure out charge
+    //
+    double preCharge = 0;
+    preCharge += -1.0 / (1.0 + Math.pow(10.0,residueTable.get(peptide.sequence.charAt(0))[1] - Modifications.pH));
+    preCharge += -chargeD / (1.0+Math.pow(10.0, 3.65-Modifications.pH));
+    preCharge += -chargeE / (1.0+Math.pow(10.0, 4.25-Modifications.pH));
+    preCharge += -chargeC / (1.0+Math.pow(10.0, 8.18-Modifications.pH));
+    preCharge += -chargeY / (1.0+Math.pow(10.0, 10.07-Modifications.pH));
+    preCharge += 1.0 / (1.0 + Math.pow(10.0, Modifications.pH - residueTable.get(peptide.sequence.charAt(peptide.sequence.length()-1))[0]));
+    preCharge += chargeH / (1.0+Math.pow(10.0, Modifications.pH-6.00));
+    preCharge += chargeK / (1.0+Math.pow(10.0, Modifications.pH-10.53));
+    preCharge += chargeR / (1.0+Math.pow(10.0, Modifications.pH-12.48));
+    chargeFloor = (int) Math.floor(preCharge);
+    chargeCeil = (int) Math.ceil(preCharge);
+
+    int[] charges;
+    if (chargeFloor == 0 || chargeFloor == chargeCeil){
+      charges = new int[1];
+      charges[0] = chargeCeil;
+    } else {
+      charges = new int[2];
+      charges[0] = chargeFloor;
+      charges[1] = chargeCeil;
+    }
+    int origHCount = elementH.count;
+    for (double charge : charges){
+      if (charge > 0){
+        //
+        // Tweak H count based on charge
+        //
+        elementH.count = origHCount + (int) charge;
+        //
+        // compute the isotopic distribution (MZs and intensities)
+        //
+
+        // calculate the isotopic slice based on the atom counts
+        // get the lowNominal and highNominal values
+        int lowNominal = 0;
+        int highNominal = 0;
+        for (Element el : elements){
+          lowNominal += el.getLowMassNumber() * el.count;
+          highNominal += el.getHighMassNumber() * el.count;
+        }
+
+        // get the fft of the vector of relative abundances for the isotopes of each element
+        int nextPow2 = 1024;
+        while (highNominal > nextPow2){
+          nextPow2 *= 2;
+        }
+        double[] relativeAbundancesReal= new double[nextPow2];
+        double[] relativeAbundancesImag= new double[nextPow2];
+
+        double[] fftAbundancesReal = new double[nextPow2];
+        double[] fftAbundancesImag = new double[nextPow2];
+
+        double monoMass = 0;
+        boolean firstGo = true;
+        for (Element el : elements){
+          // reset the arrays to compute the relative abundances
+          double[][] relativeAbundances = el.getRelativeAbundanceFFT(nextPow2, fftBase);
+          relativeAbundancesReal = relativeAbundances[0];
+          relativeAbundancesImag = relativeAbundances[1];
+
+          // convolve the frequencies of each element
+          double prevReal = 0;
+          for(int i=0; i<relativeAbundancesReal.length; i++){
+            double[] power = complexPower(relativeAbundancesReal[i],relativeAbundancesImag[i],el.count); 
+            if(firstGo){
+              fftAbundancesReal[i] = power[0];
+              fftAbundancesImag[i] = power[1];
+            } else {
+              prevReal = fftAbundancesReal[i];
+              fftAbundancesReal[i] = fftAbundancesReal[i]*power[0]-fftAbundancesImag[i]*power[1];
+              fftAbundancesImag[i] = prevReal*power[1]+fftAbundancesImag[i]*power[0];
+            }
+          }
+          firstGo = false;
+          monoMass += el.count * el.getMonoIsotopicmass();
+        }
+
+        fftBase.fft(fftAbundancesImag, fftAbundancesReal); // Inverse FFT
+
+        double maxAbundance = 0;
+        double totalAbundance = 0;
+        int monoMZIndex = 0;
+        for(int i=lowNominal; i<highNominal-1; i++){
+          if(fftAbundancesReal[i] > 0){
+          totalAbundance += fftAbundancesReal[i];
+            if (fftAbundancesReal[i] > maxAbundance ) {
+              monoMZIndex = i;
+            }
+          }
+        }
+        double normalizedAbundance = 0;
+        double newMass = 0;
+        double lastMass = (monoMass + charge)/charge - NEUTRON_MASS/charge;
+        ArrayList<Double> isotopeMasses = new ArrayList<Double>(10);
+        ArrayList<Double> isotopeIntensities = new ArrayList<Double>(10);
+
+        // we only want entries with index between lowNominal and highNominal
+        for(int i=lowNominal; i<highNominal-1; i++){
+          // normalize
+          normalizedAbundance = fftAbundancesReal[i] / totalAbundance;
+          newMass = lastMass + NEUTRON_MASS / charge;
+          lastMass = newMass;
+
+          // keep if above threshold
+          if (normalizedAbundance > ABUNDANCE_THRESHOLD) {
+            isotopeMasses.add(newMass); 
+            isotopeIntensities.add(normalizedAbundance);
+            if (i == monoMZIndex) {monoMZ = newMass;}
+          }
+        }
+        
+        // make sure in mz range
+        if(isotopeMasses.size() > 0 && (isotopeMasses.get(0) > minMZ || isotopeMasses.get(isotopeMasses.size()-1) < maxMZ)){
+          // calculate RT: create weka instance and run on model to get RTs
+          Instance rtInstance = new Instance(rtData.numAttributes());
+          rtInstance.setValue(rtAttA, aaA);
+          rtInstance.setValue(rtAttR, aaR);
+          rtInstance.setValue(rtAttN, aaN);
+          rtInstance.setValue(rtAttD, aaD);
+          rtInstance.setValue(rtAttB, aaB);
+          rtInstance.setValue(rtAttC, aaC);
+          rtInstance.setValue(rtAttE, aaE);
+          rtInstance.setValue(rtAttQ, aaQ);
+          rtInstance.setValue(rtAttZ, aaZ);
+          rtInstance.setValue(rtAttG, aaG);
+          rtInstance.setValue(rtAttH, aaH);
+          rtInstance.setValue(rtAttI, aaI);
+          rtInstance.setValue(rtAttL, aaL);
+          rtInstance.setValue(rtAttK, aaK);
+          rtInstance.setValue(rtAttM, aaM);
+          rtInstance.setValue(rtAttF, aaF);
+          rtInstance.setValue(rtAttP, aaP);
+          rtInstance.setValue(rtAttS, aaS);
+          rtInstance.setValue(rtAttT, aaT);
+          rtInstance.setValue(rtAttW, aaW);
+          rtInstance.setValue(rtAttY, aaY);
+          rtInstance.setValue(rtAttV, aaV);
+          rtInstance.setValue(rtAttJ, aaJ);
+          rtData.add(rtInstance);
+          double predictedRt=0;
+          try{
+            predictedRt = rtCls.classifyInstance(rtInstance);
+            //predictedRt = localRandomFactory.localRand.nextDouble() * MassSpec.runTime;
+          } catch (Exception ex){
+            JOptionPane.showMessageDialog(null, "WEKA error 1", "Error", JOptionPane.ERROR_MESSAGE);
+            return false;
+          }
+
+          // get absolute instensity of this peptide
+          double predictedIntensity = maxIntensity;
+          if (peptide.peptideIntensity != 0){
+            predictedIntensity = maxIntensity * (peptide.peptideIntensity/100.0);
+          } else { 
+            double histRand = localRandomFactory.localRand.nextDouble();
+            int histIdx = 0;
+            while (histIdx < 9 && intensityHistogram[histIdx] <= histRand){histIdx++;}
+            // within the probable histogram bin with in-bin variability
+            predictedIntensity = MassSpec.minWhiteNoiseIntensity + ((double) (histIdx+1)) * intensityHistogramChunk + localRandomFactory.localRand.nextDouble() * intensityHistogramChunk;
+          }
+
+          //
+          // Create isotopic envelope
+          //
+          if (predictedRt > 0) { // check this upfront so as not to waste time
+            double secondsToScans = 250.0 * (double) samplingRate * 60.0; //Convert # seconds (250 max) to # scans
+            int traceLength =  (int) (localRandomFactory.localRand.nextDouble() * secondsToScans);
+
+            // find first rtArray index greater than value (or rtArray.size-1 if at tail)
+            int rtIndex = 0;
+            int start = (int)(predictedRt * 10.0);
+            if (predictedRt > rtArray[rtArray.length-1]){
+              rtIndex = rtArray.length-1;
+            } else {rtIndex = rtArrayShifted[start];}
+
+            int rtFloor = Math.max(0,rtIndex-(int) (secondsToScans/4.0));
+            int rtCeil = Math.min(rtArray.length-1,rtIndex+(int) (secondsToScans/2.0));
+
+            IsotopicEnvelope isotopicEnvelope = new IsotopicEnvelope(isotopeIntensities, 
+                                        isotopeMasses, 
+                                        predictedIntensity, 
+                                        predictedRt, 
+                                        traceLength, 
+                                        rtFloor, 
+                                        rtCeil, 
+                                        charge, 
+                                        peptide.peptideID, 
+                                        peptide.sequence,
+                                        isotopeEnvelopeID,
+                                        charges);
+            isotopeEnvelopeID++;
+            // Add this isotopicEnvelope to the list of all envelopes
+            isotopicEnvelopesInstance.add(isotopicEnvelope);
+          }
+        }
+      }
+    }
+    return true;
 	}
 	
 	private double[] complexMultiply(double aReal, double aImag, double bReal, double bImag){
@@ -1136,8 +1106,8 @@ public class MassSpec {
 						mergedCent.centroidID = oldCent.centroidID;
 						mergedCent.charge = oldCent.charge;
 						mergedCent.isotopeTraceID = oldCent.isotopeTraceID;
+            mergedCent.isotopeEnvelopeID = oldCent.isotopeEnvelopeID;
 						mergedCent.pepID = oldCent.pepID;
-						mergedCent.proteinID = oldCent.proteinID;
 						merged.add(mergedCent);
 					}
 					mergeGroup = new LinkedList<>();
@@ -1434,7 +1404,7 @@ public class MassSpec {
 	}
 	
 	static boolean printTruthPre(){
-		File peptideFile = new File("JAMSSfiles" + File.separator + "output_truth_peptides.csv");
+		File peptideFile = new File("JAMSSfiles" + File.separator + "centroids.csv");
 		try{
 			peptideFile.createNewFile(); // overwrite any previous truth file
 		} catch(IOException e){
@@ -1442,7 +1412,7 @@ public class MassSpec {
 			return false;
 		}
 		
-		File truthFile = new File("JAMSSfiles" + File.separator + "output_truth.csv");
+		File truthFile = new File("JAMSSfiles" + File.separator + "centroids.csv");
 		try{
 			truthFile.createNewFile(); // overwrite any previous truth file
 		} catch(IOException e){
@@ -1462,10 +1432,10 @@ public class MassSpec {
 	static boolean printTruth(LinkedList<Centroid> masterScan, double rt){
 		// print regular truth file
 		try {
-			// centroidID, isotopeTraceID, charge, pepID, proteinID, m/z, RT, intensity
+			// centroidID, isotopeTraceID, charge, pepID, m/z, RT, intensity
 			char[] lineEnd = System.getProperty("line.separator").toCharArray();
 			char comma = ',';
-			FileWriter writer = new FileWriter("JAMSSfiles" + File.separator + truthFilename ,true); // append
+			FileWriter writer = new FileWriter("JAMSSfiles" + File.separator + "centroids.csv" ,true); // append
 			BufferedWriter truthWriter = new BufferedWriter(writer, masterScan.size() * 25);
 			int bufIndex = 0;
 			char[] lineBuf = new char[350];
@@ -1490,11 +1460,11 @@ public class MassSpec {
 				lineBuf[bufIndex] = comma;
 				bufIndex++;
 				
-				char[] protId = Integer.toString(cent.proteinID).toCharArray();
-				bufIndex = charArrayHelper(protId,lineBuf,bufIndex);
+        char[] ieId = Integer.toString(cent.isotopeEnvelopeID).toCharArray();
+				bufIndex = charArrayHelper(ieId,lineBuf,bufIndex);
 				lineBuf[bufIndex] = comma;
 				bufIndex++;
-				
+        
 				char[] mz = Double.toString(cent.mz).toCharArray();
 				bufIndex = charArrayHelper(mz,lineBuf,bufIndex);
 				lineBuf[bufIndex] = comma;
@@ -1510,45 +1480,24 @@ public class MassSpec {
 				bufIndex = charArrayHelper(lineEnd,lineBuf,bufIndex);
 
 				truthWriter.write(lineBuf, 0, bufIndex);
-				//cent.centroidID.toCharArray() + comma + cent.isotopeTraceID + "," + cent.charge +"," + cent.pepID + "," + cent.proteinID + "," + cent.mz + "," + rt + "," + cent.abundance  + lineEnd;
-				//truthWriter.write();
 				bufIndex = 0;
 			}
 
 			truthWriter.flush();
 			truthWriter.close();
  		} catch (IOException e) {
-			JOptionPane.showMessageDialog(null, "Error writing to truth file.", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Error writing centroids file.", "Error", JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
 		return true;
 	}
 
-	static boolean printSequences(){
-		try {
-			//contains list of peptide sequences and IDs
-			FileWriter peptideWriter = new FileWriter("JAMSSfiles" + File.separator + "output_truth_peptides.csv",true); // append
-
-			for(int pepIdx = 0; pepIdx < peptides.size(); pepIdx++){
-				//proteinID (pos in fasta file), peptideID, peptide sequence
-				peptideWriter.append(proteinIDs.get(pepIdx) + "," + pepIdx + "," + peptides.get(pepIdx) + System.getProperty("line.separator"));
-			}
-			peptideWriter.flush();
-			peptideWriter.close();
-		} catch (IOException e){
-			JOptionPane.showMessageDialog(null, "Error appending to peptide truth file.", "Error", JOptionPane.ERROR_MESSAGE);
-			return false;
-		}
-		return true;
-	}
-	
 	public static void finishController(){
-		
+		LocalProgressMonitor.beginExtendSimulation(rtArray.length);
+    
 		// write the beginning of the output and truth files
 		if(!outputPre(rtArray.length)){return;}
-		if(createTruthFile){
-			if (!printTruthPre()){return;}
-		}
+  		if (!printTruthPre()){return;}
 
 		FileWriterThread writeThread = new FileWriterThread();
 
@@ -1559,15 +1508,13 @@ public class MassSpec {
 		}
 
 		for(int i=0; i<rtArray.length; i++){
-			simulatorGUI.progressMonitor.setNote("Calculating/writing RT scans: scan "+ i + " of " + rtArray.length);
-			simulatorGUI.progressMonitor.setProgress((int) (((double) i/(double) rtArray.length) * 75.0)+25);
+			LocalProgressMonitor.updateExtendSimulation(i);
 			ScanGeneratorThread.numFinished = 0; //reset each RT
 			LinkedList<MS2> ms2s = new LinkedList<MS2>(); // highest intensity sequences from run
 			
 			// for each current RT, get rid of any out of range
 			//ArrayList<Integer> iesToRemove = new ArrayList<Integer>(isotopicEnvelopes.size());
 			ArrayList<Integer> iesToRemove = new ArrayList<Integer>();
-			//for(int j=0; j<isotopicEnvelopes.size(); j++){
 			int ieIndex = 0;
 			for(IsotopicEnvelope ie : isotopicEnvelopes){
 				if(!ie.isInRange(i)){
@@ -1587,6 +1534,7 @@ public class MassSpec {
 			ScanGeneratorThread[] threads = new ScanGeneratorThread[numCpus];
 			ieIndex = 0;
 			LinkedList<Centroid> masterScan = new LinkedList<Centroid>();
+//System.out.println(isotopicEnvelopes.size());      
 			while(ieIndex < isotopicEnvelopes.size()){
 				for(int j = 0; j < numCpus && ieIndex < isotopicEnvelopes.size(); j++){
 					if(threads[j] == null){ // thread not running
@@ -1669,11 +1617,19 @@ public class MassSpec {
 			try{Thread.sleep(2000);} catch(Exception e){}
 		}
 		if(!thisSimulationHasPoints){
+      //delete empty mzml file so as to avoid confusion
+      File file = new File(pathToClass + "JAMSSfiles" + File.separator + mzmlFilename);
+      file.delete();
+      
+      //delete empty truth files
+      file = new File(pathToClass + "JAMSSfiles" + File.separator + "peptide_sequences.csv");
+      file.delete();
+      file = new File(pathToClass + "JAMSSfiles" + File.separator + "protein_peptides.csv");
+      file.delete();
+      
 			JOptionPane.showMessageDialog(null, "Sorry, no peptides with above-noise intensity appear within the m/z range of this simulation.", "Finished", JOptionPane.ERROR_MESSAGE);
+      return;
 		}
-			// write out the peptide sequences
-			if(createTruthFile){printSequences();}
-			// write the end of the output and truth files
 			outputPost();
 //		} else{
 //			JOptionPane.showMessageDialog(null, "Sorry, no peptides with above-noise intensity appear within the m/z range of this simulation.", "Finished", JOptionPane.ERROR_MESSAGE);
@@ -1686,17 +1642,9 @@ public class MassSpec {
 		if (status == -1){
 			return;
 		}
-		if(createTruthFile){
-			if(!printTruth(masterScan, rt)){
-				return;
-			}
+		if(!printTruth(masterScan, rt)){
+			return;
 		}
 	}
 	
-	public void writeEnvelopes(int id){
-		for(IsotopicEnvelope ie : isotopicEnvelopesInstance){
-			ie.serialize(pathToClass,id);
-		}
-		isotopicEnvelopesInstance = new LinkedList<IsotopicEnvelope>();
-	}
 }

@@ -50,473 +50,445 @@ public class simulatorGUI extends javax.swing.JFrame {
      */
     @SuppressWarnings("unchecked")
     public static ProgressMonitor progressMonitor;
-    // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
-    private void initComponents() {
+  // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
+  private void initComponents() {
 
-        openOptsFileChooser = new javax.swing.JFileChooser();
-        openFastaFileChooser = new javax.swing.JFileChooser();
-        jLabel1 = new javax.swing.JLabel();
-        textOptionsFilename = new javax.swing.JLabel();
-        buttonOptionsOpen = new javax.swing.JButton();
-        buttonRun = new javax.swing.JButton();
-        textFastaFilename = new javax.swing.JLabel();
-        buttonFastaOpen = new javax.swing.JButton();
-        jLabel2 = new javax.swing.JLabel();
-        textOutputFile = new javax.swing.JTextField();
-        jLabel3 = new javax.swing.JLabel();
-        jLabel4 = new javax.swing.JLabel();
-        jLabel7 = new javax.swing.JLabel();
-        textTruthOutputFile = new javax.swing.JTextField();
-        jLabel9 = new javax.swing.JLabel();
-        sliderCleavages = new javax.swing.JSlider();
-        jLabel10 = new javax.swing.JLabel();
-        textMaxNoise = new javax.swing.JTextField();
-        jLabel11 = new javax.swing.JLabel();
-        textMinNoise = new javax.swing.JTextField();
-        jLabel12 = new javax.swing.JLabel();
-        jLabel13 = new javax.swing.JLabel();
-        textDropout = new javax.swing.JTextField();
-        jLabel15 = new javax.swing.JLabel();
-        jLabel24 = new javax.swing.JLabel();
-        textChromOverlapRange = new javax.swing.JTextField();
-        jLabel25 = new javax.swing.JLabel();
-        jLabel27 = new javax.swing.JLabel();
-        jLabel28 = new javax.swing.JLabel();
-        comboDigester = new javax.swing.JComboBox();
-        jLabel29 = new javax.swing.JLabel();
-        textSamplingRate = new javax.swing.JTextField();
-        jLabel30 = new javax.swing.JLabel();
-        textRuntime = new javax.swing.JTextField();
-        jLabel31 = new javax.swing.JLabel();
-        textPH = new javax.swing.JTextField();
-        jLabel32 = new javax.swing.JLabel();
-        sliderMS2PerScan = new javax.swing.JSlider();
-        buttonRestoreDefaults = new javax.swing.JButton();
-        checkboxCarbamidomethylationGain = new javax.swing.JCheckBox();
-        jLabel33 = new javax.swing.JLabel();
-        jLabel34 = new javax.swing.JLabel();
-        jLabel36 = new javax.swing.JLabel();
-        spinnerPyroglutamateLossPercent = new javax.swing.JSpinner();
-        spinnerPhosphorylationGainPercent = new javax.swing.JSpinner();
-        spinnerOxidationMethioninePercent = new javax.swing.JSpinner();
-        checkBoxOneD = new javax.swing.JCheckBox();
-        jLabel37 = new javax.swing.JLabel();
-        sliderNumCPUs = new javax.swing.JSlider();
-        jLabel8 = new javax.swing.JLabel();
-        jLabel5 = new javax.swing.JLabel();
-        jLabel6 = new javax.swing.JLabel();
-        cloneCheckBox = new javax.swing.JCheckBox();
-        jLabel14 = new javax.swing.JLabel();
-        createTruthCheckbox = new javax.swing.JCheckBox();
-        whiteNoisePerScanSpinner = new javax.swing.JSpinner();
-        jLabel16 = new javax.swing.JLabel();
+    openOptsFileChooser = new javax.swing.JFileChooser();
+    openFastaFileChooser = new javax.swing.JFileChooser();
+    jLabel1 = new javax.swing.JLabel();
+    textOptionsFilename = new javax.swing.JLabel();
+    buttonOptionsOpen = new javax.swing.JButton();
+    buttonRun = new javax.swing.JButton();
+    textFastaFilename = new javax.swing.JLabel();
+    buttonFastaOpen = new javax.swing.JButton();
+    jLabel2 = new javax.swing.JLabel();
+    textOutputFile = new javax.swing.JTextField();
+    jLabel3 = new javax.swing.JLabel();
+    jLabel4 = new javax.swing.JLabel();
+    jLabel9 = new javax.swing.JLabel();
+    sliderCleavages = new javax.swing.JSlider();
+    jLabel10 = new javax.swing.JLabel();
+    textMaxNoise = new javax.swing.JTextField();
+    jLabel11 = new javax.swing.JLabel();
+    textMinNoise = new javax.swing.JTextField();
+    jLabel12 = new javax.swing.JLabel();
+    jLabel13 = new javax.swing.JLabel();
+    textDropout = new javax.swing.JTextField();
+    jLabel15 = new javax.swing.JLabel();
+    jLabel24 = new javax.swing.JLabel();
+    textChromOverlapRange = new javax.swing.JTextField();
+    jLabel25 = new javax.swing.JLabel();
+    jLabel27 = new javax.swing.JLabel();
+    jLabel28 = new javax.swing.JLabel();
+    comboDigester = new javax.swing.JComboBox();
+    jLabel29 = new javax.swing.JLabel();
+    textSamplingRate = new javax.swing.JTextField();
+    jLabel30 = new javax.swing.JLabel();
+    textRuntime = new javax.swing.JTextField();
+    jLabel31 = new javax.swing.JLabel();
+    textPH = new javax.swing.JTextField();
+    jLabel32 = new javax.swing.JLabel();
+    sliderMS2PerScan = new javax.swing.JSlider();
+    buttonRestoreDefaults = new javax.swing.JButton();
+    checkboxCarbamidomethylationGain = new javax.swing.JCheckBox();
+    jLabel33 = new javax.swing.JLabel();
+    jLabel34 = new javax.swing.JLabel();
+    jLabel36 = new javax.swing.JLabel();
+    spinnerPyroglutamateLossPercent = new javax.swing.JSpinner();
+    spinnerPhosphorylationGainPercent = new javax.swing.JSpinner();
+    spinnerOxidationMethioninePercent = new javax.swing.JSpinner();
+    checkBoxOneD = new javax.swing.JCheckBox();
+    jLabel37 = new javax.swing.JLabel();
+    sliderNumCPUs = new javax.swing.JSlider();
+    jLabel8 = new javax.swing.JLabel();
+    jLabel5 = new javax.swing.JLabel();
+    jLabel6 = new javax.swing.JLabel();
+    cloneCheckBox = new javax.swing.JCheckBox();
+    whiteNoisePerScanSpinner = new javax.swing.JSpinner();
+    jLabel16 = new javax.swing.JLabel();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setMinimumSize(null);
+    setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+    setMinimumSize(null);
 
-        jLabel1.setFont(new java.awt.Font("Dialog", 1, 14));
-        jLabel1.setText("IO Options:");
+    jLabel1.setFont(new java.awt.Font("Dialog", 1, 14));
+    jLabel1.setText("IO Options:");
 
-        textOptionsFilename.setText("none");
-        textOptionsFilename.setMaximumSize(new java.awt.Dimension(64, 15));
-        textOptionsFilename.setMinimumSize(new java.awt.Dimension(64, 15));
-        textOptionsFilename.setPreferredSize(new java.awt.Dimension(64, 15));
+    textOptionsFilename.setText("none");
+    textOptionsFilename.setMaximumSize(new java.awt.Dimension(64, 15));
+    textOptionsFilename.setMinimumSize(new java.awt.Dimension(64, 15));
+    textOptionsFilename.setPreferredSize(new java.awt.Dimension(64, 15));
 
-        buttonOptionsOpen.setText("Open");
-        buttonOptionsOpen.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                buttonOptionsOpenMouseClicked(evt);
-            }
-        });
+    buttonOptionsOpen.setText("Open");
+    buttonOptionsOpen.addMouseListener(new java.awt.event.MouseAdapter() {
+      public void mouseClicked(java.awt.event.MouseEvent evt) {
+        buttonOptionsOpenMouseClicked(evt);
+      }
+    });
 
-        buttonRun.setText("Run");
-        buttonRun.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                buttonRunMouseClicked(evt);
-            }
-        });
+    buttonRun.setText("Run");
+    buttonRun.addMouseListener(new java.awt.event.MouseAdapter() {
+      public void mouseClicked(java.awt.event.MouseEvent evt) {
+        buttonRunMouseClicked(evt);
+      }
+    });
 
-        textFastaFilename.setText("none");
-        textFastaFilename.setMaximumSize(new java.awt.Dimension(64, 15));
-        textFastaFilename.setMinimumSize(new java.awt.Dimension(64, 15));
-        textFastaFilename.setPreferredSize(new java.awt.Dimension(64, 15));
+    textFastaFilename.setText("none");
+    textFastaFilename.setMaximumSize(new java.awt.Dimension(64, 15));
+    textFastaFilename.setMinimumSize(new java.awt.Dimension(64, 15));
+    textFastaFilename.setPreferredSize(new java.awt.Dimension(64, 15));
 
-        buttonFastaOpen.setText("Open");
-        buttonFastaOpen.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                buttonFastaOpenMouseClicked(evt);
-            }
-        });
+    buttonFastaOpen.setText("Open");
+    buttonFastaOpen.addMouseListener(new java.awt.event.MouseAdapter() {
+      public void mouseClicked(java.awt.event.MouseEvent evt) {
+        buttonFastaOpenMouseClicked(evt);
+      }
+    });
 
-        jLabel2.setText("*mzML Output File:");
+    jLabel2.setText("*mzML Output File:");
 
-        textOutputFile.setText("output");
-        textOutputFile.setMaximumSize(new java.awt.Dimension(64, 25));
-        textOutputFile.setMinimumSize(new java.awt.Dimension(64, 25));
-        textOutputFile.setPreferredSize(new java.awt.Dimension(64, 25));
+    textOutputFile.setText("output");
+    textOutputFile.setMaximumSize(new java.awt.Dimension(64, 25));
+    textOutputFile.setMinimumSize(new java.awt.Dimension(64, 25));
+    textOutputFile.setPreferredSize(new java.awt.Dimension(64, 25));
 
-        jLabel3.setText("*.fasta File:");
+    jLabel3.setText("*.fasta File:");
 
-        jLabel4.setText("Load Options:");
+    jLabel4.setText("Load Options:");
 
-        jLabel7.setText("Truth Output File:");
+    jLabel9.setText("Missed Cleavages:");
 
-        textTruthOutputFile.setText("truth");
-        textTruthOutputFile.setMaximumSize(new java.awt.Dimension(64, 25));
-        textTruthOutputFile.setMinimumSize(new java.awt.Dimension(64, 25));
-        textTruthOutputFile.setPreferredSize(new java.awt.Dimension(64, 25));
+    sliderCleavages.setMajorTickSpacing(1);
+    sliderCleavages.setMaximum(5);
+    sliderCleavages.setPaintLabels(true);
+    sliderCleavages.setPaintTicks(true);
+    sliderCleavages.setSnapToTicks(true);
+    sliderCleavages.setToolTipText("");
+    sliderCleavages.setValue(0);
 
-        jLabel9.setText("Missed Cleavages:");
+    jLabel10.setText("Max Noise Intensity:");
 
-        sliderCleavages.setMajorTickSpacing(1);
-        sliderCleavages.setMaximum(5);
-        sliderCleavages.setPaintLabels(true);
-        sliderCleavages.setPaintTicks(true);
-        sliderCleavages.setSnapToTicks(true);
-        sliderCleavages.setToolTipText("");
-        sliderCleavages.setValue(0);
+    textMaxNoise.setText("1000");
 
-        jLabel10.setText("Max Noise Intensity:");
+    jLabel11.setText("Min Noise Intensity:");
 
-        textMaxNoise.setText("1000");
+    textMinNoise.setText("50");
 
-        jLabel11.setText("Min Noise Intensity:");
+    jLabel12.setText("White Noise Points Per Scan:");
 
-        textMinNoise.setText("50");
+    jLabel13.setText("Dropout Percentage (1-100):");
 
-        jLabel12.setText("White Noise Points Per Scan:");
+    textDropout.setText("1");
 
-        jLabel13.setText("Dropout Percentage (1-100):");
+    jLabel15.setText("One Dimension Simulation?:");
 
-        textDropout.setText("1");
+    jLabel24.setText("Overlap Range:");
 
-        jLabel15.setText("One Dimension Simulation?:");
+    textChromOverlapRange.setText("0.002");
+    textChromOverlapRange.addActionListener(new java.awt.event.ActionListener() {
+      public void actionPerformed(java.awt.event.ActionEvent evt) {
+        textChromOverlapRangeActionPerformed(evt);
+      }
+    });
 
-        jLabel24.setText("Overlap Range:");
+    jLabel25.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+    jLabel25.setText("Modifications:");
 
-        textChromOverlapRange.setText("0.002");
-        textChromOverlapRange.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                textChromOverlapRangeActionPerformed(evt);
-            }
-        });
+    jLabel27.setFont(new java.awt.Font("Dialog", 1, 14));
+    jLabel27.setText("Mass Spec Options:");
 
-        jLabel25.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        jLabel25.setText("Modifications:");
+    jLabel28.setText("Digester:");
 
-        jLabel27.setFont(new java.awt.Font("Dialog", 1, 14));
-        jLabel27.setText("Mass Spec Options:");
+    comboDigester.setModel(new javax.swing.DefaultComboBoxModel(DigesterOpts.getOptions()));
 
-        jLabel28.setText("Digester:");
+    jLabel29.setText("Scans Per Second:");
 
-        comboDigester.setModel(new javax.swing.DefaultComboBoxModel(DigesterOpts.getOptions()));
+    textSamplingRate.setText("1");
 
-        jLabel29.setText("Scans Per Second:");
+    jLabel30.setText("Runtime (seconds):");
 
-        textSamplingRate.setText("1");
+    textRuntime.setText("1000");
 
-        jLabel30.setText("Runtime (seconds):");
+    jLabel31.setText("Sample pH:");
 
-        textRuntime.setText("1000");
+    textPH.setText("2.6");
 
-        jLabel31.setText("Sample pH:");
+    jLabel32.setText("MS2 Per Scan:");
 
-        textPH.setText("2.6");
+    sliderMS2PerScan.setMajorTickSpacing(1);
+    sliderMS2PerScan.setMaximum(10);
+    sliderMS2PerScan.setPaintLabels(true);
+    sliderMS2PerScan.setPaintTicks(true);
+    sliderMS2PerScan.setSnapToTicks(true);
+    sliderMS2PerScan.setToolTipText("");
+    sliderMS2PerScan.setValue(0);
 
-        jLabel32.setText("MS2 Per Scan:");
+    buttonRestoreDefaults.setText("Restore Defaults");
+    buttonRestoreDefaults.addMouseListener(new java.awt.event.MouseAdapter() {
+      public void mouseClicked(java.awt.event.MouseEvent evt) {
+        buttonRestoreDefaultsMouseClicked(evt);
+      }
+    });
 
-        sliderMS2PerScan.setMajorTickSpacing(1);
-        sliderMS2PerScan.setMaximum(10);
-        sliderMS2PerScan.setPaintLabels(true);
-        sliderMS2PerScan.setPaintTicks(true);
-        sliderMS2PerScan.setSnapToTicks(true);
-        sliderMS2PerScan.setToolTipText("");
-        sliderMS2PerScan.setValue(0);
+    jLabel33.setText("Pyroglutamate Loss");
 
-        buttonRestoreDefaults.setText("Restore Defaults");
-        buttonRestoreDefaults.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                buttonRestoreDefaultsMouseClicked(evt);
-            }
-        });
+    jLabel34.setText("Phosphorylation Gain");
 
-        jLabel33.setText("Pyroglutamate Loss");
+    jLabel36.setText("Oxidation of Methionine Gain");
 
-        jLabel34.setText("Phosphorylation Gain");
+    spinnerPyroglutamateLossPercent.setModel(new javax.swing.SpinnerNumberModel(0, 0, 100, 1));
 
-        jLabel36.setText("Oxidation of Methionine Gain");
+    spinnerPhosphorylationGainPercent.setModel(new javax.swing.SpinnerNumberModel(0, 0, 100, 1));
 
-        spinnerPyroglutamateLossPercent.setModel(new javax.swing.SpinnerNumberModel(0, 0, 100, 1));
+    spinnerOxidationMethioninePercent.setModel(new javax.swing.SpinnerNumberModel(0, 0, 100, 1));
 
-        spinnerPhosphorylationGainPercent.setModel(new javax.swing.SpinnerNumberModel(0, 0, 100, 1));
+    jLabel37.setText("Multithread: How many CPUs?");
 
-        spinnerOxidationMethioninePercent.setModel(new javax.swing.SpinnerNumberModel(0, 0, 100, 1));
+    sliderNumCPUs.setMajorTickSpacing(1);
+    sliderNumCPUs.setMaximum(Runtime.getRuntime().availableProcessors());
+    sliderNumCPUs.setMinimum(1);
+    sliderNumCPUs.setPaintLabels(true);
+    sliderNumCPUs.setPaintTicks(true);
 
-        jLabel37.setText("Multithread: How many CPUs?");
+    jLabel8.setText("Carbamidomethylation gain");
 
-        sliderNumCPUs.setMajorTickSpacing(1);
-        sliderNumCPUs.setMaximum(Runtime.getRuntime().availableProcessors());
-        sliderNumCPUs.setMinimum(1);
-        sliderNumCPUs.setPaintLabels(true);
-        sliderNumCPUs.setPaintTicks(true);
+    jLabel5.setToolTipText("");
 
-        jLabel8.setText("Carbamidomethylation gain");
+    jLabel6.setText("Clone?");
 
-        jLabel5.setToolTipText("");
+    whiteNoisePerScanSpinner.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(1), Integer.valueOf(1), null, Integer.valueOf(1)));
 
-        jLabel6.setText("Clone?");
+    jLabel16.setIcon(new javax.swing.ImageIcon(getClass().getResource("/simulatorGUI/JaMSS_logo.jpeg"))); // NOI18N
 
-        jLabel14.setText("Create Truth File?");
-
-        whiteNoisePerScanSpinner.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(1), Integer.valueOf(1), null, Integer.valueOf(1)));
-
-        jLabel16.setIcon(new javax.swing.ImageIcon(getClass().getResource("/simulatorGUI/JaMSS_logo.jpeg"))); // NOI18N
-
-        javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
-        getContentPane().setLayout(layout);
-        layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(12, 12, 12)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel1)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(textOutputFile, javax.swing.GroupLayout.PREFERRED_SIZE, 347, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                .addComponent(jLabel6)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(cloneCheckBox))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(0, 0, Short.MAX_VALUE)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(textTruthOutputFile, javax.swing.GroupLayout.PREFERRED_SIZE, 347, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(spinnerPyroglutamateLossPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(checkboxCarbamidomethylationGain)
-                                    .addComponent(spinnerOxidationMethioninePercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(buttonFastaOpen)
-                                    .addComponent(spinnerPhosphorylationGainPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(createTruthCheckbox)))
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                        .addGroup(layout.createSequentialGroup()
-                                            .addComponent(jLabel7)
-                                            .addGap(374, 374, 374))
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addComponent(jLabel3)
-                                                .addGap(30, 30, 30)
-                                                .addComponent(textFastaFilename, javax.swing.GroupLayout.PREFERRED_SIZE, 304, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                            .addComponent(jLabel25)
-                                            .addComponent(jLabel8)
-                                            .addComponent(jLabel33)
-                                            .addComponent(jLabel34)
-                                            .addComponent(jLabel36)
-                                            .addComponent(jLabel5)
-                                            .addGroup(layout.createSequentialGroup()
-                                                .addComponent(jLabel4)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                                .addComponent(textOptionsFilename, javax.swing.GroupLayout.PREFERRED_SIZE, 304, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(buttonOptionsOpen))))
-                                    .addComponent(jLabel16, javax.swing.GroupLayout.Alignment.LEADING))
-                                .addGap(0, 0, Short.MAX_VALUE)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel31)
-                                    .addComponent(jLabel30)
-                                    .addComponent(jLabel32)
-                                    .addComponent(jLabel13)
-                                    .addComponent(jLabel15)
-                                    .addComponent(jLabel24)
-                                    .addComponent(jLabel27)
-                                    .addComponent(jLabel28)
-                                    .addComponent(jLabel29)
-                                    .addComponent(jLabel11)
-                                    .addComponent(jLabel10)
-                                    .addComponent(jLabel9)
-                                    .addComponent(jLabel12)
-                                    .addComponent(jLabel37))
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(textPH, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(textRuntime, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(sliderMS2PerScan, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(textDropout, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(textChromOverlapRange, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(comboDigester, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(textSamplingRate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(textMinNoise, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(textMaxNoise, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(sliderCleavages, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(sliderNumCPUs, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(checkBoxOneD, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(whiteNoisePerScanSpinner, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(buttonRestoreDefaults)
-                                .addGap(6, 6, 6)
-                                .addComponent(buttonRun)))))
-                .addContainerGap())
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(jLabel14)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
-        layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addGap(12, 12, 12)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addGap(6, 6, 6)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(buttonFastaOpen)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(5, 5, 5)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel3)
-                                    .addComponent(textFastaFilename, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addGap(6, 6, 6)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(textOutputFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel2))
-                        .addGap(161, 161, 161)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel25)
-                                .addGap(8, 8, 8)
-                                .addComponent(jLabel8))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(25, 25, 25)
-                                .addComponent(checkboxCarbamidomethylationGain)))
-                        .addGap(2, 2, 2)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel33)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(4, 4, 4)
-                                .addComponent(spinnerPyroglutamateLossPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(8, 8, 8)
-                                .addComponent(jLabel34))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(6, 6, 6)
-                                .addComponent(spinnerPhosphorylationGainPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(6, 6, 6)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(spinnerOxidationMethioninePercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(2, 2, 2)
-                                .addComponent(jLabel36)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+    javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
+    getContentPane().setLayout(layout);
+    layout.setHorizontalGroup(
+      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(layout.createSequentialGroup()
+        .addGap(12, 12, 12)
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(jLabel1)
+          .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                  .addGroup(layout.createSequentialGroup()
+                    .addComponent(jLabel2)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(textOutputFile, javax.swing.GroupLayout.PREFERRED_SIZE, 347, javax.swing.GroupLayout.PREFERRED_SIZE))
+                  .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                    .addComponent(jLabel6)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(cloneCheckBox))
+                  .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                      .addGroup(layout.createSequentialGroup()
+                        .addGap(482, 482, 482)
                         .addComponent(jLabel5))
+                      .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(30, 30, 30)
+                        .addComponent(textFastaFilename, javax.swing.GroupLayout.PREFERRED_SIZE, 304, javax.swing.GroupLayout.PREFERRED_SIZE))
+                      .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel4)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(textOptionsFilename, javax.swing.GroupLayout.PREFERRED_SIZE, 304, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(35, 35, 35)
+                        .addComponent(buttonOptionsOpen))
+                      .addComponent(jLabel25)
+                      .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                          .addComponent(jLabel36)
+                          .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                          .addComponent(spinnerOxidationMethioninePercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                          .addComponent(jLabel34)
+                          .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                          .addComponent(spinnerPhosphorylationGainPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                          .addComponent(jLabel33)
+                          .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                          .addComponent(spinnerPyroglutamateLossPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                          .addComponent(jLabel8)
+                          .addGap(132, 132, 132)
+                          .addComponent(checkboxCarbamidomethylationGain))))
+                    .addGap(0, 0, Short.MAX_VALUE))
+                  .addGroup(layout.createSequentialGroup()
+                    .addGap(0, 0, Short.MAX_VALUE)
+                    .addComponent(buttonFastaOpen)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED))
+              .addGroup(layout.createSequentialGroup()
+                .addComponent(jLabel16)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+              .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                  .addComponent(jLabel31)
+                  .addComponent(jLabel30)
+                  .addComponent(jLabel32)
+                  .addComponent(jLabel13)
+                  .addComponent(jLabel15)
+                  .addComponent(jLabel24)
+                  .addComponent(jLabel27)
+                  .addComponent(jLabel28)
+                  .addComponent(jLabel29)
+                  .addComponent(jLabel11)
+                  .addComponent(jLabel10)
+                  .addComponent(jLabel9)
+                  .addComponent(jLabel12)
+                  .addComponent(jLabel37))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                  .addComponent(textPH, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                  .addComponent(textRuntime, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                  .addComponent(sliderMS2PerScan, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                  .addComponent(textDropout, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                  .addComponent(textChromOverlapRange, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                  .addComponent(comboDigester, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                  .addComponent(textSamplingRate, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                  .addComponent(sliderCleavages, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                  .addComponent(sliderNumCPUs, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                  .addComponent(checkBoxOneD, javax.swing.GroupLayout.Alignment.TRAILING)
+                  .addComponent(whiteNoisePerScanSpinner, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                  .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(jLabel27)
-                                .addGap(6, 6, 6)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGap(5, 5, 5)
-                                        .addComponent(jLabel37)
-                                        .addGap(33, 33, 33)
-                                        .addComponent(jLabel28))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(sliderNumCPUs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addGap(6, 6, 6)
-                                        .addComponent(comboDigester, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                                .addGap(39, 39, 39)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGap(7, 7, 7)
-                                        .addComponent(jLabel29))
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGap(5, 5, 5)
-                                        .addComponent(textSamplingRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(jLabel7)
-                                    .addComponent(textTruthOutputFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel14, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(createTruthCheckbox, javax.swing.GroupLayout.Alignment.TRAILING))
-                                .addGap(4, 4, 4)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(textOptionsFilename, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(buttonOptionsOpen, javax.swing.GroupLayout.Alignment.TRAILING))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)))
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(textRuntime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(2, 2, 2)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                        .addComponent(jLabel30)
-                                        .addComponent(jLabel6))
-                                    .addComponent(cloneCheckBox))))
-                        .addGap(6, 6, 6)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(12, 12, 12)
-                                .addComponent(jLabel9))
-                            .addComponent(sliderCleavages, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(6, 6, 6)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(1, 1, 1)
-                                .addComponent(jLabel32))
-                            .addComponent(sliderMS2PerScan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(31, 31, 31)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel15, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(checkBoxOneD, javax.swing.GroupLayout.Alignment.TRAILING))
-                        .addGap(6, 6, 6)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel31, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(textPH, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(8, 8, 8)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel13, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(textDropout, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel12, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(whiteNoisePerScanSpinner, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel10, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(textMaxNoise, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel11, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(textMinNoise, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jLabel24, javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(textChromOverlapRange, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(buttonRestoreDefaults)
-                                    .addComponent(buttonRun)))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(20, 20, 20)
-                                .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 0, Short.MAX_VALUE)))))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-        );
+                      .addGap(12, 12, 12)
+                      .addComponent(textMinNoise, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(textMaxNoise, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+              .addGroup(layout.createSequentialGroup()
+                .addComponent(buttonRestoreDefaults)
+                .addGap(6, 6, 6)
+                .addComponent(buttonRun)))))
+        .addContainerGap())
+    );
+    layout.setVerticalGroup(
+      layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+      .addGroup(layout.createSequentialGroup()
+        .addGap(12, 12, 12)
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addGroup(layout.createSequentialGroup()
+            .addComponent(jLabel1)
+            .addGap(6, 6, 6)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addComponent(buttonFastaOpen)
+              .addGroup(layout.createSequentialGroup()
+                .addGap(5, 5, 5)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                  .addComponent(jLabel3)
+                  .addComponent(textFastaFilename, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+            .addGap(6, 6, 6)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+              .addComponent(textOutputFile, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+              .addComponent(jLabel2))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addGroup(layout.createSequentialGroup()
+                .addComponent(buttonOptionsOpen)
+                .addGap(2, 2, 2))
+              .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                  .addComponent(jLabel4)
+                  .addComponent(textOptionsFilename, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)))
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addComponent(jLabel6)
+              .addComponent(cloneCheckBox))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addComponent(jLabel25)
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+              .addComponent(jLabel8)
+              .addComponent(checkboxCarbamidomethylationGain))
+            .addGap(3, 3, 3)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+              .addComponent(jLabel33)
+              .addComponent(spinnerPyroglutamateLossPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGap(12, 12, 12)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+              .addComponent(jLabel34)
+              .addComponent(spinnerPhosphorylationGainPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGap(6, 6, 6)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+              .addComponent(jLabel36)
+              .addComponent(spinnerOxidationMethioninePercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addGroup(layout.createSequentialGroup()
+                .addGap(114, 114, 114)
+                .addComponent(jLabel5))
+              .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE))))
+          .addGroup(layout.createSequentialGroup()
+            .addComponent(jLabel27)
+            .addGap(6, 6, 6)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addGroup(layout.createSequentialGroup()
+                .addGap(5, 5, 5)
+                .addComponent(jLabel37)
+                .addGap(33, 33, 33)
+                .addComponent(jLabel28))
+              .addGroup(layout.createSequentialGroup()
+                .addComponent(sliderNumCPUs, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(6, 6, 6)
+                .addComponent(comboDigester, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addComponent(textSamplingRate, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+              .addComponent(jLabel29))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addComponent(textRuntime, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+              .addGroup(layout.createSequentialGroup()
+                .addGap(2, 2, 2)
+                .addComponent(jLabel30)))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addGroup(layout.createSequentialGroup()
+                .addGap(12, 12, 12)
+                .addComponent(jLabel9))
+              .addComponent(sliderCleavages, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addGroup(layout.createSequentialGroup()
+                .addGap(1, 1, 1)
+                .addComponent(jLabel32))
+              .addComponent(sliderMS2PerScan, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addComponent(jLabel15, javax.swing.GroupLayout.Alignment.TRAILING)
+              .addComponent(checkBoxOneD, javax.swing.GroupLayout.Alignment.TRAILING))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addComponent(jLabel31, javax.swing.GroupLayout.Alignment.TRAILING)
+              .addComponent(textPH, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addComponent(jLabel13, javax.swing.GroupLayout.Alignment.TRAILING)
+              .addComponent(textDropout, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addComponent(jLabel12, javax.swing.GroupLayout.Alignment.TRAILING)
+              .addComponent(whiteNoisePerScanSpinner, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addComponent(jLabel10, javax.swing.GroupLayout.Alignment.TRAILING)
+              .addComponent(textMaxNoise, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+              .addComponent(jLabel11)
+              .addComponent(textMinNoise, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+              .addComponent(jLabel24)
+              .addComponent(textChromOverlapRange, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+          .addComponent(buttonRestoreDefaults)
+          .addComponent(buttonRun))
+        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+    );
 
-        pack();
-    }// </editor-fold>//GEN-END:initComponents
+    pack();
+  }// </editor-fold>//GEN-END:initComponents
 
 private void buttonOptionsOpenMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_buttonOptionsOpenMouseClicked
     int returnVal = openOptsFileChooser.showOpenDialog(this);
@@ -536,26 +508,24 @@ private void buttonOptionsOpenMouseClicked(java.awt.event.MouseEvent evt) {//GEN
 			MassSpec.simOptions = line.substring(startIdx,line.indexOf(" ", startIdx)-1);
 			String[] options = MassSpec.simOptions.split(",");
 			textOutputFile.setText(options[0]);
-			textTruthOutputFile.setText(options[1]);
-			checkboxCarbamidomethylationGain.setSelected(Boolean.parseBoolean(options[2]));
-			spinnerPyroglutamateLossPercent.setValue(Integer.parseInt(options[3]));
-			spinnerPhosphorylationGainPercent.setValue(Integer.parseInt(options[4]));
-			spinnerOxidationMethioninePercent.setValue(Integer.parseInt(options[5]));
-			comboDigester.setSelectedIndex(Integer.parseInt(options[6]));
-			textSamplingRate.setText(options[7]);
-			textRuntime.setText(options[8]);
-			sliderCleavages.setValue(Integer.parseInt(options[9]));
-			sliderMS2PerScan.setValue(Integer.parseInt(options[10]));
-			checkBoxOneD.setSelected(Boolean.parseBoolean(options[11]));
-			textPH.setText(options[12]);
-			textDropout.setText(options[13]);
-			whiteNoisePerScanSpinner.setValue(Integer.parseInt(options[14]));
-			textMaxNoise.setText(options[15]);
-			textMinNoise.setText(options[16]);
-			textChromOverlapRange.setText(options[17]);
-			cloneCheckBox.setSelected(Boolean.parseBoolean(options[18]));
-			createTruthCheckbox.setSelected(Boolean.parseBoolean(options[20])); 
-			cloneSeed = Long.parseLong(options[20]);
+			checkboxCarbamidomethylationGain.setSelected(Boolean.parseBoolean(options[1]));
+			spinnerPyroglutamateLossPercent.setValue(Integer.parseInt(options[2]));
+			spinnerPhosphorylationGainPercent.setValue(Integer.parseInt(options[3]));
+			spinnerOxidationMethioninePercent.setValue(Integer.parseInt(options[4]));
+			comboDigester.setSelectedIndex(Integer.parseInt(options[5]));
+			textSamplingRate.setText(options[6]);
+			textRuntime.setText(options[7]);
+			sliderCleavages.setValue(Integer.parseInt(options[8]));
+			sliderMS2PerScan.setValue(Integer.parseInt(options[9]));
+			checkBoxOneD.setSelected(Boolean.parseBoolean(options[10]));
+			textPH.setText(options[11]);
+			textDropout.setText(options[12]);
+			whiteNoisePerScanSpinner.setValue(Integer.parseInt(options[13]));
+			textMaxNoise.setText(options[14]);
+			textMinNoise.setText(options[15]);
+			textChromOverlapRange.setText(options[16]);
+			cloneCheckBox.setSelected(Boolean.parseBoolean(options[17]));
+			cloneSeed = Long.parseLong(options[18]);
 			gotOptions = true;
 		}
 	}
@@ -584,7 +554,6 @@ private void resetDefaults(){
 	textOptionsFilename.setText("none");
 	textFastaFilename.setText("none");
 	textOutputFile.setText("output");
-	textTruthOutputFile.setText("truth");
 	checkboxCarbamidomethylationGain.setSelected(false);
 	spinnerPyroglutamateLossPercent.setValue(0);
 	spinnerPhosphorylationGainPercent.setValue(0);
@@ -602,7 +571,6 @@ private void resetDefaults(){
 	textMinNoise.setText("50");
 	textChromOverlapRange.setText("0.002");
 	cloneCheckBox.setSelected(false);
-	createTruthCheckbox.setSelected(false); 
 }
 
 private void buttonRestoreDefaultsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_buttonRestoreDefaultsMouseClicked
@@ -630,9 +598,7 @@ private void buttonRunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
 	MassSpec.whiteNoiseCount = (int) whiteNoisePerScanSpinner.getValue();
 	MassSpec.minWhiteNoiseIntensity = Double.parseDouble(textMinNoise.getText());
 	MassSpec.maxWhiteNoiseIntensity = Double.parseDouble(textMaxNoise.getText());
-	MassSpec.truthFile = textTruthOutputFile.getText();
 	MassSpec.numCpus = sliderNumCPUs.getValue(); 
-	MassSpec.createTruthFile = createTruthCheckbox.isSelected();
 	if (cloneCheckBox.isSelected()){ 
 		if (cloneSeed != 0){
 			RandomFactory.cloneSeed = cloneSeed;
@@ -643,7 +609,6 @@ private void buttonRunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
 		}
 	}
 	MassSpec.mzmlFilename = textOutputFile.getText() + ".mzML";
-	MassSpec.truthFilename = textTruthOutputFile.getText() + ".csv";
 		
 	// set Ph
 	Modifications.pH = Double.parseDouble(textPH.getText());
@@ -651,7 +616,6 @@ private void buttonRunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
 	// create string of simulator options to put in mzML file
 	StringBuilder msOptions = new StringBuilder();
 	msOptions.append(textOutputFile.getText() + ",");
-	msOptions.append(textTruthOutputFile.getText() + ",");
 	msOptions.append(checkboxCarbamidomethylationGain.isSelected() + ",");
 	msOptions.append(spinnerPyroglutamateLossPercent.getValue() + ",");
 	msOptions.append(spinnerPhosphorylationGainPercent.getValue() + ",");
@@ -669,9 +633,9 @@ private void buttonRunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
 	msOptions.append(textMinNoise.getText() + ",");
 	msOptions.append(textChromOverlapRange.getText() + ",");
 	msOptions.append(cloneCheckBox.isSelected() + ",");
-	msOptions.append(createTruthCheckbox.isSelected());
 	MassSpec.simOptions = msOptions.toString();
-	
+	progressMonitor = new ProgressMonitor(simulatorGUI.this, "Simulating...", "", 0, 100);
+  
 	(new Thread() {	public void run() {
 		long startTime = System.currentTimeMillis();
 		// digest & modifications //
@@ -681,13 +645,8 @@ private void buttonRunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
 		File file = new File(fastaFile);
 		String digesterName = comboDigester.getSelectedItem().toString();
 		Digester digester = DigesterOpts.getDigester(digesterName);
-		
-		progressMonitor = new ProgressMonitor(simulatorGUI.this, "Simulating...", "", 0, 100);
-
 		digester.processFile(file, sliderCleavages.getValue(),"M5P.model","M5Rules.model");
-		
-		progressMonitor.close();
-		JOptionPane.showMessageDialog(null, "Simulator successfully completed in " + (System.currentTimeMillis()-startTime)/60000.0 + " mins." , "Done", JOptionPane.PLAIN_MESSAGE);
+		JOptionPane.showMessageDialog(null, "Simulator completed in " + (System.currentTimeMillis()-startTime)/60000.0 + " mins." , "Done", JOptionPane.PLAIN_MESSAGE);
 		System.exit(1);
 	}}).start();
 }//GEN-LAST:event_buttonRunMouseClicked
@@ -731,63 +690,59 @@ private void buttonRunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
             }
         });
     }
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton buttonFastaOpen;
-    private javax.swing.JButton buttonOptionsOpen;
-    private javax.swing.JButton buttonRestoreDefaults;
-    private javax.swing.JButton buttonRun;
-    private javax.swing.JCheckBox checkBoxOneD;
-    private javax.swing.JCheckBox checkboxCarbamidomethylationGain;
-    private javax.swing.JCheckBox cloneCheckBox;
-    private javax.swing.JComboBox comboDigester;
-    private javax.swing.JCheckBox createTruthCheckbox;
-    private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel10;
-    private javax.swing.JLabel jLabel11;
-    private javax.swing.JLabel jLabel12;
-    private javax.swing.JLabel jLabel13;
-    private javax.swing.JLabel jLabel14;
-    private javax.swing.JLabel jLabel15;
-    private javax.swing.JLabel jLabel16;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel24;
-    private javax.swing.JLabel jLabel25;
-    private javax.swing.JLabel jLabel27;
-    private javax.swing.JLabel jLabel28;
-    private javax.swing.JLabel jLabel29;
-    private javax.swing.JLabel jLabel3;
-    private javax.swing.JLabel jLabel30;
-    private javax.swing.JLabel jLabel31;
-    private javax.swing.JLabel jLabel32;
-    private javax.swing.JLabel jLabel33;
-    private javax.swing.JLabel jLabel34;
-    private javax.swing.JLabel jLabel36;
-    private javax.swing.JLabel jLabel37;
-    private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
-    private javax.swing.JLabel jLabel6;
-    private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
-    private javax.swing.JLabel jLabel9;
-    private javax.swing.JFileChooser openFastaFileChooser;
-    private javax.swing.JFileChooser openOptsFileChooser;
-    private javax.swing.JSlider sliderCleavages;
-    private javax.swing.JSlider sliderMS2PerScan;
-    private javax.swing.JSlider sliderNumCPUs;
-    private javax.swing.JSpinner spinnerOxidationMethioninePercent;
-    private javax.swing.JSpinner spinnerPhosphorylationGainPercent;
-    private javax.swing.JSpinner spinnerPyroglutamateLossPercent;
-    private javax.swing.JTextField textChromOverlapRange;
-    private javax.swing.JTextField textDropout;
-    private javax.swing.JLabel textFastaFilename;
-    private javax.swing.JTextField textMaxNoise;
-    private javax.swing.JTextField textMinNoise;
-    private javax.swing.JLabel textOptionsFilename;
-    private javax.swing.JTextField textOutputFile;
-    private javax.swing.JTextField textPH;
-    private javax.swing.JTextField textRuntime;
-    private javax.swing.JTextField textSamplingRate;
-    private javax.swing.JTextField textTruthOutputFile;
-    private javax.swing.JSpinner whiteNoisePerScanSpinner;
-    // End of variables declaration//GEN-END:variables
+  // Variables declaration - do not modify//GEN-BEGIN:variables
+  private javax.swing.JButton buttonFastaOpen;
+  private javax.swing.JButton buttonOptionsOpen;
+  private javax.swing.JButton buttonRestoreDefaults;
+  private javax.swing.JButton buttonRun;
+  private javax.swing.JCheckBox checkBoxOneD;
+  private javax.swing.JCheckBox checkboxCarbamidomethylationGain;
+  private javax.swing.JCheckBox cloneCheckBox;
+  private javax.swing.JComboBox comboDigester;
+  private javax.swing.JLabel jLabel1;
+  private javax.swing.JLabel jLabel10;
+  private javax.swing.JLabel jLabel11;
+  private javax.swing.JLabel jLabel12;
+  private javax.swing.JLabel jLabel13;
+  private javax.swing.JLabel jLabel15;
+  private javax.swing.JLabel jLabel16;
+  private javax.swing.JLabel jLabel2;
+  private javax.swing.JLabel jLabel24;
+  private javax.swing.JLabel jLabel25;
+  private javax.swing.JLabel jLabel27;
+  private javax.swing.JLabel jLabel28;
+  private javax.swing.JLabel jLabel29;
+  private javax.swing.JLabel jLabel3;
+  private javax.swing.JLabel jLabel30;
+  private javax.swing.JLabel jLabel31;
+  private javax.swing.JLabel jLabel32;
+  private javax.swing.JLabel jLabel33;
+  private javax.swing.JLabel jLabel34;
+  private javax.swing.JLabel jLabel36;
+  private javax.swing.JLabel jLabel37;
+  private javax.swing.JLabel jLabel4;
+  private javax.swing.JLabel jLabel5;
+  private javax.swing.JLabel jLabel6;
+  private javax.swing.JLabel jLabel8;
+  private javax.swing.JLabel jLabel9;
+  private javax.swing.JFileChooser openFastaFileChooser;
+  private javax.swing.JFileChooser openOptsFileChooser;
+  private javax.swing.JSlider sliderCleavages;
+  private javax.swing.JSlider sliderMS2PerScan;
+  private javax.swing.JSlider sliderNumCPUs;
+  private javax.swing.JSpinner spinnerOxidationMethioninePercent;
+  private javax.swing.JSpinner spinnerPhosphorylationGainPercent;
+  private javax.swing.JSpinner spinnerPyroglutamateLossPercent;
+  private javax.swing.JTextField textChromOverlapRange;
+  private javax.swing.JTextField textDropout;
+  private javax.swing.JLabel textFastaFilename;
+  private javax.swing.JTextField textMaxNoise;
+  private javax.swing.JTextField textMinNoise;
+  private javax.swing.JLabel textOptionsFilename;
+  private javax.swing.JTextField textOutputFile;
+  private javax.swing.JTextField textPH;
+  private javax.swing.JTextField textRuntime;
+  private javax.swing.JTextField textSamplingRate;
+  private javax.swing.JSpinner whiteNoisePerScanSpinner;
+  // End of variables declaration//GEN-END:variables
 }

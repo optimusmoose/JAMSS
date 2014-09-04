@@ -15,31 +15,36 @@ JAMSS mass spec simulator.
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-To run the program:
+Basics
+-------
+**Minimal test run:**
+1) Download project.
+2) Navigate to .../JAMSS/dist/
+3) Some OSs will allow the execution of the jar file with a double click (JAMSS.jar). For instance, on linux, right click the jar and select "run with Java" (or something like that).
+4) Open the included test FASTA file (.../JAMSS/hum\_multi\_noquant.fasta).
+5) Click run.
+
+**To run the program:**
 1) Download project
 2) Navigate to .../JAMSS/dist/
 3) Some OSs will allow the execution of the jar file with a double click (JAMSS.jar). For instance, on linux, right click the jar and select "run with Java" (or something like that).
 4) Alternative: navigate a terminal to the .jar and execute: "java -jar JAMSS.jar"
 5) Optionally, specify how much RAM you want to dedicate to the run: "java -Xmx10g -jar JAMSS.jar" will allocate 10GB of RAM. 
 
-To develop the program:
+**To develop the program:**
 1) Open as a netbeans project (easiest).
 
-Minimumalist run:
-1) Open a fasta file. (IMPORTANT: Make sure fasta headers do not contain a #. If they do, remove it.)
-2) Click run.
-
-How to clone a run: 
+**How to clone a run:**
 1) Open an mzML file created by JaMMS with the "Load Options" Open button. All parameters will be automatically populated in the GUI.
 2) Unclick the "Replicate?" box. This means you want to use the same random seed as was used in the original file, and you will get the same exact output file as you loaded options from, provided the .fasta file has not changed.
 3) Click run.
 
-How to replicate a run:
+**How to replicate a run:**
 1) Open an mzML file created by JaMMS with the "Load Options" Open button. All parameters will be automatically populated in the GUI.
 2) Optional: tweak options. The more things you change, the more different the "replicate" will be.
 3) Hit run.
 
-More involved run:
+**More involved run:**
 1) Open a fasta file.
 2) Turn mods on/off by selecting check box (static modifications) or adjusting percentage affected (variable modifications). NOTE: using variable modifications will significantly increase runtime, as it increases the number of simulation permutations that have to be calculated.
 3) Adjust how many cores you want to use. If you want to continue working on this machine at the same time, select at least one less than the total number available. 
@@ -50,17 +55,20 @@ More involved run:
 8) Select the dropout percentage. This is how many scans will randomly be excluded from the simulation.
 9) Adjust the white noise points.
 10) The resolution of the simulation can be adjusted by selecting a different overlap range. This value is in mz.
-11) The intensities of each protein can be set in the fasta file. For each header, append a decimal value indicating the percent of the sample composed of this protein preceded by a pound sign. For example, #0.342. The percentages of the whole file should sum to 1.
-12) Hit run.
+11) Hit run.
 
-How to simulate a non-chromatographic run:
+**How to specify intensities of each protein:**
+1) Intensities are specified by the '#' sign at the end of the first line of each .fasta entry. If you specify intensity on one fasta entry, you must specify it on all entries. The intensity should be expressed as a percentage of the total sample. For example, add #0.36 to indicate that a certain protein comprises 36% of the sample. These percentages should add to 1, but JAMSS will not verify that.
+2) Important note: Some (very few) cannonical fasta entries include a '#' character in the description of the entry. Any '#' not intended for intensity specification must be removed before using the fasta file with JAMSS. The easiest way is open the file in a text editor, press CTRL+F and type #. Then remove the characters found.
+
+**How to simulate a non-chromatographic run:**
 1) Follow above instructions, but check the "One Dimension Simulation" box.
 2) Hit run.
 
-Advanced options to take caution with:
+**Advanced options to take caution with:**
 1) Overlap Range. This controls the effective resolution of the mass spectrometer (higher number, lower resolution).
 
-Ways to make faster runs:
+**Ways to make faster runs:**
 1) Decrease modifications (significant).
 2) Increase number of CPUs (significant).
 3) Increase amount of memory allocated to Java Virtual Machine. This can be done by adding "Xmx10g" onto the command line of your java run, where 10 is the number of GB of RAM you are allocating to the JVM (significant).
@@ -70,11 +78,23 @@ Ways to make faster runs:
 7) Increase minimum noise intensity, which is the global floor of points that are accepted in simulation (minor).
 8) Increase overlap range (careful with this one) (minor).
 
-OTHER THINGS YOU SHOULD KNOW:
-The truth files contain flat file lists of the peptides included in the .fasta file. Note that for any reasonably-sized .fasta file, these files will be very large. "output_truth.csv" contains one line per centroid in the mzML file with the following schema:
-centroidID,isotopeTraceID,charge,pepID,proteinID,mz,rt,abundance
+Other things you should know:
+--------
 
-output_truth_peptides.csv" contains one line per peptide in the mzML file with the following schema:
-proteinIdx, peptideIdx, peptideSequence
+**Schema of output files**
+* centroids.csv: This file contains one line per "true" centroid in the mzML file. An isotopicEnvelopeID is included because, in the event of PTMs, one peptide/charge combination can generate more than one isotopic envelope. Schema:
+centroidID,isotopeTraceID,charge,pepID,isotopicEnvelopeID,mz,rt,abundance
 
+* peptide_sequences.csv contains one line per peptide in the digestion with the following schema:
+pepID, peptideSequence
 
+* protein_peptides.csv contains one line per protein/peptide pair in the digestion such that the peptide was a result of the digestion from the protein. Note that this will generate 1 or more entries per peptide in the mzML file, since the same peptide can come from more than one protein. Schema:
+proteinID, pepID
+
+**FAQs**
+Q) Can I run more than one instance of JAMSS at a time?
+A) No. JAMSS creates intermittent files in a common location, and more than one instance will cause problems. Due to the computational complexity of JAMSS, running more than one instance is probably not a good idea, anyway, as a complex FASTA file will occupy a top of the line desktop for quite some time.
+Q) It seems no matter how few entries are in my FASTA file, I still get very long runtimes. Is something broken?
+A) No. In designing JAMSS, we had the option of optimizing for either small or large FASTA files. Due to internal constraints, the design possibilities that yielded quick runs on small FASTA files created significant slowdown and even out of memory errors on realistically large FASTA files. We opted to allow for a longer bottom limit of computation time, even on smaller files. We expect few people will run a FASTA file with only a few entries, so it should not be problematic.
+Q) Why does it take forever to run my FASTA file when the program says nothing is within the m/z range for the simulation?
+A) The current workflow for JAMSS creates an isotopic envelope pattern for each digested protein prior to generating the individual data points across the time dimension. So, before it is known whether a given isotopic envelope will yield data points, the entire FASTA file must be digested and the pattern for each peptide must be computed. This takes time, and for now we don't have a clever way of avoiding that for peptides that will not appear within the simulated m/z range.

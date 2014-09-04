@@ -57,7 +57,7 @@ public class IsotopeTrace {
 			//centroidIntensity = maxXIntensity * Math.exp(-Math.pow(rtIndex - predictedRt,2.0) / ( ((double) rtIndex / (double) traceLength) * (traceLength + 14.66692)));
 			centroidIntensity = maxXIntensity * Math.exp(-Math.pow(rtIndex - predictedRt,2.0) / Math.pow(((double) rtIndex / (double) traceLength) * traceLength * 0.14,2.0));
 		}
-
+// System.out.println(centroidIntensity + " " + isotopeTraceMass);
 		if (centroidIntensity > MassSpec.minWhiteNoiseIntensity){
 			double wobbleJaggedRand = localRandomFactory.localRand.nextDouble();
 			double minWobble = 0.001;

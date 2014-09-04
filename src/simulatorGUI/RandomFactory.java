@@ -38,6 +38,6 @@ public class RandomFactory {
 		rand.setSeed(cloneSeed);
 		
 		// add to options so it is added to mzML file
-		MassSpec.simOptions = MassSpec.simOptions + "," + cloneSeed;
+		MassSpec.simOptions = MassSpec.simOptions + cloneSeed;
 	}
 }

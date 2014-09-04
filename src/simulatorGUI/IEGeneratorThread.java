@@ -19,51 +19,61 @@
 package simulatorGUI;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 
 /**
  *
  * @author rob
  */
 public class IEGeneratorThread extends Thread{
-	ArrayList<String> queue;
-	Digester digester;
-	static int totalThreads = 0;
+	ArrayList<Peptide> queue;
 	private int threadId;
-	static int maxQueueSize = 0;
-	static int proteinCount=0;
 	public boolean finished = false;
 	public MassSpec massSpec;
-	static public int maxEnvelopes;
-	public IEGeneratorThread(ArrayList<String> q, Digester _digester, int threadIdx){
-		threadId = totalThreads++;
-		queue = q;
-		digester = _digester;
-		massSpec = new MassSpec(threadIdx);
-		maxEnvelopes = (int) ((Runtime.getRuntime().maxMemory() - 1000000000) / 1000) / MassSpec.numCpus;
-	}
-	
-	static public void setQueueSize(int size){
-		if (size > maxQueueSize){
-			maxQueueSize = size;
-		}
+	public IEGeneratorThread(ArrayList<Peptide> _queue, int threadId){
+		queue = _queue;
+		massSpec = new MassSpec(threadId);
 	}
 	
 	@Override
 	public void run() {
 		// create one mass spec object per thread
-		for(String data:queue) {
+		for(Peptide peptide:queue) {
+      // write out to disk once memory is scant
 			if(Runtime.getRuntime().freeMemory() < Runtime.getRuntime().maxMemory()*0.10){
-				massSpec.writeEnvelopes(threadId);
+         serializeEnvelopes();
 			}
-			if(data==null){return;}
-			String[] parts = data.split("_");
-			massSpec.processPeptides(digester.processProtein(parts[0], Integer.parseInt(parts[1])), Double.parseDouble(parts[2]), Integer.parseInt(parts[3]));
-			simulatorGUI.progressMonitor.setNote("Simulating protein "+proteinCount + " of " + maxQueueSize);
-			simulatorGUI.progressMonitor.setProgress((int) (((double) proteinCount/(double) maxQueueSize) * 21.0)+4);
-			proteinCount++;
+			//if(peptide==null){return;}
+			processPeptide(peptide);
+      
+      LocalProgressMonitor.updateIsotopePatternSimulation();
 		}
-		massSpec.writeEnvelopes(threadId);
+		serializeEnvelopes();
+    massSpec.isotopicEnvelopesInstance = null;
 		finished = true;
 		return;
 	}
+  
+  private void serializeEnvelopes(){
+    for(IsotopicEnvelope ie : massSpec.isotopicEnvelopesInstance){
+      ie.serialize(MassSpec.pathToClass,threadId);
+    }
+    massSpec.isotopicEnvelopesInstance = new LinkedList<IsotopicEnvelope>();
+  }
+  
+  public boolean processPeptide(Peptide peptide){
+		if (MassSpec.modifications.powerSet.size() == 0){ // no variable mods
+			massSpec.computeIsotopicEnvelopes(peptide, new ArrayList<Modification>());
+		} else {
+      double totalAbundance = peptide.peptideIntensity;
+      for (int i=0; i < MassSpec.modifications.powerSet.size(); i++){ // for each combination of mods
+				// create peptide with the proper intensity
+        peptide.peptideIntensity = totalAbundance * ((Modification) MassSpec.modifications.powerSet.get(i).get(0)).percent;
+				massSpec.computeIsotopicEnvelopes(peptide, MassSpec.modifications.powerSet.get(i));
+			}
+    }
+		return true;
+	}
 }
+
+

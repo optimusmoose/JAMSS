@@ -55,8 +55,11 @@ Basics
 8) Select the dropout percentage. This is how many scans will randomly be excluded from the simulation.
 9) Adjust the white noise points.
 10) The resolution of the simulation can be adjusted by selecting a different overlap range. This value is in mz.
-11) The intensities of each protein can be set in the fasta file. For each header, append a decimal value indicating the percent of the sample composed of this protein preceded by a pound sign. For example, #0.342. The percentages of the whole file should sum to 1.
-12) Hit run.
+11) Hit run.
+
+**How to specify intensities of each protein:**
+1) Intensities are specified by the '#' sign at the end of the first line of each .fasta entry. If you specify intensity on one fasta entry, you must specify it on all entries. The intensity should be expressed as a percentage of the total sample. For example, add #0.36 to indicate that a certain protein comprises 36% of the sample. For realism (not mandatory) these percentages should add to 1.
+2) Important note: Some (very few) cannonical fasta entries include a '#' character in the description of the entry. Any '#' not intended for intensity specification must be removed before using the fasta file with JAMSS. The easiest way is open the file in a text editor, press CTRL+F and type #. Then remove the characters found.
 
 **How to simulate a non-chromatographic run:**
 1) Follow above instructions, but check the "One Dimension Simulation" box.
@@ -79,11 +82,14 @@ Other things you should know:
 --------
 
 **Schema of output files**
-* The truth files contain flat file lists of the peptides included in the .fasta file. Note that for any reasonably-sized .fasta file, these files will be very large. "output_truth.csv" contains one line per centroid in the mzML file with the following schema:
-centroidID,isotopeTraceID,charge,pepID,proteinID,mz,rt,abundance
+* centroids.csv: This file contains one line per "true" centroid in the mzML file. An isotopicEnvelopeID is included because, in the event of PTMs, one peptide/charge combination can generate more than one isotopic envelope. Schema:
+centroidID,isotopeTraceID,charge,pepID,isotopicEnvelopeID,mz,rt,abundance
 
-* output_truth_peptides.csv" contains one line per peptide in the mzML file with the following schema:
-proteinIdx, peptideIdx, peptideSequence
+* peptide_sequences.csv contains one line per peptide in the digestion with the following schema:
+pepID, peptideSequence
+
+* protein_peptides.csv contains one line per protein/peptide pair in the digestion such that the peptide was a result of the digestion from the protein. Note that this will generate 1 or more entries per peptide in the mzML file, since the same peptide can come from more than one protein. Schema:
+proteinID, pepID
 
 **FAQs**
 Q) Can I run more than one instance of JAMSS at a time?

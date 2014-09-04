@@ -34,6 +34,7 @@ import javax.swing.JOptionPane;
  * @author Rob.Smith
  */
 public class IsotopicEnvelope {
+  double peptideIntensity;
 	ArrayList<Double> isotopeIntensities; 
 	ArrayList<Double> isotopeMasses;
 	double predictedIntensity;
@@ -43,61 +44,13 @@ public class IsotopicEnvelope {
 	int rtCeil;
 	double charge;
 	int peptideID; 
-	int proteinID;
 	String sequence;
 	int[] charges;
 	IsotopeTrace[] isotopeTraces;
 	boolean inRange;
+  int isotopeEnvelopeID;
 	
 	public static void main(String [] args){
-	/*	RandomFactory.setSeed();
-		// test write-in write-out
-		ArrayList<Double> _isotopeIntensities = new ArrayList<Double>();
-		_isotopeIntensities.add(123.45);
-		_isotopeIntensities.add(678.9);
-		ArrayList<Double> _isotopeMasses = new ArrayList<Double>();
-		_isotopeMasses.add(123.45);
-		_isotopeMasses.add(987.6);
-		double _predictedIntensity = 6.78;
-		double _predictedRt = 234.234623456;
-		int _traceLength = 5;
-		int _rtFloor = 6;
-		int _rtCeil = 9;
-		double _charge = 234.2346;
-		int _peptideID = 7;
-		int _proteinID = 1;
-		String _sequence = "ASDFPOIQWER";
-		int[] _charges = {3,4,5};
-		IsotopicEnvelope ie = new IsotopicEnvelope(_isotopeIntensities, _isotopeMasses, _predictedIntensity, _predictedRt, _traceLength, _rtFloor, _rtCeil,
-		_charge, _peptideID, _proteinID, _sequence, _charges);
-		
-		String path = MassSpec.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-		String pathToClass = "";
-		try {
-			pathToClass = URLDecoder.decode(path, "UTF-8").replace("JAMSS.jar", "");
-		} catch (UnsupportedEncodingException ex) {
-			JOptionPane.showMessageDialog(null, "Error: encoding error when finding path to JAR file.", "Error", JOptionPane.ERROR_MESSAGE);
-		}
-		ie.serialize(pathToClass,0);
-		LinkedList<IsotopicEnvelope> iesFromFile = IsotopicEnvelope.getIEsFromFile(pathToClass, _rtFloor, localRandomFactory);
-		for(IsotopicEnvelope ieFromFile : iesFromFile){
-			System.out.println(ieFromFile.isotopeIntensities.get(0) + " 123.45");
-			System.out.println(ieFromFile.isotopeIntensities.get(1) + " 678.9");
-			System.out.println(ieFromFile.isotopeMasses.get(0) + " 123.45");			
-			System.out.println(ieFromFile.isotopeMasses.get(1) + " 987.6");			
-			System.out.println(ieFromFile.predictedIntensity + " 6.78");			
-			System.out.println(ieFromFile.predictedRt + " 234.234623456");			
-			System.out.println(ieFromFile.traceLength + " 5");						
-			System.out.println(ieFromFile.rtFloor + " 6");									
-			System.out.println(ieFromFile.rtCeil + " 9");									
-			System.out.println(ieFromFile.charge + " 234.2346");									
-			System.out.println(ieFromFile.peptideID + " 7");									
-			System.out.println(ieFromFile.proteinID + " 1");												
-			System.out.println(ieFromFile.sequence + " ASDFPOIQWER");
-			System.out.println(ieFromFile.charges[0] + " 3");
-			System.out.println(ieFromFile.charges[1] + " 4");
-			System.out.println(ieFromFile.charges[2] + " 5");
-		} */
 	}
 	public static LinkedList<IsotopicEnvelope> getIEsFromFile(String pathToClass, int rtIdx, XORShiftRandom  rand){
 		LinkedList<IsotopicEnvelope> ieList = new LinkedList<IsotopicEnvelope>();		
@@ -154,15 +107,17 @@ public class IsotopicEnvelope {
 
 							// double rtCeil;
 							int _rtCeil = ieCollection.getInt();
+              
 							// double charge;
 							double _charge = ieCollection.getDouble();
+              
 							// int peptideID; 
 							int _peptideID = ieCollection.getInt();
-							// int proteinID;
-							int _proteinID = ieCollection.getInt();
+              
 							// int sequence length
 							int sequenceLength = ieCollection.getInt();
 							char[] seqCharArray = new char[sequenceLength];
+              
 							// char sequence letters
 							for(int i=0; i<sequenceLength; i++){
 								seqCharArray[i] = ieCollection.getChar();
@@ -177,6 +132,9 @@ public class IsotopicEnvelope {
 								_charges[i] = ieCollection.getInt();
 							}
 
+              // int isotopicEnvelopeID; 
+							int _isotopeEnvelopeID = ieCollection.getInt();
+              
 							IsotopicEnvelope newIE = new IsotopicEnvelope(_isotopeIntensities, 
 																			_isotopeMasses, 
 																			_predictedIntensity, 
@@ -186,8 +144,8 @@ public class IsotopicEnvelope {
 																			_rtCeil, 
 																			_charge, 
 																			_peptideID, 
-																			_proteinID,
 																			 _sequence,
+                                      _isotopeEnvelopeID,
 																			_charges);
 							newIE.isotopeTraces = new IsotopeTrace[newIE.isotopeIntensities.size()];
 							for (int i = 0; i < newIE.isotopeIntensities.size(); i++){
@@ -215,8 +173,8 @@ public class IsotopicEnvelope {
 							int _rtCeil, 
 							double _charge, 
 							int _peptideID, 
-							int _proteinID,
 							String _sequence,
+              int _isotopeEnvelopeID,
 							int[] _charges){
 		isotopeIntensities = _isotopeIntensities; 
 		isotopeMasses = _isotopeMasses;
@@ -227,10 +185,10 @@ public class IsotopicEnvelope {
 		rtCeil = _rtCeil;
 		charge = _charge;
 		peptideID = _peptideID; 
-		proteinID = _proteinID;
 		sequence = _sequence;
 		charges = _charges;
 		inRange = true;
+    isotopeEnvelopeID = _isotopeEnvelopeID;
 	}
 	public boolean isInRange(int rt){
 
@@ -240,16 +198,18 @@ public class IsotopicEnvelope {
 		return false;
 	}
 	public Centroid[] getIEAtRT(double rt, RandomFactory localRandomFactory, LinkedList<MS2> ms2s){
+//System.out.println("test");    
 		Centroid[] result = new Centroid[isotopeTraces.length];
 		for (int i=0; i<isotopeTraces.length; i++){
+//System.out.println(isotopeTraces[i].isotopeTraceMass);      
 			if(isotopeTraces[i].isotopeTraceMass > MassSpec.minMZ && isotopeTraces[i].isotopeTraceMass < MassSpec.maxMZ){
 				if (MassSpec.oneD && localRandomFactory.localRand.nextBoolean()) {result[i] = null;} // random drop for 1-d
 				Centroid tempCent = isotopeTraces[i].getCentroidAtRT(rt, localRandomFactory);
 				if (tempCent.abundance > MassSpec.minWhiteNoiseIntensity){
 					tempCent.charge = (int) charge;
 					tempCent.pepID = peptideID;
-					tempCent.proteinID = proteinID;
 					tempCent.isotopeTraceID = i;
+          tempCent.isotopeEnvelopeID = isotopeEnvelopeID;
 					result[i] = tempCent;
 
 					ms2s.add(new MS2(sequence, (int) charge, isotopeTraces[i].isotopeTraceMass, tempCent.abundance));
@@ -263,16 +223,27 @@ public class IsotopicEnvelope {
 		int SIZEOFDOUBLE = 8;
 		int SIZEOFINT = 4;
 		int SIZEOFCHAR = 2;
-		int bbSize = SIZEOFINT + isotopeIntensities.size() * SIZEOFDOUBLE +
-					SIZEOFINT +isotopeMasses.size() * SIZEOFDOUBLE +
-					SIZEOFDOUBLE * 9 + 
-					SIZEOFINT * 5 +
-					SIZEOFCHAR * sequence.length() + 
-					SIZEOFINT;
+		int bbSize = SIZEOFINT +
+      isotopeIntensities.size() * SIZEOFDOUBLE +
+      SIZEOFINT +
+      isotopeMasses.size() * SIZEOFDOUBLE +
+      SIZEOFDOUBLE + 
+      SIZEOFDOUBLE + 
+      SIZEOFINT + 
+      SIZEOFINT + 
+      SIZEOFINT + 
+      SIZEOFDOUBLE + 
+      SIZEOFINT + 
+      SIZEOFINT +
+      SIZEOFCHAR * sequence.length() + 
+      SIZEOFINT +
+      SIZEOFINT * charges.length + 
+      SIZEOFINT;
 		ByteBuffer bb = ByteBuffer.allocate(bbSize);
 		
 		// int number of entries in isotope intensities
 		bb.putInt(isotopeIntensities.size());
+    
 		// double isotope intensities entries
 		for(double isotopeIntensity : isotopeIntensities){
 			bb.putDouble(isotopeIntensity);
@@ -307,9 +278,6 @@ public class IsotopicEnvelope {
 		// int peptideID; 
 		bb.putInt(peptideID);
 		
-		// int proteinID;
-		bb.putInt(proteinID);
-		
 		// int sequence length
 		bb.putInt(sequence.length()); 
 		
@@ -326,6 +294,9 @@ public class IsotopicEnvelope {
 			bb.putInt(charges[i]);
 		}
 
+    // int isotopicEnvelope;
+		bb.putInt(isotopeEnvelopeID);
+    
 		try{
 			FileOutputStream f = new FileOutputStream(pathToClass + "JAMSSfiles" + File.separator + rtFloor + "_" + id + ".ser", true);
 			bb.flip();

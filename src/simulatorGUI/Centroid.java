@@ -30,7 +30,7 @@ public class Centroid{
 	public int isotopeTraceID;
 	public int charge;
 	public int pepID;
-	public int proteinID;
+	public int isotopeEnvelopeID;
 	
 	private Centroid(){}
 	
@@ -54,7 +54,7 @@ public class Centroid{
 		cent.isotopeTraceID = this.isotopeTraceID;
 		cent.mz = this.mz;
 		cent.pepID = this.pepID;
-		cent.proteinID = this.pepID;
+		cent.isotopeEnvelopeID = this.isotopeEnvelopeID;
 		return cent;
 	}
 }

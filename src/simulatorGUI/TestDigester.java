@@ -26,11 +26,13 @@ import java.util.ArrayList;
  */
 public class TestDigester {
 	public static void main(String [ ] args){
+    /*
 		Digester digester = DigesterOpts.getDigester("trypsin");
 		digester.testProcessProtein();
 		ArrayList<String> result = digester.processProtein("HLKTEAEMK", 2);
 		for(String s : result){
 			System.out.println(s);
 		}
+      */
 	}
 }
