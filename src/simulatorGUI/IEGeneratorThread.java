@@ -30,9 +30,10 @@ public class IEGeneratorThread extends Thread{
 	private int threadId;
 	public boolean finished = false;
 	public MassSpec massSpec;
-	public IEGeneratorThread(ArrayList<Peptide> _queue, int threadId){
+	public IEGeneratorThread(ArrayList<Peptide> _queue, int _threadId){
 		queue = _queue;
-		massSpec = new MassSpec(threadId);
+		massSpec = new MassSpec(_threadId);
+    threadId = _threadId;
 	}
 	
 	@Override
@@ -43,12 +44,12 @@ public class IEGeneratorThread extends Thread{
 			if(Runtime.getRuntime().freeMemory() < Runtime.getRuntime().maxMemory()*0.10){
          serializeEnvelopes();
 			}
-			//if(peptide==null){return;}
 			processPeptide(peptide);
       
       LocalProgressMonitor.updateIsotopePatternSimulation();
 		}
 		serializeEnvelopes();
+    queue=null;
     massSpec.isotopicEnvelopesInstance = null;
 		finished = true;
 		return;
@@ -65,10 +66,10 @@ public class IEGeneratorThread extends Thread{
 		if (MassSpec.modifications.powerSet.size() == 0){ // no variable mods
 			massSpec.computeIsotopicEnvelopes(peptide, new ArrayList<Modification>());
 		} else {
-      double totalAbundance = peptide.peptideIntensity;
+      double totalAbundance = peptide.abundance;
       for (int i=0; i < MassSpec.modifications.powerSet.size(); i++){ // for each combination of mods
 				// create peptide with the proper intensity
-        peptide.peptideIntensity = totalAbundance * ((Modification) MassSpec.modifications.powerSet.get(i).get(0)).percent;
+        peptide.abundance = totalAbundance * ((Modification) MassSpec.modifications.powerSet.get(i).get(0)).percent;
 				massSpec.computeIsotopicEnvelopes(peptide, MassSpec.modifications.powerSet.get(i));
 			}
     }

@@ -67,6 +67,7 @@ public class MassSpec {
 	public static String fastaFile;
 	public static String mzmlFilename;
   public static int isotopeEnvelopeID=0;
+  public static int missedCleavages;
 	
 	//
 	// constants
@@ -182,10 +183,6 @@ public class MassSpec {
 	private int aaV;
 	private int aaJ;
 	
-	public static double maxIntensity = 200000; 
-	//double[] intensityHistogram = {0.80,0.61,0.46,0.34,0.24,0.16,0.09,0.05,0.02};
-	double[] intensityHistogram = {0.64,0.36,0.26,0.16,0.08,0.05,0.03,0.015,0.005};
-	double intensityHistogramChunk = (MassSpec.maxIntensity - MassSpec.minWhiteNoiseIntensity)/10.0;
 	private RandomFactory localRandomFactory;
 		
 	FFTbase fftBase = new FFTbase();
@@ -194,8 +191,6 @@ public class MassSpec {
 	// thread containing this mass spec object
 	public static LinkedList<IsotopicEnvelope> isotopicEnvelopes = new LinkedList<IsotopicEnvelope>();
 	public LinkedList<IsotopicEnvelope> isotopicEnvelopesInstance = new LinkedList<IsotopicEnvelope>();
-//	public static Object[] ieByRtIdx;
-//	public Object[] ieByRtIdxInstance;
 	
 	// this is used to define the window for noise points
 	// while allowing threaded operations
@@ -248,42 +243,15 @@ public class MassSpec {
 	//
 	// VARS FOR COMPUTING THE ISOTOPIC DISTRIBUTION (MZS AND INTENSITIES) (NIST)
 	//
-	public static final Element elementO = new Element(1,16,18,15.99491461956);
-	static {
-		elementO.massNumberArray = new int[] {16,17,18};
-		elementO.relativeAbundanceArray = new double[] {0.99759, 0.00037, 0.00204};
-	}
-	public static final Element elementN = new Element(0,14,15,14.0030740048);
-	static {
-		elementN.massNumberArray = new int[] {14,15};
-		elementN.relativeAbundanceArray = new double[] {0.99635, 0.00365};
-	}
-	public static final Element elementC = new Element(0,12,13,12.0);
-	static {
-		elementC.massNumberArray = new int[] {12,13};
-		elementC.relativeAbundanceArray = new double[] {0.9891, 0.0109};
-	}		
-	public static final Element elementH = new Element(0,1,2,1.00782503207);
-	static {
-		elementH.massNumberArray = new int[] {1,2};
-		elementH.relativeAbundanceArray = new double[] {0.999844, 0.000156};
-	}
-	public static final Element elementS = new Element(0,32,36,31.972071);
-	static {
-		elementS.massNumberArray = new int[] {32, 33, 34, 36};
-		elementS.relativeAbundanceArray = new double[] {0.9493, 0.0076, 0.0429, 0.0002};
-	}
-	public static final Element elementP = new Element(0,31,31,30.97376163);
-	static {
-		elementP.massNumberArray = new int[] {31};
-		elementP.relativeAbundanceArray = new double[] {1.0};
-	}
-	public static final Element elementSe = new Element(0,74,82,79.9165213);
-	static {
-		elementSe.massNumberArray = new int[] {74, 76, 77, 78, 80, 82};
-		elementSe.relativeAbundanceArray = new double[] {0.0089, 0.0937, 0.0763, 0.2377, 0.4961, 0.0873};
-	}
-	private static final Element[] elements = new Element[] {elementO, elementN, elementC, elementH, elementS, elementP, elementSe};
+	public Element elementO;
+	public Element elementN;
+	public Element elementC;
+	public Element elementH;
+	public Element elementS;
+	public Element elementP;
+	public Element elementSe;
+	private Element[] elements;
+  
 	private final String aasX = "ACDEFGIHKLMNOPQRSTUV";
 	private final String aasB = "ND";
 	private final String aasZ = "QE";
@@ -311,7 +279,6 @@ public class MassSpec {
 		}
 		Arrays.sort(rtArray);
 		rtArrayShifted = new int[(int)(rtArray[rtArray.length-1] * 10.0)+2];
-		//rtArrayShifted = new int[(int)(rtArray[rtArray.length-1] * 10.0)+1];
 		for (int i=0; i<rtArray.length; i++){
 			rtArrayShifted[(int) (rtArray[i] * 10)] = i;
 		}
@@ -328,25 +295,13 @@ public class MassSpec {
 		masterMS2s = new MS2[rtArray.length][];
 	}
 	private double monoMZ;
+  
 	public MassSpec(int _msIdx){
 		// create a unique ID for this MS (used to prevent race conditions on output files)
 		msIdx = _msIdx;
 		
 		localRandomFactory = new RandomFactory(_msIdx);
-		/* Now done in digster
-		try {
-			pathToClass = MassSpec.class.getProtectionDomain().getCodeSource().getLocation().toURI().getRawPath().replace("JAMSS.jar","");
-			// Java has a bug in that it gives an erroneous leading slash in windows on the above command. Workaround:
-			pathToClass = pathToClass.replace("/",File.separator).substring(1); 
-			FileOutputStream f = new FileOutputStream(pathToClass + File.separator + "test", true); //trigger exception if not on windows
-			
-		} catch (Exception ex) {
-			try {
-				pathToClass = MassSpec.class.getProtectionDomain().getCodeSource().getLocation().toURI().getRawPath().replace("JAMSS.jar","");
-			} catch (URISyntaxException ex1) {
-				JOptionPane.showMessageDialog(null, "Error obtaining JAR directory.", "Error", JOptionPane.ERROR_MESSAGE);
-			}
-		} */
+		
 		// check for extant RT files and delete them
     File directory = new File(pathToClass + "JAMSSfiles" + File.separator);
 		
@@ -452,6 +407,29 @@ public class MassSpec {
 		rtAttRT = new Attribute("rt");
 		rtAttributeList.addElement(rtAttRT);
 		rtData = new Instances("TestInstances",rtAttributeList,1);
+    
+    elementO = new Element(1,16,18,15.99491461956);
+		elementO.massNumberArray = new int[] {16,17,18};
+		elementO.relativeAbundanceArray = new double[] {0.99759, 0.00037, 0.00204};
+    elementN = new Element(0,14,15,14.0030740048);
+		elementN.massNumberArray = new int[] {14,15};
+		elementN.relativeAbundanceArray = new double[] {0.99635, 0.00365};
+    elementC = new Element(0,12,13,12.0);
+		elementC.massNumberArray = new int[] {12,13};
+		elementC.relativeAbundanceArray = new double[] {0.9891, 0.0109};
+    elementH = new Element(0,1,2,1.00782503207);
+		elementH.massNumberArray = new int[] {1,2};
+		elementH.relativeAbundanceArray = new double[] {0.999844, 0.000156};
+    elementS = new Element(0,32,36,31.972071);
+		elementS.massNumberArray = new int[] {32, 33, 34, 36};
+		elementS.relativeAbundanceArray = new double[] {0.9493, 0.0076, 0.0429, 0.0002};
+    elementP = new Element(0,31,31,30.97376163);
+		elementP.massNumberArray = new int[] {31};
+		elementP.relativeAbundanceArray = new double[] {1.0};
+    elementSe = new Element(0,74,82,79.9165213);
+		elementSe.massNumberArray = new int[] {74, 76, 77, 78, 80, 82};
+		elementSe.relativeAbundanceArray = new double[] {0.0089, 0.0937, 0.0763, 0.2377, 0.4961, 0.0873};
+    elements = new Element[] {elementO, elementN, elementC, elementH, elementS, elementP, elementSe};
 	}
 	
 	
@@ -1001,18 +979,6 @@ public class MassSpec {
             return false;
           }
 
-          // get absolute instensity of this peptide
-          double predictedIntensity = maxIntensity;
-          if (peptide.peptideIntensity != 0){
-            predictedIntensity = maxIntensity * (peptide.peptideIntensity/100.0);
-          } else { 
-            double histRand = localRandomFactory.localRand.nextDouble();
-            int histIdx = 0;
-            while (histIdx < 9 && intensityHistogram[histIdx] <= histRand){histIdx++;}
-            // within the probable histogram bin with in-bin variability
-            predictedIntensity = MassSpec.minWhiteNoiseIntensity + ((double) (histIdx+1)) * intensityHistogramChunk + localRandomFactory.localRand.nextDouble() * intensityHistogramChunk;
-          }
-
           //
           // Create isotopic envelope
           //
@@ -1032,7 +998,7 @@ public class MassSpec {
 
             IsotopicEnvelope isotopicEnvelope = new IsotopicEnvelope(isotopeIntensities, 
                                         isotopeMasses, 
-                                        predictedIntensity, 
+                                        peptide.abundance, 
                                         predictedRt, 
                                         traceLength, 
                                         rtFloor, 
@@ -1406,6 +1372,7 @@ public class MassSpec {
 	static boolean printTruthPre(){
 		File peptideFile = new File("JAMSSfiles" + File.separator + "centroids.csv");
 		try{
+			peptideFile.delete(); // overwrite any previous truth file
 			peptideFile.createNewFile(); // overwrite any previous truth file
 		} catch(IOException e){
 			JOptionPane.showMessageDialog(null, "Error creating peptide truth file.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -1414,6 +1381,7 @@ public class MassSpec {
 		
 		File truthFile = new File("JAMSSfiles" + File.separator + "centroids.csv");
 		try{
+      truthFile.delete();
 			truthFile.createNewFile(); // overwrite any previous truth file
 		} catch(IOException e){
 			JOptionPane.showMessageDialog(null, "Error creating truth file.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -1534,7 +1502,6 @@ public class MassSpec {
 			ScanGeneratorThread[] threads = new ScanGeneratorThread[numCpus];
 			ieIndex = 0;
 			LinkedList<Centroid> masterScan = new LinkedList<Centroid>();
-//System.out.println(isotopicEnvelopes.size());      
 			while(ieIndex < isotopicEnvelopes.size()){
 				for(int j = 0; j < numCpus && ieIndex < isotopicEnvelopes.size(); j++){
 					if(threads[j] == null){ // thread not running

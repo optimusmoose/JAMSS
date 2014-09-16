@@ -645,7 +645,8 @@ private void buttonRunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
 		File file = new File(fastaFile);
 		String digesterName = comboDigester.getSelectedItem().toString();
 		Digester digester = DigesterOpts.getDigester(digesterName);
-		digester.processFile(file, sliderCleavages.getValue(),"M5P.model","M5Rules.model");
+    MassSpec.missedCleavages = sliderCleavages.getValue();
+		digester.processFile(file, "M5P.model","M5Rules.model");
 		JOptionPane.showMessageDialog(null, "Simulator completed in " + (System.currentTimeMillis()-startTime)/60000.0 + " mins." , "Done", JOptionPane.PLAIN_MESSAGE);
 		System.exit(1);
 	}}).start();

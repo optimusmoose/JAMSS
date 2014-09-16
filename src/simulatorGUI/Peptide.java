@@ -24,11 +24,21 @@ package simulatorGUI;
 public class Peptide {
   public String sequence;
   public int peptideID;
-  public double peptideIntensity;
+  public double abundance;
+  int proteinID;
   
-  public Peptide(double _peptideIntensity, int _peptideID, String _sequence){ 
+  public Peptide(double _peptideIntensity, int _peptideID, String _sequence, int _proteinID){ 
+    proteinID = _proteinID;
 		sequence = _sequence;
 		peptideID = _peptideID;
-    peptideIntensity = _peptideIntensity;
+    abundance = _peptideIntensity;
+	}
+  
+  //for use when ID will be set later
+  public Peptide(String _sequence, double _peptideIntensity, int _proteinID){ 
+		sequence = _sequence;
+		peptideID = -1;
+    abundance = _peptideIntensity;
+    proteinID = _proteinID;
 	}
 }

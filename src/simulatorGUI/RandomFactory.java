@@ -32,11 +32,11 @@ public class RandomFactory {
 	}
 	public static void setSeed(){
 		rand = new XORShiftRandom();
+
 		if (cloneSeed == 0){ // if not cloning
 			cloneSeed = System.currentTimeMillis();
 		} 
 		rand.setSeed(cloneSeed);
-		
 		// add to options so it is added to mzML file
 		MassSpec.simOptions = MassSpec.simOptions + cloneSeed;
 	}

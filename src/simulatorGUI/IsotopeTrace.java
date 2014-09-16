@@ -62,7 +62,7 @@ public class IsotopeTrace {
 			double wobbleJaggedRand = localRandomFactory.localRand.nextDouble();
 			double minWobble = 0.001;
 			double maxWobble = 0.02;
-			double maxIntScaled = 5.0 / MassSpec.maxIntensity * centroidIntensity;
+			double maxIntScaled = 5.0 / Digester.maxIntensity * centroidIntensity;
 			double mzWobble = Math.max(minWobble,maxWobble * Math.exp(-maxIntScaled));
 			mzWobble = isotopeTraceMass - mzWobble + mzWobble * 2.0 * wobbleJaggedRand; 
 				// TADA! finished centroid. Add to output map.		

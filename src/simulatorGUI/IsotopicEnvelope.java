@@ -19,6 +19,7 @@ package simulatorGUI;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -304,6 +305,16 @@ public class IsotopicEnvelope {
 			bb.get(data);
 			f.write(data);
 			f.close();
+ /*     
+FileWriter outputWriter = new FileWriter("JAMSSfiles" + File.separator + rtFloor + "_test_" + id+ ".txt", true);
+StringBuilder masses = new StringBuilder();
+for(int i=0; i<isotopeMasses.size(); i++){
+  masses.append(isotopeMasses.get(i));
+  masses.append(",");
+}
+			outputWriter.write(masses.toString() + " " + predictedRt + " " + predictedIntensity + System.getProperty("line.separator"));
+			outputWriter.close();
+   */   
 		}catch(IOException e){e.printStackTrace();}
 	}
 }

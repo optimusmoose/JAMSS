@@ -30,6 +30,7 @@ import java.io.Reader;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import javax.swing.JOptionPane;
 
@@ -43,6 +44,9 @@ public class Digester {
 	static String splitLetters;
 	static String excludeLetters;
 	static Boolean cTerm;
+  public static double maxIntensity = 200000; 
+	double[] intensityHistogram = {0.64,0.36,0.26,0.16,0.08,0.05,0.03,0.015,0.005};
+	double intensityHistogramChunk = (maxIntensity - MassSpec.minWhiteNoiseIntensity)/10.0;
 	
 	public Digester(String _name, String _splitLetters, String _excludeLetters, Boolean _cTerm) {
 		name = _name;
@@ -67,15 +71,15 @@ public class Digester {
 		return cTerm;
 	}
 
-	public void processFile(File file, int missedCleavages, String intensityModelLocation, String rtModelLocation) {
+	public void processFile(File file, String intensityModelLocation, String rtModelLocation) {
     // First read through .fasta file to count how many lines (for time estimation)
     // Also count how many #s there are. We want one per entry or none.
     simulatorGUI.progressMonitor.setNote("Counting .fasta lines, please wait");
     int numFastaLines = 0;
+    boolean hashEncountered = false; // this is a flag for whether abundance is specified
     try {
         BufferedReader reader = new BufferedReader(new FileReader(file));
         String line = null;
-        boolean hashEncountered = false;
         boolean lookingForHash = false;
         while ((line = reader.readLine()) !=null) {
             for(int i=0; i<line.length();i++){
@@ -107,7 +111,7 @@ public class Digester {
     }
     LocalProgressMonitor.beginDigestion(numFastaLines);
     
-		ArrayList<String> queue = new ArrayList<String>();
+		ArrayList<Protein> queue = new ArrayList<Protein>();
 		
 		// set up the random seed
 		RandomFactory.setSeed();
@@ -134,8 +138,19 @@ public class Digester {
 							inHeader = false;
 							inAbundance = false;
 							if (abundanceBuilder.length() > 0) {
-								abundance = Double.parseDouble(abundanceBuilder.toString());
-							}
+								abundance = maxIntensity * Double.parseDouble(abundanceBuilder.toString());
+							} else { // need to sample abundance, it isn't provided
+                // Histogram divides possible intensity range into 10 equal chunks
+                // this code simulates a Pareto distribution, with highest intensity very
+                // unlikely and lower intensities much more likely (the code below is 
+                // akin to a uniform distribution, but intensityHistogram is hard
+                // coded above to turn it into a Pareto-like distribution)
+                double histRand = RandomFactory.rand.nextDouble();
+                int histIdx = 0;
+                while (histIdx < 9 && histRand <= intensityHistogram[histIdx]){histIdx++;}
+                // within the probable histogram bin with in-bin variability
+                abundance = MassSpec.minWhiteNoiseIntensity + ((double) (histIdx+1)) * intensityHistogramChunk + RandomFactory.rand.nextDouble() * intensityHistogramChunk;
+              }
 							currentInput = new StringBuilder();
 							abundanceBuilder = new StringBuilder();
 						} else {
@@ -151,11 +166,10 @@ public class Digester {
 
 					} else {
 						if (ch == '>') { // beg of next header
-//							System.out.println("Processed line " + fastaIdx + " of fasta");
 							fastaIdx++;
 							inHeader = true;
 							if (currentInput.length() > 0) {
-								queue.add(currentInput.toString()+"_"+missedCleavages+"_"+abundance+"_"+proteinID);
+								queue.add(new Protein(currentInput.toString(),abundance,proteinID));
 								currentInput = new StringBuilder();
 								proteinID++;
 							}
@@ -165,8 +179,7 @@ public class Digester {
 						}
 					}
 				}
-				queue.add(currentInput.toString()+"_"+missedCleavages+"_"+abundance+"_"+proteinID);
-//TODO proteinID add to proteins_peptides with peptideID...        
+				queue.add(new Protein(currentInput.toString(),abundance,proteinID));
 				reader.close();
 				buffer.close();
 			} catch (IOException e) {
@@ -194,9 +207,41 @@ public class Digester {
 		boolean finished = false;
 		int chunk = (int) (Math.ceil((double) queue.size() / (double) MassSpec.numCpus));
 		DigesterThread.setQueueSize(queue.size());
-    HashMap<String, Integer> pepIdxHash = new HashMap<String, Integer>();
-    HashMap<Integer,Double> pepAbundanceHash = new HashMap<Integer,Double>();
+    ArrayList<Peptide> peptides = new ArrayList<Peptide>();
+    
     try{
+      ArrayList<Peptide> finishedPeptides = new ArrayList<Peptide>();
+      while(!finished){
+        finished = true;
+        for(int i = 0; i < MassSpec.numCpus; i++){
+          if(digesterThreads[i] == null){
+            to = from + chunk;
+            if(to <= queue.size()){
+              finished = false;
+              digesterThreads[i] = new DigesterThread(new ArrayList<Protein>(queue.subList(from,to)), this, i); //must do to+1 because to is exclusive
+              from = to;
+              digesterThreads[i].start();
+            }
+          } else{
+            if (digesterThreads[i].finished){
+              
+              // collect digested peptides
+              for(Peptide peptide : digesterThreads[i].digestedProteins){
+                finishedPeptides.add(peptide);
+              }
+              digesterThreads[i] = null;
+            } else{
+              finished = false;
+            }
+          }
+        }
+        try{Thread.sleep(500);} catch(Exception e){
+          JOptionPane.showMessageDialog(null, "Error digesting proteins.", "Error", JOptionPane.ERROR_MESSAGE);
+          return;
+        }
+      }
+      
+      // sort peptides for consistent peptideIDs on clone, assign IDs and output to flat files
       try {
         MassSpec.pathToClass = MassSpec.class.getProtectionDomain().getCodeSource().getLocation().toURI().getRawPath().replace("JAMSS.jar","");
         // Java has a bug in that it gives an erroneous leading slash in windows on the above command. Workaround:
@@ -216,47 +261,26 @@ public class Digester {
 			FileWriter peptideSequenceWriter = new FileWriter("JAMSSfiles" + File.separator + "peptide_sequences.csv", false);
       //contains list of peptide sequences and IDs
 			FileWriter proteinPeptideWriter = new FileWriter("JAMSSfiles" + File.separator + "protein_peptides.csv", false);
+      
+      HashMap<String, Integer> pepIdxHash = new HashMap<String, Integer>();
       int pepIdx = 0;
-      while(!finished){
-        finished = true;
-        for(int i = 0; i < MassSpec.numCpus; i++){
-          if(digesterThreads[i] == null){
-            to = from + chunk;
-
-            if(to <= queue.size()){
-              finished = false;
-              digesterThreads[i] = new DigesterThread(new ArrayList<String>(queue.subList(from,to)), this, i); //must do to+1 because to is exclusive
-              from = to;
-              digesterThreads[i].start();
-            }
-          } else{
-            if (digesterThreads[i].finished){
-              // collect digested peptides, add peptide sequence, protein id to output file
-              for(DigestedProtein digestedProtein : digesterThreads[i].digestedProteins){
-                for(String peptideSequence : digestedProtein.peptideSequences){
-                  int currPepIdx = pepIdx;
-                  if(!pepIdxHash.containsKey(peptideSequence)){
-                    pepIdxHash.put(peptideSequence, pepIdx);
-                    pepAbundanceHash.put(pepIdx, digestedProtein.proteinAbundance);
-                    peptideSequenceWriter.append(currPepIdx + "," + peptideSequence + System.getProperty("line.separator"));
-                    pepIdx++;
-                  } else{ // this sequence is already in the hash
-                    currPepIdx = pepIdxHash.get(peptideSequence);
-                    pepAbundanceHash.put(currPepIdx, pepAbundanceHash.get(currPepIdx) + digestedProtein.proteinAbundance);
-                  }
-                  proteinPeptideWriter.append(digestedProtein.proteinID + "," + currPepIdx + System.getProperty("line.separator"));
-                }
-                digesterThreads[i] = null;
-              }
-            } else{
-              finished = false;
-            }
-          }
+      // sort finishedPeptides so they are in the same order
+      Collections.sort(finishedPeptides, new PeptideSequenceComparator());
+      for(Peptide peptide : finishedPeptides){
+        int currPepIdx = pepIdx;
+        if(!pepIdxHash.containsKey(peptide.sequence)){
+          pepIdxHash.put(peptide.sequence, pepIdx);
+          peptideSequenceWriter.append(currPepIdx + "," + peptide.sequence + System.getProperty("line.separator"));
+          peptide.peptideID = pepIdx;
+          peptide.proteinID = -1; //this variable now has no meaning, as the same sequence peptide from different proteins will now be combined
+          peptides.add(peptide);
+          pepIdx++;
+        } else{ // this sequence is already in the hash
+          currPepIdx = pepIdxHash.get(peptide.sequence);
+          double newAbundance = peptides.get(currPepIdx).abundance + peptide.abundance;
+          peptides.set(currPepIdx, new Peptide(newAbundance, currPepIdx, peptide.sequence, peptide.proteinID));
         }
-        try{Thread.sleep(500);} catch(Exception e){
-          JOptionPane.showMessageDialog(null, "Error digesting proteins.", "Error", JOptionPane.ERROR_MESSAGE);
-          return;
-        }
+        proteinPeptideWriter.append(peptide.proteinID + "," + currPepIdx + System.getProperty("line.separator"));
       }
       peptideSequenceWriter.flush();
 			peptideSequenceWriter.close();
@@ -269,19 +293,13 @@ public class Digester {
 		queue = null;
 		System.gc();
 
-    //housekeeping: create array of peptide sequences in order of pepId
-    String[] pepSeqArray = new String[pepIdxHash.size()];
-    for(String sequence : pepIdxHash.keySet()){
-      pepSeqArray[pepIdxHash.get(sequence)] = sequence;
-    }
-    
     //calculate Isotopic patterns and finish simulation
     // create Isotopic Envelope objects for each peptide
     IEGeneratorThread[] threads = new IEGeneratorThread[MassSpec.numCpus];
     int threadIdx = -1;
-    chunk = (int) (Math.ceil((double) pepIdxHash.size() / (double) MassSpec.numCpus));
+    chunk = (int) (Math.ceil((double) peptides.size() / (double) MassSpec.numCpus));
     ArrayList<Peptide> currQueue = new ArrayList<Peptide>();
-    for(int i = 0; i < pepIdxHash.size(); i++){ // once per peptide
+    for(int i = 0; i < peptides.size(); i++){ // once per peptide
       if(i % chunk == 0){ // have reached queue capacity, start new one
         if (currQueue.size() > 0){ // don't run on first iteration
           threads[threadIdx] = new IEGeneratorThread(currQueue, threadIdx);
@@ -289,15 +307,15 @@ public class Digester {
         currQueue = new ArrayList<Peptide>(); //make new queue
         threadIdx++;
       } else { //queue not full yet
-        currQueue.add(new Peptide(pepAbundanceHash.get(i), i, pepSeqArray[i]));
+        currQueue.add(peptides.get(i));
       }
     }
-    if (currQueue.size() > 0){ //means last queue has not been started
+    if (currQueue.size() > 0){ //means last queue has not been assigned
       threads[threadIdx] = new IEGeneratorThread(currQueue, threadIdx);
     }
 
     // end digestion, begin simulation
-    LocalProgressMonitor.beginIsotopePatternSimulation(pepIdxHash.size());
+    LocalProgressMonitor.beginIsotopePatternSimulation(peptides.size());
     
     //start threads
     for(int i=0; i<MassSpec.numCpus; i++){threads[i].start();}
@@ -309,9 +327,6 @@ public class Digester {
       }
     }
     threads = null;
-    pepIdxHash = null;
-    pepAbundanceHash = null;
-    pepSeqArray = null;
 		System.gc();
     
     // finish the writing out of files

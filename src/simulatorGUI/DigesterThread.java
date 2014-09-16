@@ -25,20 +25,20 @@ import java.util.ArrayList;
  * @author rob
  */
 public class DigesterThread extends Thread{
-	ArrayList<String> queue;
+	ArrayList<Protein> queue;
 	Digester digester;
-	static int totalThreads = 0;
-	private int threadId;
 	static int maxQueueSize = 0;
 	public boolean finished = false;
 	static public int maxEnvelopes;
-  public ArrayList<DigestedProtein> digestedProteins;
-	public DigesterThread(ArrayList<String> q, Digester _digester, int threadIdx){
-		threadId = totalThreads++;
+  public ArrayList<Peptide> digestedProteins;
+  RandomFactory localRandomFactory;
+  
+	public DigesterThread(ArrayList<Protein> q, Digester _digester, int threadID){
 		queue = q;
 		digester = _digester;
-    digestedProteins = new ArrayList<DigestedProtein>();
+    digestedProteins = new ArrayList<Peptide>();
 		maxEnvelopes = (int) ((Runtime.getRuntime().maxMemory() - 1000000000) / 1000) / MassSpec.numCpus;
+    localRandomFactory = new RandomFactory(threadID);
 	}
 	
 	static public void setQueueSize(int size){
@@ -50,62 +50,14 @@ public class DigesterThread extends Thread{
 	@Override
   @SuppressWarnings("static-access")
 	public void run() {
-		for(String data:queue) {
-			if(data==null){return;}
-			String[] parts = data.split("_");
-      ArrayList<String> peptideSequences = processProtein(parts[0], Integer.parseInt(parts[1]));
-      int proteinId = Integer.parseInt(parts[3]);
-      digestedProteins.add(new DigestedProtein(peptideSequences,proteinId,Double.parseDouble(parts[2])));
-      LocalProgressMonitor.updateDigestion(proteinId);
+		for(Protein prot:queue) {
+      digestedProteins.addAll(prot.processProtein(localRandomFactory));
+      LocalProgressMonitor.updateDigestion(prot.proteinID);
 		}
 		finished = true;
 		return;
 	}
   
-  public ArrayList<String> processProtein(String protein, int missedCleavages) {
-		StringBuilder nextPep = new StringBuilder();
-		ArrayList<String> peptides = new ArrayList<>(); // canonical
-		ArrayList<String> augmentedPeptides = new ArrayList<>(); //includes missedCleavage possibilities
-		for (int i = 0; i < protein.length(); i++) {
-			char c1 = protein.charAt(i);
-			// exclusion is true if next char exists and matches something on the ignore list
-			Boolean exclusion = (i + 1 < protein.length() ? Digester.getExcludeLetters().indexOf(protein.charAt(i + 1)) != -1 : false);
-			if (Digester.getSplitLetters().indexOf(c1) != -1 && !exclusion) {
-				if (!Digester.getcTerm()) { //n terminus, put current char in next peptide
-					if (nextPep.length() > 0) {
-						peptides.add(nextPep.toString());
-					}
-					nextPep = new StringBuilder();
-					nextPep.append(c1);
-				} else { // c terminus, put current char in current peptide
-					nextPep.append(c1);
-					if (nextPep.length() > 0) {
-						peptides.add(nextPep.toString());
-					}
-					nextPep = new StringBuilder();
-				}
-			} else {
-				nextPep.append(protein.charAt(i));
-			}
-		}
-		if (nextPep.length() > 0) {
-			peptides.add(nextPep.toString());
-		}
-		// handle missed cleavages
-		for (int i = 0; i < peptides.size(); i++) { // for each canonical peptide
-			for (int j = 0; j <= missedCleavages && j <= peptides.size(); j++) { // for each possible missed cleavage (0 to missedCleavages where missedCleavages is the max)
-				StringBuilder sequence = new StringBuilder();
-				for (int k = i; k <= j + i && j + i < peptides.size(); k++) { // construct the series of j consecutive peptides as one sequence
-					sequence.append(peptides.get(k));
-				}
-				if (sequence.length() > 0) { // add the constructed sequence to the list of possible sequences
-					augmentedPeptides.add(sequence.toString());
-				} 
-			}
-		}
-		return augmentedPeptides;
-	}
-
   /*
 	public void testProcessProtein() {
         // NOTE only for Trypsin
