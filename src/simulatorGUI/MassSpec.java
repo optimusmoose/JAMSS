@@ -19,9 +19,10 @@
 package simulatorGUI;
 
 import java.io.BufferedWriter;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import org.apache.commons.codec.binary.Base64;
 import java.io.FileWriter;
 import java.io.FilenameFilter;
 import java.io.IOException;
@@ -35,8 +36,12 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.DataFormatException;
 import java.util.zip.Deflater;
+import java.util.zip.Inflater;
 import javax.swing.JOptionPane;
+import static javax.xml.bind.DatatypeConverter.parseBase64Binary;
+import static javax.xml.bind.DatatypeConverter.printBase64Binary;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
 import weka.core.FastVector;
@@ -1185,6 +1190,8 @@ public class MassSpec {
 		}
 		return true;
 	}
+  
+  
 	// output mzml file
 	public static int output(LinkedList<Centroid> masterScan, double rt, int rtIdx){
 		try {
@@ -1193,8 +1200,7 @@ public class MassSpec {
 			
 			String encodedMZ = compressCentroids(masterScan,true);
 			String encodedINT = compressCentroids(masterScan,false);
-			
-//			int binaryMZlength = getBinaryLength(masterScan,true);
+
 			// write out lists in a spectrum tag
 			mzMLWriter.write("\t\t\t<spectrum index=\"" + scanIdx + "\" id=\"scan="+rtIdx + "\" defaultArrayLength=\""+ masterScan.size() + "\">" + System.getProperty("line.separator"));
 			mzMLWriter.write("\t\t\t\t<cvParam cvRef=\"MS\" accession=\"MS:1000127\" name=\"centroid spectrum\"/>"+ System.getProperty("line.separator"));
@@ -1326,7 +1332,7 @@ public class MassSpec {
 		}
 		
 		byte[] input = buf.array();
-		byte[] output = new byte[input.length * 2];
+		byte[] output = new byte[input.length * 4];
 		Deflater compresser = new Deflater();
 		compresser.setInput(input);
 		compresser.finish();
@@ -1337,7 +1343,7 @@ public class MassSpec {
 			compressed[i] = output[i];
 		}
 		
-		String decrypted = Base64.encodeBase64String(compressed);
+    String decrypted = printBase64Binary(compressed);
 		return decrypted;
 	}
 	
