@@ -44,7 +44,7 @@ public class Digester {
 	static String splitLetters;
 	static String excludeLetters;
 	static Boolean cTerm;
-  public static double maxIntensity = 200000; 
+  public static double maxIntensity = 9000000; 
 	double[] intensityHistogram = {0.64,0.36,0.26,0.16,0.08,0.05,0.03,0.015,0.005};
 	double intensityHistogramChunk = (maxIntensity - MassSpec.minWhiteNoiseIntensity)/10.0;
 	
