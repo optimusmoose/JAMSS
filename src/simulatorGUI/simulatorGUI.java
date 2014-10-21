@@ -255,6 +255,12 @@ public class simulatorGUI extends javax.swing.JFrame {
 
     jLabel6.setText("Clone?");
 
+    cloneCheckBox.addChangeListener(new javax.swing.event.ChangeListener() {
+      public void stateChanged(javax.swing.event.ChangeEvent evt) {
+        cloneCheckBoxStateChanged(evt);
+      }
+    });
+
     whiteNoisePerScanSpinner.setModel(new javax.swing.SpinnerNumberModel(Integer.valueOf(1), Integer.valueOf(1), null, Integer.valueOf(1)));
 
     jLabel16.setIcon(new javax.swing.ImageIcon(getClass().getResource("/simulatorGUI/JaMSS_logo.jpeg"))); // NOI18N
@@ -269,57 +275,53 @@ public class simulatorGUI extends javax.swing.JFrame {
           .addComponent(jLabel1)
           .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+              .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(textOutputFile, javax.swing.GroupLayout.PREFERRED_SIZE, 347, javax.swing.GroupLayout.PREFERRED_SIZE))
               .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                  .addGroup(layout.createSequentialGroup()
-                    .addComponent(jLabel2)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(textOutputFile, javax.swing.GroupLayout.PREFERRED_SIZE, 347, javax.swing.GroupLayout.PREFERRED_SIZE))
-                  .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                    .addComponent(jLabel6)
-                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(cloneCheckBox))
-                  .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                      .addGroup(layout.createSequentialGroup()
-                        .addGap(482, 482, 482)
-                        .addComponent(jLabel5))
-                      .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(30, 30, 30)
-                        .addComponent(textFastaFilename, javax.swing.GroupLayout.PREFERRED_SIZE, 304, javax.swing.GroupLayout.PREFERRED_SIZE))
-                      .addGroup(layout.createSequentialGroup()
-                        .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(textOptionsFilename, javax.swing.GroupLayout.PREFERRED_SIZE, 304, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(35, 35, 35)
-                        .addComponent(buttonOptionsOpen))
-                      .addComponent(jLabel25)
-                      .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                          .addComponent(jLabel36)
-                          .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                          .addComponent(spinnerOxidationMethioninePercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                          .addComponent(jLabel34)
-                          .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                          .addComponent(spinnerPhosphorylationGainPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                          .addComponent(jLabel33)
-                          .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                          .addComponent(spinnerPyroglutamateLossPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                          .addComponent(jLabel8)
-                          .addGap(132, 132, 132)
-                          .addComponent(checkboxCarbamidomethylationGain))))
-                    .addGap(0, 0, Short.MAX_VALUE))
-                  .addGroup(layout.createSequentialGroup()
-                    .addGap(0, 0, Short.MAX_VALUE)
-                    .addComponent(buttonFastaOpen)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED))
+                .addComponent(jLabel6)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(cloneCheckBox))
+              .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addComponent(buttonFastaOpen))
               .addGroup(layout.createSequentialGroup()
-                .addComponent(jLabel16)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                  .addGroup(layout.createSequentialGroup()
+                    .addGap(482, 482, 482)
+                    .addComponent(jLabel5))
+                  .addGroup(layout.createSequentialGroup()
+                    .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(30, 30, 30)
+                    .addComponent(textFastaFilename, javax.swing.GroupLayout.PREFERRED_SIZE, 304, javax.swing.GroupLayout.PREFERRED_SIZE))
+                  .addGroup(layout.createSequentialGroup()
+                    .addComponent(jLabel4)
+                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addComponent(textOptionsFilename, javax.swing.GroupLayout.PREFERRED_SIZE, 304, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGap(35, 35, 35)
+                    .addComponent(buttonOptionsOpen))
+                  .addComponent(jLabel25)
+                  .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                      .addComponent(jLabel36)
+                      .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                      .addComponent(spinnerOxidationMethioninePercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                      .addComponent(jLabel34)
+                      .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                      .addComponent(spinnerPhosphorylationGainPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                      .addComponent(jLabel33)
+                      .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                      .addComponent(spinnerPyroglutamateLossPercent, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                      .addComponent(jLabel8)
+                      .addGap(132, 132, 132)
+                      .addComponent(checkboxCarbamidomethylationGain)))
+                  .addComponent(jLabel16))
+                .addGap(0, 0, Short.MAX_VALUE)))
+            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
               .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -491,11 +493,11 @@ public class simulatorGUI extends javax.swing.JFrame {
   }// </editor-fold>//GEN-END:initComponents
 
 private void buttonOptionsOpenMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_buttonOptionsOpenMouseClicked
-    int returnVal = openOptsFileChooser.showOpenDialog(this);
-    if (returnVal == JFileChooser.APPROVE_OPTION) {
-        File file = openOptsFileChooser.getSelectedFile();
-         textOptionsFilename.setText(file.getAbsolutePath());
-    }
+  int returnVal = openOptsFileChooser.showOpenDialog(this);
+  if (returnVal == JFileChooser.APPROVE_OPTION) {
+      File file = openOptsFileChooser.getSelectedFile();
+       textOptionsFilename.setText(file.getAbsolutePath());
+  } else {return;}
 	
 	// read mzML file and set the msOptions string (will be overridden if not clone)
 	try{
@@ -573,12 +575,37 @@ private void resetDefaults(){
 	cloneCheckBox.setSelected(false);
 }
 
+// Set options as (enabled/disabled) depending on input (true/false)
+private void toggleOpts(boolean tf){
+  textOptionsFilename.setEnabled(tf);
+	//textFastaFilename.setEnabled(tf);
+	//textOutputFile.setEnabled(tf);
+	checkboxCarbamidomethylationGain.setEnabled(tf);
+	spinnerPyroglutamateLossPercent.setEnabled(tf);
+	spinnerPhosphorylationGainPercent.setEnabled(tf);
+	spinnerOxidationMethioninePercent.setEnabled(tf);
+	comboDigester.setEnabled(tf);
+	textSamplingRate.setEnabled(tf);
+	textRuntime.setEnabled(tf);
+	sliderCleavages.setEnabled(tf);
+	sliderMS2PerScan.setEnabled(tf);
+	checkBoxOneD.setEnabled(tf);
+	textPH.setEnabled(tf);
+	textDropout.setEnabled(tf);
+	whiteNoisePerScanSpinner.setEnabled(tf);
+	textMaxNoise.setEnabled(tf);
+	textMinNoise.setEnabled(tf);
+	textChromOverlapRange.setEnabled(tf);
+  sliderNumCPUs.setEnabled(tf);
+}
+
 private void buttonRestoreDefaultsMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_buttonRestoreDefaultsMouseClicked
     resetDefaults();
 }//GEN-LAST:event_buttonRestoreDefaultsMouseClicked
 
 private void buttonRunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_buttonRunMouseClicked
-	simulatorGUI.this.setVisible(false);
+	if(!checkCloneOptionsLoaded()){return;}
+  simulatorGUI.this.setVisible(false);
 	
 	// set modifications
 	Modifications.CarbamidomethylationGain = checkboxCarbamidomethylationGain.isSelected();
@@ -599,15 +626,6 @@ private void buttonRunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
 	MassSpec.minWhiteNoiseIntensity = Double.parseDouble(textMinNoise.getText());
 	MassSpec.maxWhiteNoiseIntensity = Double.parseDouble(textMaxNoise.getText());
 	MassSpec.numCpus = sliderNumCPUs.getValue(); 
-	if (cloneCheckBox.isSelected()){ 
-		if (cloneSeed != 0){
-			RandomFactory.cloneSeed = cloneSeed;
-		}
-		else{
-			JOptionPane.showMessageDialog(null, "Error: Clone option selected but options from previous mzML file have not been loaded.", "Error", JOptionPane.ERROR_MESSAGE);
-			System.exit(1);
-		}
-	}
 	MassSpec.mzmlFilename = textOutputFile.getText() + ".mzML";
 		
 	// set Ph
@@ -655,6 +673,40 @@ private void buttonRunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
     private void textChromOverlapRangeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_textChromOverlapRangeActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_textChromOverlapRangeActionPerformed
+
+    // if clone check box is selected, ensure options to clone are loaded.
+    private boolean checkCloneOptionsLoaded(){
+     if (cloneCheckBox.isSelected()){ 
+        if (cloneSeed != 0){
+          RandomFactory.cloneSeed = cloneSeed;
+        }
+       else{
+          JOptionPane.showMessageDialog(null, "Error: Clone option selected but options from previous mzML file have not been loaded.", "Error", JOptionPane.ERROR_MESSAGE);
+          return false;
+      	}
+    	}
+     return true;
+   }
+    
+  private void cloneCheckBoxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_cloneCheckBoxStateChanged
+    if(cloneCheckBox.isSelected()){
+      if(!checkCloneOptionsLoaded()){
+        cloneCheckBox.setSelected(false);
+        return;
+      }
+      
+      // error out and uncheck if options are not loaded
+      // or if numCpus isn't replicable
+      if(MassSpec.numCpus > Runtime.getRuntime().availableProcessors()){
+        JOptionPane.showMessageDialog(null, "Error: Clone options require more CPUs than this machine has available. Consider re-runing source simulation with " + Runtime.getRuntime().availableProcessors() + " or less CPUs.", "Error", JOptionPane.ERROR_MESSAGE);
+        cloneCheckBox.setSelected(false);
+        return;
+      }
+    }
+    
+    // gray out options if it is checked
+    toggleOpts(!cloneCheckBox.isSelected());
+  }//GEN-LAST:event_cloneCheckBoxStateChanged
 
     /**
      * @param args the command line arguments
