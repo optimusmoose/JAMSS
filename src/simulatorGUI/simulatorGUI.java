@@ -527,7 +527,8 @@ private void buttonOptionsOpenMouseClicked(java.awt.event.MouseEvent evt) {//GEN
 			textMinNoise.setText(options[15]);
 			textChromOverlapRange.setText(options[16]);
 			cloneCheckBox.setSelected(Boolean.parseBoolean(options[17]));
-			cloneSeed = Long.parseLong(options[18]);
+      sliderNumCPUs.setValue(Integer.parseInt(options[18]));
+			cloneSeed = Long.parseLong(options[19]);
 			gotOptions = true;
 		}
 	}
@@ -573,6 +574,7 @@ private void resetDefaults(){
 	textMinNoise.setText("50");
 	textChromOverlapRange.setText("0.002");
 	cloneCheckBox.setSelected(false);
+  sliderNumCPUs.setValue(Runtime.getRuntime().availableProcessors());
 }
 
 // Set options as (enabled/disabled) depending on input (true/false)
@@ -651,6 +653,7 @@ private void buttonRunMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:e
 	msOptions.append(textMinNoise.getText() + ",");
 	msOptions.append(textChromOverlapRange.getText() + ",");
 	msOptions.append(cloneCheckBox.isSelected() + ",");
+  msOptions.append(sliderNumCPUs.getValue() + ",");
 	MassSpec.simOptions = msOptions.toString();
 	progressMonitor = new ProgressMonitor(simulatorGUI.this, "Simulating...", "", 0, 100);
   
