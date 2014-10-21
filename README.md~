@@ -17,6 +17,11 @@ JAMSS mass spec simulator.
 
 Basics
 -------
+**Tested Environments:**
+1) Mac OS X with Java JRE 1.7
+2) Ubuntu 14.04 with Java JRE 1.7
+3) Windows 8 with Java JRE 1.7
+
 **Minimal test run:**
 1) Download project.
 2) Navigate to .../JAMSS/dist/
@@ -58,7 +63,7 @@ Basics
 11) Hit run.
 
 **How to specify intensities of each protein:**
-1) Intensities are specified by the '#' sign at the end of the first line of each .fasta entry. If you specify intensity on one fasta entry, you must specify it on all entries. The intensity should be expressed as a percentage of the total sample. For example, add #0.36 to indicate that a certain protein comprises 36% of the sample. These percentages should add to 1, but JAMSS will not verify that.
+1) Intensities are specified by the '#' sign at the end of the first line of each .fasta entry. If you specify intensity on one fasta entry, you must specify it on all entries. The intensity should be expressed as a percentage of the total sample. For example, add #0.36 to indicate that a certain protein comprises 36% of the sample. For realism (not mandatory) these percentages should add to 1.
 2) Important note: Some (very few) cannonical fasta entries include a '#' character in the description of the entry. Any '#' not intended for intensity specification must be removed before using the fasta file with JAMSS. The easiest way is open the file in a text editor, press CTRL+F and type #. Then remove the characters found.
 
 **How to simulate a non-chromatographic run:**

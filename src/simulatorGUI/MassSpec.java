@@ -269,6 +269,28 @@ public class MassSpec {
 	
 	public static final Modifications modifications = new Modifications();
 	
+  public static void deleteSerFiles(){
+    // check for extant RT files and delete them
+    File directory = new File(pathToClass + "JAMSSfiles" + File.separator);
+		
+		// get all .ser files
+		String[] myFiles = directory.list(new FilenameFilter() {
+			@Override
+			public boolean accept(File directory, String fileName) {
+				return fileName.endsWith(".ser");
+			}
+		});
+
+		if (myFiles != null){
+			for (String fileName : myFiles){
+				// delete file
+				
+				File file = new File(pathToClass + "JAMSSfiles" + File.separator + fileName);
+				file.delete();
+			}
+		}
+  }
+  
 	public static void setUpRTArray(){
 		int numScans = (int) (samplingRate * runTime);
 		double specTime = 0;
@@ -307,25 +329,8 @@ public class MassSpec {
 		
 		localRandomFactory = new RandomFactory(_msIdx);
 		
-		// check for extant RT files and delete them
-    File directory = new File(pathToClass + "JAMSSfiles" + File.separator);
+    deleteSerFiles();
 		
-		// get all .ser files
-		String[] myFiles = directory.list(new FilenameFilter() {
-			@Override
-			public boolean accept(File directory, String fileName) {
-				return fileName.endsWith(".ser");
-			}
-		});
-
-		if (myFiles != null){
-			for (String fileName : myFiles){
-				// delete file
-				
-				File file = new File(pathToClass + "JAMSSfiles" + File.separator + fileName);
-				file.delete();
-			}
-		}
 		
 		// build residueTable
 		residueTable.put('K',RESIDUE_K);
@@ -1618,6 +1623,8 @@ public class MassSpec {
 		if(!printTruth(masterScan, rt)){
 			return;
 		}
+    
+    deleteSerFiles();
 	}
 	
 }

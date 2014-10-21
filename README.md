@@ -17,10 +17,15 @@ JAMSS mass spec simulator.
 
 Basics
 -------
+**Tested Environments:**
+1) Mac OS X with Java JRE 1.7
+2) Ubuntu 14.04 with Java JRE 1.7
+3) Windows 8 with Java JRE 1.7
+
 **Minimal test run:**
 1) Download project.
 2) Navigate to .../JAMSS/dist/
-3) Some OSs will allow the execution of the jar file with a double click (JAMSS.jar). For instance, on linux, right click the jar and select "run with Java" (or something like that).
+3) Some OSs will allow the execution of the jar file with a double click (JAMSS.jar). For instance, on linux, right click the jar and select "run with Java" (or similar). Otherwise, the command line is "java -jar JAMSS.jar". You may want to run as sudo if your OS needs admin rights to write files to the project folder.
 4) Open the included test FASTA file (.../JAMSS/hum\_multi\_noquant.fasta).
 5) Click run.
 
