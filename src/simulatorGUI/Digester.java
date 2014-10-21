@@ -191,7 +191,7 @@ public class Digester {
 			return;
 		}
 		
-		MassSpec.numCpus = Math.min(Runtime.getRuntime().availableProcessors(), queue.size()); // to avoid case where #fastas < #cores
+		MassSpec.numCpus = Math.min(MassSpec.numCpus, queue.size()); // to avoid case where #fastas < #cores
 		MassSpec.intensityModelLocation = intensityModelLocation;
 		MassSpec.rtModelLocation = rtModelLocation;
 		MassSpec.setUpRTArray();

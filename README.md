@@ -41,12 +41,13 @@ Basics
 
 **How to clone a run:**
 1) Open an mzML file created by JaMMS with the "Load Options" Open button. All parameters will be automatically populated in the GUI.
-2) Unclick the "Replicate?" box. This means you want to use the same random seed as was used in the original file, and you will get the same exact output file as you loaded options from, provided the .fasta file has not changed.
+2) Click the "Clone?" box. This means you want to use the same random seed as was used in the original file, and you will get the same exact output file as you loaded options from, provided the .fasta file has not changed.
 3) Click run.
 
 **How to replicate a run:**
 1) Open an mzML file created by JaMMS with the "Load Options" Open button. All parameters will be automatically populated in the GUI.
 2) Optional: tweak options. The more things you change, the more different the "replicate" will be.
+3) Make sure "Clone?" is unchecked. Clone will make an exact duplicate of the previous mzML file.
 3) Hit run.
 
 **More involved run:**
@@ -103,3 +104,5 @@ Q) It seems no matter how few entries are in my FASTA file, I still get very lon
 A) No. In designing JAMSS, we had the option of optimizing for either small or large FASTA files. Due to internal constraints, the design possibilities that yielded quick runs on small FASTA files created significant slowdown and even out of memory errors on realistically large FASTA files. We opted to allow for a longer bottom limit of computation time, even on smaller files. We expect few people will run a FASTA file with only a few entries, so it should not be problematic.
 Q) Why does it take forever to run my FASTA file when the program says nothing is within the m/z range for the simulation?
 A) The current workflow for JAMSS creates an isotopic envelope pattern for each digested protein prior to generating the individual data points across the time dimension. So, before it is known whether a given isotopic envelope will yield data points, the entire FASTA file must be digested and the pattern for each peptide must be computed. This takes time, and for now we don't have a clever way of avoiding that for peptides that will not appear within the simulated m/z range.
+Q) What does a protein ID of -1 mean in the protein_peptides.csv file?
+A) In a complex sample (.fasta file with multiple entries), the higher the variety of proteins in the sample, the more likely that a given peptide will be found in more than one protein. If a peptide in the mzML file derives from more than a single protein, a protein ID of -1, the corresponding protein ID entry in protein_peptides.csv will be -1.

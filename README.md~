@@ -25,7 +25,7 @@ Basics
 **Minimal test run:**
 1) Download project.
 2) Navigate to .../JAMSS/dist/
-3) Some OSs will allow the execution of the jar file with a double click (JAMSS.jar). For instance, on linux, right click the jar and select "run with Java" (or something like that).
+3) Some OSs will allow the execution of the jar file with a double click (JAMSS.jar). For instance, on linux, right click the jar and select "run with Java" (or similar). Otherwise, the command line is "java -jar JAMSS.jar". You may want to run as sudo if your OS needs admin rights to write files to the project folder.
 4) Open the included test FASTA file (.../JAMSS/hum\_multi\_noquant.fasta).
 5) Click run.
 
@@ -41,12 +41,13 @@ Basics
 
 **How to clone a run:**
 1) Open an mzML file created by JaMMS with the "Load Options" Open button. All parameters will be automatically populated in the GUI.
-2) Unclick the "Replicate?" box. This means you want to use the same random seed as was used in the original file, and you will get the same exact output file as you loaded options from, provided the .fasta file has not changed.
+2) Click the "Clone?" box. This means you want to use the same random seed as was used in the original file, and you will get the same exact output file as you loaded options from, provided the .fasta file has not changed.
 3) Click run.
 
 **How to replicate a run:**
 1) Open an mzML file created by JaMMS with the "Load Options" Open button. All parameters will be automatically populated in the GUI.
 2) Optional: tweak options. The more things you change, the more different the "replicate" will be.
+3) Make sure "Clone?" is unchecked. Clone will make an exact duplicate of the previous mzML file.
 3) Hit run.
 
 **More involved run:**

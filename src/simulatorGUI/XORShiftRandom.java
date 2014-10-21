@@ -21,7 +21,6 @@ import java.util.Random;
 
 /**
  *
- * @author Rob.Smith
  * BASED ON @article{marsaglia2003xorshift,
   title={Xorshift rngs},
   author={Marsaglia, George},
