@@ -18,9 +18,9 @@ JAMSS mass spec simulator.
 Basics
 -------
 **Tested Environments:**
-1) Mac OS X with Java JRE 1.7
-2) Ubuntu 14.04 with Java JRE 1.7
-3) Windows 8 with Java JRE 1.7
+1) Mac OS X with Java JRE 1.7 or higher.
+2) Ubuntu 14.04 with Java JRE 1.7 or higher.
+3) Windows 8 with Java JRE 1.7 or higher.
 
 **Minimal test run:**
 1) Download project.
@@ -104,3 +104,5 @@ Q) It seems no matter how few entries are in my FASTA file, I still get very lon
 A) No. In designing JAMSS, we had the option of optimizing for either small or large FASTA files. Due to internal constraints, the design possibilities that yielded quick runs on small FASTA files created significant slowdown and even out of memory errors on realistically large FASTA files. We opted to allow for a longer bottom limit of computation time, even on smaller files. We expect few people will run a FASTA file with only a few entries, so it should not be problematic.
 Q) Why does it take forever to run my FASTA file when the program says nothing is within the m/z range for the simulation?
 A) The current workflow for JAMSS creates an isotopic envelope pattern for each digested protein prior to generating the individual data points across the time dimension. So, before it is known whether a given isotopic envelope will yield data points, the entire FASTA file must be digested and the pattern for each peptide must be computed. This takes time, and for now we don't have a clever way of avoiding that for peptides that will not appear within the simulated m/z range.
+Q) What does a protein ID of -1 mean in the protein_peptides.csv file?
+A) In a complex sample (.fasta file with multiple entries), the higher the variety of proteins in the sample, the more likely that a given peptide will be found in more than one protein. If a peptide in the mzML file derives from more than a single protein, a protein ID of -1, the corresponding protein ID entry in protein_peptides.csv will be -1.

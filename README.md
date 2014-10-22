@@ -18,9 +18,9 @@ JAMSS mass spec simulator.
 Basics
 -------
 **Tested Environments:**
-1) Mac OS X with Java JRE 1.7
-2) Ubuntu 14.04 with Java JRE 1.7
-3) Windows 8 with Java JRE 1.7
+1) Mac OS X with Java JRE 1.7 or higher.
+2) Ubuntu 14.04 with Java JRE 1.7 or higher.
+3) Windows 8 with Java JRE 1.7 or higher.
 
 **Minimal test run:**
 1) Download project.
@@ -32,7 +32,7 @@ Basics
 **To run the program:**
 1) Download project
 2) Navigate to .../JAMSS/dist/
-3) Some OSs will allow the execution of the jar file with a double click (JAMSS.jar). For instance, on linux, right click the jar and select "run with Java" (or something like that).
+3) Some OSs will allow the execution of the jar file with a double click (JAMSS.jar). For instance, on linux, right click the jar and select "run with Java".
 4) Alternative: navigate a terminal to the .jar and execute: "java -jar JAMSS.jar"
 5) Optionally, specify how much RAM you want to dedicate to the run: "java -Xmx10g -jar JAMSS.jar" will allocate 10GB of RAM. 
 
