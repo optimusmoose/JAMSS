@@ -26,21 +26,25 @@ public class Centroid{
 	public double mz;
 	public double abundance;
 	public static int totalCentroids=0;
-	public int centroidID;
 	public int isotopeTraceID;
 	public int charge;
 	public int pepID;
 	public int isotopeEnvelopeID;
 	
-	private Centroid(){}
-	
-	public Centroid(double _mz, double _abundance){
-		centroidID = totalCentroids;
-//System.out.println(totalCentroids);
+	public Centroid(){
+    mz = 0;
+    abundance = 0;
+  }
+  
+  public Centroid(double _mz, double _abundance){
 		totalCentroids += 1;
 		mz = _mz;
 		abundance = _abundance;
 	}
+	
+  public static int nextID(){
+    return totalCentroids++;
+  }
 	
 	public double getMZ(){
 		return mz;
@@ -49,7 +53,6 @@ public class Centroid{
 	public Centroid clone(){
 		Centroid cent = new Centroid();
 		cent.abundance = this.abundance;
-		cent.centroidID = this.centroidID;
 		cent.charge = this.charge;
 		cent.isotopeTraceID = this.isotopeTraceID;
 		cent.mz = this.mz;

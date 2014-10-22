@@ -1079,7 +1079,6 @@ public class MassSpec {
 						Centroid mergedCent = new Centroid(numerator / mergedIntensity, mergedIntensity);
 						Centroid oldCent = mergeGroup.get(mergeGroup.size()-1);
 						//keep other properties from last centriod in merged group
-						mergedCent.centroidID = oldCent.centroidID;
 						mergedCent.charge = oldCent.charge;
 						mergedCent.isotopeTraceID = oldCent.isotopeTraceID;
             mergedCent.isotopeEnvelopeID = oldCent.isotopeEnvelopeID;
@@ -1419,7 +1418,7 @@ public class MassSpec {
 			int bufIndex = 0;
 			char[] lineBuf = new char[350];
 			for (Centroid cent : masterScan){
-				char[] centId = Integer.toString(cent.centroidID).toCharArray();
+				char[] centId = Integer.toString(Centroid.nextID()).toCharArray();
 				bufIndex = charArrayHelper(centId, lineBuf, bufIndex);
 				lineBuf[bufIndex] = comma;
 				bufIndex++;

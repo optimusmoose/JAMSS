@@ -49,7 +49,7 @@ public class IsotopeTrace {
 	}
 	
 	public Centroid getCentroidAtRT(double rt, RandomFactory localRandomFactory){
-		Centroid result = new Centroid(0,0);
+		Centroid result = new Centroid();
 		if (MassSpec.oneD) {
 			oneDIntensityFactor = 0.05 + 0.45 * localRandomFactory.localRand.nextFloat(); // between 0.05 and 1
 			centroidIntensity = maxXIntensity * oneDIntensityFactor;
