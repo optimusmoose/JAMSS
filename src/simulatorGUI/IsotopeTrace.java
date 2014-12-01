@@ -45,7 +45,6 @@ public class IsotopeTrace {
 		rand1 = _rand1 * 0.20;
 		centroidIntensity=0;
 		maxXIntensity = _predictedIEIntensity * _isotopeTraceIntensityRatio;
-
 	}
 	
 	public Centroid getCentroidAtRT(double rt, RandomFactory localRandomFactory){

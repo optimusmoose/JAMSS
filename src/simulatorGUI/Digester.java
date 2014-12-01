@@ -44,8 +44,9 @@ public class Digester {
 	static String splitLetters;
 	static String excludeLetters;
 	static Boolean cTerm;
-  public static double maxIntensity = 9000000; 
-	double[] intensityHistogram = {0.64,0.36,0.26,0.16,0.08,0.05,0.03,0.015,0.005};
+  public static double maxIntensity = 9000000; //max protein intensity
+	//double[] intensityHistogram = {0.64,0.36,0.26,0.16,0.08,0.05,0.03,0.015,0.005};
+  double[] intensityHistogram = {0.40,0.10,0.09,0.08,0.07,0.06,0.05,0.02,0.01};
 	double intensityHistogramChunk = (maxIntensity - MassSpec.minWhiteNoiseIntensity)/10.0;
 	
 	public Digester(String _name, String _splitLetters, String _excludeLetters, Boolean _cTerm) {
