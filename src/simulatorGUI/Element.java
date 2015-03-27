@@ -29,8 +29,8 @@ public class Element {
 	public int defaultCount;
 	private int lowMassNumber;
 	private int highMassNumber;
-	public static int[] massNumberArray;
-	public static double[] relativeAbundanceArray;
+	public int[] massNumberArray;
+	public double[] relativeAbundanceArray;
 	private double monoIsotopicMass;
 	private HashMap fftArrayHash;
 	public Element(int _count, int _lowMassNumber, int _highMassNumber, double _monoIsotopicMass){
