@@ -88,17 +88,17 @@ public class Digester {
                 if(charAt == '>'){
                     if(hashEncountered && lookingForHash){
                       // if here, means there is a missing # after at least one has been found
-                      JOptionPane.showMessageDialog(null, "Only some fasta entries specify qty. Specify qty with '#' for each entry or remove '#' symbols from fasta.", "Error", JOptionPane.ERROR_MESSAGE);
+                      JOptionPane.showMessageDialog(null, "Fasta line(s) do not specify quantity after specifying quantity on at least one line. Specify qty with '#' for each entry or remove '#' symbols from fasta.", "Error", JOptionPane.ERROR_MESSAGE);
                       return;
                     }
                     numFastaLines++;
                     lookingForHash = true;
                 } else if(lookingForHash == true && charAt == '#'){
                   lookingForHash = false;
-                  if(!hashEncountered && i > 0){
+                  if(!hashEncountered && numFastaLines > 1){
                     // if here, a hash was found after the first line but
                     // previous lines contained no hash
-                    JOptionPane.showMessageDialog(null, "Only some fasta entries specify qty. Specify qty with '#' for each entry or remove '#' symbols from fasta.", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(null, "Fasta specifies quantity on at least one entry after not specifying quantity on at least one entry. Specify qty with '#' for each entry or remove '#' symbols from fasta.", "Error", JOptionPane.ERROR_MESSAGE);
                     return;
                   }
                   hashEncountered = true;
